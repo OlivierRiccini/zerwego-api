@@ -1,0 +1,19 @@
+version: '3'
+services:
+  app:
+    container_name: zerwego-api
+    restart: always
+    build: .
+    command: npm run build
+    ports:
+      - '3000:3000'
+    links:
+      - mongo
+    volumes:
+      - .:/home/app/appDir
+      - /home/app/appDir/node_modules
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - '27017:27017'
