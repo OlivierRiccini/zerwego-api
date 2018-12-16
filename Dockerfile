@@ -43,6 +43,7 @@
 
 # Finally, switch back to the non root user and run the final command
 #	USER $USER
+	EXPOSE 3000
 
 # Kick node off from the compiled dist folder, which is compiled from our simple gulpfile
 	CMD ["node", "dist/index.js"]
