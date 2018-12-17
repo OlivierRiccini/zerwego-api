@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import { Request, Response } from "express";
+import {User} from '../models/user.model';
 
 class App {
 
