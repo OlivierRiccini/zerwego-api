@@ -1,40 +1,45 @@
-import * as express from "express";
-import * as bodyParser from "body-parser";
-import { Request, Response } from "express";
-import {User} from '../models/user.model';
+import * as path from 'path';
+import * as express from 'express';
+import * as logger from 'morgan';
+import * as bodyParser from 'body-parser';
+import HeroRouter from '../routes/hero-router';
 
-class App {
+// Creates and configures an ExpressJS web server.
+class app {
 
+  // ref to Express instance
+  public express: express.Application;
+
+  //Run configuration methods on the Express instance.
   constructor() {
-    this.app = express();
-    this.config();
+    this.express = express();
+    this.middleware();
     this.routes();
   }
 
-  public app: express.Application;
-
-  private config(): void {
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: false }));
+  // Configure Express middleware.
+  private middleware(): void {
+    this.express.use(logger('dev'));
+    this.express.use(bodyParser.json());
+    this.express.use(bodyParser.urlencoded({ extended: false }));
   }
 
+  // Configure API endpoints.
   private routes(): void {
-    const router = express.Router();
-
-    router.get('/', (req: Request, res: Response) => {
-      res.status(200).send({
-        message: 'Hello World!'
-      })
-    });
-    router.post('/', (req: Request, res: Response) => {
-        const data = req.body;
-        // query a database and save data
-        res.status(200).send(data);
+    /* This is just to get up and running, and to make sure what we've got is
+     * working so far. This function will change when we start to add more
+     * API endpoints */
+    let router = express.Router();
+    // placeholder route handler
+    router.get('/', (req, res, next) => {
+      res.json({
+        message: 'Hello Inho le Boss!'
       });
-  
-      this.app.use('/', router)
-  
-    }
+    });
+    this.express.use('/', router);
+    this.express.use('/api/v1/heroes', HeroRouter);
+  }
+
 }
 
-export default new App().app;
+export default new app().express;
