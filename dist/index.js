@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const http = require("http");
 const debug = require("debug");
+const mongoose_config_1 = require("./setup/mongoose-config");
 const express_config_1 = require("./setup/express-config");
 debug('ts-express:server');
 const port = normalizePort(process.env.PORT || 3000);
@@ -36,6 +37,7 @@ function onError(error) {
             throw error;
     }
 }
+mongoose_config_1.default.connect();
 function onListening() {
     let addr = server.address();
     let bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`;

@@ -1,4 +1,5 @@
 import {Router, Request, Response, NextFunction} from 'express';
+import { UserSchema } from '../schemas/user-dao';
 const Heroes = ['Wolverine', 'xx','cc' ,'cs' ,'ee' ];
 
 export class HeroRouter {
@@ -19,12 +20,29 @@ export class HeroRouter {
     res.send(Heroes);
   }
 
+  public post(req: Request, res: Response) {   
+   
+    let user = {
+      createdAt: null,
+      email: req.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+    };
+    // console.log(user);
+    new UserSchema(user).save().then((user) => {
+      res.status(200).send(user);
+    }, (e) => {
+      res.status(400).send(e);
+    });
+  };
+
   /**
    * Take each handler, and attach to one of the Express.Router's
    * endpoints.
    */
   init() {
-    this.router.get('/', this.getAll);
+    this.router.get('/heros', this.getAll);
+    this.router.post('/heros', this.post);
   }
 
 }

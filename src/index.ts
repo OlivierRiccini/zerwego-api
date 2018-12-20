@@ -1,7 +1,8 @@
 import * as http from 'http';
 import * as debug from 'debug';
-
+import mongooseConfig from './setup/mongoose-config';
 import app from './setup/express-config';
+import { connect } from 'mongoose';
 
 debug('ts-express:server');
 
@@ -36,6 +37,8 @@ function onError(error: NodeJS.ErrnoException): void {
       throw error;
   }
 }
+
+mongooseConfig.connect();
 
 function onListening(): void {
   let addr = server.address();
