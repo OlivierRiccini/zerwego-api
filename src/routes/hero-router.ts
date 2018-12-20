@@ -1,5 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
-import { UserSchema } from '../schemas/user-dao';
+import { UserSchema } from '../schemas/user-schema';
+import {User} from "../models/User";
+
 const Heroes = ['Wolverine', 'xx','cc' ,'cs' ,'ee' ];
 
 export class HeroRouter {
@@ -21,16 +23,16 @@ export class HeroRouter {
   }
 
   public post(req: Request, res: Response) {   
-   
-    let user = {
-      createdAt: null,
+
+    let user = new User({
       email: req.body.email,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-    };
-    // console.log(user);
-    new UserSchema(user).save().then((user) => {
-      res.status(200).send(user);
+    });
+    console.log(user);
+
+    user.save().then((doc) => {
+      res.status(200).send(doc);
     }, (e) => {
       res.status(400).send(e);
     });
