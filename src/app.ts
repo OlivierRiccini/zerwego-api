@@ -1,5 +1,5 @@
 import * as express from "express";
-import * as book from './controllers/book-controller';
+import * as trip from './controllers/trip-controller';
 import * as bodyParser from 'body-parser';
 
 // Our Express APP config
@@ -10,11 +10,11 @@ app.set("port", process.env.PORT || 3000);
 // API Endpoints
 app.use(bodyParser.json());
 
-app.get('/', book.allBooks)
-app.get('/{id}', book.getBook)
-app.post('/', book.addBook)
-app.put('/{id}', book.updateBook)
-app.delete('/{id}', book.deleteBook)
+app.get('/', trip.allTrips)
+app.get('/{id}', trip.getTrip)
+app.post('/', trip.addTrip)
+app.put('/{id}', trip.updateTrip)
+app.delete('/{id}', trip.deleteTrip)
 
 const server = app.listen(app.get("port"), () => {
   console.log("App is running on http://localhost:%d", app.get("port"))
