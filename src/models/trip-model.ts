@@ -17,6 +17,7 @@ export interface ITrip extends mongoose.Document {
     imageUrl: string,
     startDate: Date;
     endDate: Date;
+    participants: [];
 };
 
 export const TripSchema = new mongoose.Schema({
@@ -25,7 +26,8 @@ export const TripSchema = new mongoose.Schema({
     destination: String,
     imageUrl: String,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    participants: []
 });
   
 const Trip = mongoose.model('Trip', TripSchema);

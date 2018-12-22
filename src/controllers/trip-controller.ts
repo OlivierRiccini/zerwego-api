@@ -2,33 +2,36 @@ import { Request, Response } from 'express'
 import Trip from '../models/trip-model'
 
 export let allTrips = (req: Request, res: Response) => {
-  let trips = Trip.find((err: any, books: any) => {
+  let trips = Trip.find((err: any, trips: any) => {
     if (err) {
       res.send("Error!");
     } else {
-      res.send(books);
+      res.send(trips);
     }
   })
 }
 
 export let getTrip = (req: Request, res: Response) => {
-    let trip = Trip.findById(req.params.id, (err: any, book: any) => {
+    let foundTrip = Trip.findById(req.params.id, (err: any, trip: any) => {
       if (err) {
         res.send(err);
       } else {
-        res.send(book)
+        res.send(trip)
       }
     })
   }
 
   export let deleteTrip = (req: Request, res: Response) => {
-    let trip = Trip.deleteOne({ _id: req.params.id }, (err: any) => {
-      if (err) {
-        res.send(err)
-      } else {
-        res.send("Succesfully Deleted Trip");
-      }
-    })
+    let trip = Trip.deleteOne({ _id: req.params.id })
+      .then(res => res.send("Succesfully Deleted Trip"))
+      .catch(err => res.send(err));
+    //  => {
+      // if (err) {
+      //   res.send(err)
+      // } else {
+      //   res.send("Succesfully Deleted Trip");
+      // }
+    // })
   }
 
   export let updateTrip = (req: Request, res: Response) => {

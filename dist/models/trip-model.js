@@ -17,7 +17,8 @@ exports.TripSchema = new mongoose.Schema({
     destination: String,
     imageUrl: String,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    participants: []
 });
 const Trip = mongoose.model('Trip', exports.TripSchema);
 exports.default = Trip;

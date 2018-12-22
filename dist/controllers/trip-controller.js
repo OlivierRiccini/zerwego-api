@@ -2,34 +2,36 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const trip_model_1 = require("../models/trip-model");
 exports.allTrips = (req, res) => {
-    let trips = trip_model_1.default.find((err, books) => {
+    let trips = trip_model_1.default.find((err, trips) => {
         if (err) {
             res.send("Error!");
         }
         else {
-            res.send(books);
+            res.send(trips);
         }
     });
 };
 exports.getTrip = (req, res) => {
-    let trip = trip_model_1.default.findById(req.params.id, (err, book) => {
+    let foundTrip = trip_model_1.default.findById(req.params.id, (err, trip) => {
         if (err) {
             res.send(err);
         }
         else {
-            res.send(book);
+            res.send(trip);
         }
     });
 };
 exports.deleteTrip = (req, res) => {
-    let trip = trip_model_1.default.deleteOne({ _id: req.params.id }, (err) => {
-        if (err) {
-            res.send(err);
-        }
-        else {
-            res.send("Succesfully Deleted Trip");
-        }
-    });
+    let trip = trip_model_1.default.deleteOne({ _id: req.params.id })
+        .then(res => res.send("Succesfully Deleted Trip"))
+        .catch(err => res.send(err));
+    //  => {
+    // if (err) {
+    //   res.send(err)
+    // } else {
+    //   res.send("Succesfully Deleted Trip");
+    // }
+    // })
 };
 exports.updateTrip = (req, res) => {
     console.log(req.body);
