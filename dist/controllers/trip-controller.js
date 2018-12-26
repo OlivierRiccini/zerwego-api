@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const trip_model_1 = require("../models/trip-model");
+// import { Mongoose } from 'mongoose';
+var ObjectID = require("bson-objectid");
 exports.allTrips = (req, res) => {
     let trips = trip_model_1.default.find((err, trips) => {
         if (err) {
@@ -45,7 +47,8 @@ exports.updateTrip = (req, res) => {
     });
 };
 exports.addTrip = (req, res) => {
-    var trip = new trip_model_1.default(req.body);
+    let trip = new trip_model_1.default(req.body);
+    trip._id = ObjectID();
     console.log(trip);
     trip.save((err) => {
         if (err) {

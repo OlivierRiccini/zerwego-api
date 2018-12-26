@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const uri = 'mongodb://127.0.0.1:27017/zerwego-api';
-mongoose.connect(uri, (err) => {
+mongoose.connect(uri, { useNewUrlParser: true }, (err) => {
     if (err) {
         console.log(err.message);
     }

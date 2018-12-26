@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 import Trip from '../models/trip-model'
+// import { Mongoose } from 'mongoose';
+var ObjectID = require("bson-objectid");
 
 export let allTrips = (req: Request, res: Response) => {
   let trips = Trip.find((err: any, trips: any) => {
@@ -47,7 +49,8 @@ export let getTrip = (req: Request, res: Response) => {
   }
 
   export let addTrip = (req: Request, res: Response) => {
-    var trip = new Trip(req.body);
+    let trip = new Trip(req.body);
+    trip._id = ObjectID();
     console.log(trip);
     trip.save((err: any) => {
       if (err) {
