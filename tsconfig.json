@@ -6,7 +6,11 @@
     "sourceMap": true,
     "target": "es6",
     "outDir": "./dist",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "experimentalDecorators":true,
+    "emitDecoratorMetadata": true,
+    "lib": ["es2015"],
+    "types": ["reflect-metadata"]
   },
   "files": [
     "./node_modules/@types/mocha/index.d.ts",
