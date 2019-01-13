@@ -1,15 +1,5 @@
 import * as mongoose from 'mongoose';
 
-const uri: string = 'mongodb://127.0.0.1:27017/zerwego-api';
-
-mongoose.connect(uri, { useNewUrlParser: true }, (err: any) => {
-    if (err) {
-        console.log(err.message);
-    } else {
-        console.log("Succesfully Connected!")
-    }
-});
-
 export interface ITrip extends mongoose.Document {
     id?: string,
     tripName: string,
@@ -33,6 +23,6 @@ export const TripSchema = new mongoose.Schema({
         type: String
     }]
 });
-  
+
 const Trip = mongoose.model('Trip', TripSchema);
 export default Trip;
