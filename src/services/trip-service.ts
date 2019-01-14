@@ -11,19 +11,16 @@ export class TripService {
         return new Promise((resolve, reject) => {
             
             Trip.find({})
+            .lean()
             .exec((err: any, res: any) => {
                 if (err) {
                     reject(new Error("No trips found"));
                 } else {
-                    let finalResponse = [];
-                    for (let obj of res) {
-                        console.log(obj);
-                        finalResponse.push(obj._doc);
-                    }
-                    resolve(finalResponse);
-                    console.log(finalResponse);
+                    resolve(res);
+                    console.log(res);
                 }
             })
         });
     }
+    
 }

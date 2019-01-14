@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node dist/app.js",
-    "test": "npm run build && mocha 'dist/test/*.test.js'",
+    "test": "npm run build && mocha './test/*.test.js'",
     "start-local-mongo": "~/./mongo/bin/mongod --dbpath /Users/olivierriccini/mongo/bin"
   },
   "keywords": [],
@@ -44,7 +44,9 @@
     "@types/mongoose": "^5.3.5",
     "chai": "^4.2.0",
     "chai-http": "^4.2.0",
+    "expect": "^23.6.0",
     "mocha": "^5.2.0",
+    "supertest": "^3.3.0",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
   }

@@ -17,18 +17,14 @@ let TripService = class TripService {
     fetchAll() {
         return new Promise((resolve, reject) => {
             trip_model_1.default.find({})
+                .lean()
                 .exec((err, res) => {
                 if (err) {
                     reject(new Error("No trips found"));
                 }
                 else {
-                    let finalResponse = [];
-                    for (let obj of res) {
-                        console.log(obj);
-                        finalResponse.push(obj._doc);
-                    }
-                    resolve(finalResponse);
-                    console.log(finalResponse);
+                    resolve(res);
+                    console.log(res);
                 }
             });
         });
