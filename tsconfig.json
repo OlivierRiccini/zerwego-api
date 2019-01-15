@@ -10,7 +10,7 @@
     "experimentalDecorators":true,
     "emitDecoratorMetadata": true,
     "lib": ["es2015"],
-    "types": ["reflect-metadata"]
+    "types": ["reflect-metadata", "node"],
   },
   "files": [
     "./node_modules/@types/mocha/index.d.ts",

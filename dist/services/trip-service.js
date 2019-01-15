@@ -35,4 +35,4 @@ TripService = __decorate([
     __metadata("design:paramtypes", [])
 ], TripService);
 exports.TripService = TripService;
-//# sourceMappingURL=trip-Service.js.map
+//# sourceMappingURL=trip-service.js.map
