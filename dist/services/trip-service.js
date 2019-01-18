@@ -29,6 +29,18 @@ let TripService = class TripService {
             });
         });
     }
+    createTrip(req) {
+        return new Promise((resolve, reject) => {
+            let trip = new trip_model_1.default(req);
+            trip.save((err, trip) => {
+                if (err) {
+                    reject(err);
+                }
+                console.log('Successfully created!');
+                resolve(trip);
+            });
+        });
+    }
 };
 TripService = __decorate([
     typedi_1.Service(),

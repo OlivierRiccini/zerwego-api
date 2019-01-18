@@ -19,9 +19,9 @@ export const TripSchema = new mongoose.Schema({
     startDate: Date,
     endDate: Date,
     adminId: String, 
-    usersIds: [{
-        type: String
-    }]
+    // usersIds: [{
+    //     type: String
+    // }]
 });
 
 const Trip = mongoose.model('Trip', TripSchema);

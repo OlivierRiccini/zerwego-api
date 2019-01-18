@@ -9,7 +9,6 @@ export class TripService {
     
     fetchAll(){
         return new Promise((resolve, reject) => {
-            
             Trip.find({})
             .lean()
             .exec((err: any, res: any) => {
@@ -22,5 +21,17 @@ export class TripService {
             })
         });
     }
-    
+
+    public createTrip (req: any) {          
+        return new Promise((resolve, reject) => {
+            let trip = new Trip(req);
+            trip.save((err, trip) => {
+                if (err) {
+                    reject(err);
+                }    
+                console.log('Successfully created!');
+                resolve(trip);
+            });
+        })
+    }
 }

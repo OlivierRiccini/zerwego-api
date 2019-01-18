@@ -1,8 +1,4 @@
 "use strict";
-// import { Request, Response } from 'express'
-// import Trip from '../models/trip-model'
-// import { Mongoose } from 'mongoose';
-// var ObjectID = require("bson-objectid");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,6 +7,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -21,103 +20,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// export let allTrips = (req: Request, res: Response) => {
-//   let trips = Trip.find((err: any, trips: any) => {
-//     if (err) {
-//       res.send("Error!");
-//     } else {
-//       res.send(trips);
-//     }
-//   })
-// }
-// export let getTrip = (req: Request, res: Response) => {
-//     let foundTrip = Trip.findById(req.params.id, (err: any, trip: any) => {
-//       if (err) {
-//         res.send(err);
-//       } else {
-//         res.send(trip)
-//       }
-//     })
-//   }
-//   export let deleteTrip = (req: Request, res: Response) => {
-//     let trip = Trip.deleteOne({ _id: req.params.id })
-//       .then(res => res.send("Succesfully Deleted Trip"))
-//       .catch(err => res.send(err));
-//     //  => {
-//       // if (err) {
-//       //   res.send(err)
-//       // } else {
-//       //   res.send("Succesfully Deleted Trip");
-//       // }
-//     // })
-//   }
-//   export let updateTrip = (req: Request, res: Response) => {
-//     console.log(req.body);
-//     let trip = Trip.findByIdAndUpdate(req.params.id, req.body, (err: any, book: any) => {
-//       if (err) {
-//         res.send(err);
-//       } else {
-//         res.send("Succesfully updated book!");
-//       }
-//     });
-//   }
-//   export let addTrip = (req: Request, res: Response) => {
-//     let trip = new Trip(req.body);
-//     trip._id = ObjectID();
-//     console.log(trip);
-//     trip.save((err: any) => {
-//       if (err) {
-//         res.status(400).send(err)
-//       } else {
-//         res.send(trip)
-//       }
-//     })
-//   }
-// import {
-//   Controller, Get, Render, Post, 
-//   Authenticated, Required, BodyParams,
-//   Delete,
-//   Inject
-// } from "@tsed/common";
-// import { ITrip, Trip } from "../models/trip-model";
-// import { MongooseModel } from "@tsed/mongoose";
-// // import { Mongoose } from 'mongoose';
-// // export interface Calendar{
-// //   id: string;
-// //   name: string;
-// // }
-// @Controller("/trips")
-// export class CalendarCtrl {
-//   constructor(@Inject(Trip) private trip: MongooseModel<Trip>) {
-//     console.log(Trip) // Mongoose.model class
-//   }
-//   // async find(query: any) {
-//   //   const list = await this.trip.find(query).exec();
-//   //   console.log(list);
-//   //   return list;
-//   // }
-//   // @Get("/")
-//   // // @Render("calendars/index")
-//   // async renderCalendars(): Promise<JSON> {
-//   //   let trips = await this.trip.find();
-//   //   return trips;
-//   // }
-//   // @Post("/")
-//   // @Authenticated()
-//   // async post(
-//   //   @Required() @BodyParams("calendar") calendar: Calendar
-//   // ): Promise<Calendar> {
-//   //   calendar.id = "1";
-//   //   return Promise.resolve(calendar);
-//   // }
-//   // @Delete("/")
-//   // @Authenticated()
-//   // async deleteItem(
-//   //   @BodyParams("calendar.id") @Required() id: string 
-//   // ): Promise<Calendar> {
-//   //   return {id, name: "calendar"};
-//   // }
-// }
 const routing_controllers_1 = require("routing-controllers");
 const trip_Service_1 = require("../services/trip-Service");
 let TripController = class TripController {
@@ -132,6 +34,17 @@ let TripController = class TripController {
             return trips;
         });
     }
+    addTrip(trip, request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.tripService.createTrip(request.body);
+        });
+    }
+    deleteTrip(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(routing_controllers_1.Param);
+            // return this.tripService.deleteTrip(Param);
+        });
+    }
 };
 __decorate([
     routing_controllers_1.Get(),
@@ -139,6 +52,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], TripController.prototype, "getAll", null);
+__decorate([
+    routing_controllers_1.Post(),
+    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Req()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], TripController.prototype, "addTrip", null);
+__decorate([
+    routing_controllers_1.Delete(),
+    __param(0, routing_controllers_1.Param('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], TripController.prototype, "deleteTrip", null);
 TripController = __decorate([
     routing_controllers_1.JsonController('/trips'),
     __metadata("design:paramtypes", [trip_Service_1.TripService])
