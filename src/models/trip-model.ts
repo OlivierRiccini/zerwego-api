@@ -8,7 +8,7 @@ export interface ITrip extends mongoose.Document {
     startDate: Date;
     endDate: Date;
     adminId: String, 
-    usersIds: String[];
+    usersIds?: String[];
 };
 
 export const TripSchema = new mongoose.Schema({

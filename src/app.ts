@@ -28,8 +28,8 @@ require('./config/config.js');
 import "reflect-metadata"; // this shim is required
 import {createExpressServer} from "routing-controllers";
 import {TripController} from "./controllers/trip-controller";
-import * as mongoose from 'mongoose';
-import { MongooseConnection } from './db/mongoose';
+// import * as mongoose from 'mongoose';
+import { MongooseConnection } from './db/mongoose-connection';
  
 // creates express app, registers all controller routes and returns you express app instance
 const app = createExpressServer({
@@ -37,20 +37,10 @@ const app = createExpressServer({
   controllers: [TripController] // we specify controllers we want to use
 });
 
-
-const uri: string = 'mongodb://127.0.0.1:27017/zerwego-api-dev';
-
-// mongoose.connect(uri, { useNewUrlParser: true }, (err: any) => {
-//   if (err) {
-//     console.log(err.message);
-//   } else {
-//     console.log("Succesfully Connected!")
-//   }
-// });
 const mongooseConnection = new MongooseConnection();
 mongooseConnection.init();
 
-app.set("port", process.env.PORT || 3000);
+app.set("port", process.env.PORT);
 
 app.listen(app.get("port"), () => {
   console.log(`Server running on port ${app.get("port")}`);

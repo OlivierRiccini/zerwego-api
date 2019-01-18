@@ -4,7 +4,7 @@ export class MongooseConnection {
     public init() {
         mongoose.Promise = global.Promise;
         mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
-            .then(() => console.log("SUCCES"))
+            .then(() => console.log(`Successfully connected DB: ${process.env.MONGODB_URI}`))
             .catch((err) => console.log(err));
     }
 }

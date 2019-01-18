@@ -11,6 +11,7 @@
     "emitDecoratorMetadata": true,
     "lib": ["es2015"],
     "types": ["reflect-metadata", "node"],
+    "resolveJsonModule": true,
   },
   "files": [
     "./node_modules/@types/mocha/index.d.ts",

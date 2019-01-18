@@ -1,10 +1,16 @@
-var app = require('../dist/app').app;
+process.env.NODE_ENV = 'test';
+var app = require('../../dist/app').app;
+
 import 'mocha';
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
+import { TripSeed } from '../seed/trip-seed';
 
 chai.use(chaiHttp);
 chai.should();
+
+const tripSeed = new TripSeed();
+tripSeed.addTrips();
 
 describe('Trips', function() {
   const request = chai.request(app);
