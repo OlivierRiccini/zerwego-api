@@ -1,48 +1,25 @@
-// import mongoose = require('mongoose');
-// import { ITrip } from '../../src/models/trip-model';
-// import Trip from '../../src/models/trip-model';
-// import { TripService}  from '../../src/services/trip-service';
+import mongoose = require('mongoose');
+import { TripService}  from '../../src/services/trip-service';
+import TRIPS from './trip-seed-data';
 
-// // export class TripSeed {
-// const tripService: TripService = new TripService();
+export class TripSeed {
+    trips = [];
 
-//     const trips: any[] = [
-//         {
-//             tripName: "Test",
-//             destination: "Los Angeles, California, United States",
-//             imageUrl: null,
-//             startDate: new Date('2019-03-12'),
-//             endDate: new Date('2019-03-25'),
-//             adminId: null
-//         }
-//     ]
-    
-//     // constructor(private tripService: TripService) {}
+    constructor(private tripService: TripService) {
+        this.trips = TRIPS;
+    }
 
-//     export function addTrips() {
-//         console.log(tripService);
-//         // for (const trip of this.trips) {
-//         //     this.tripService.createTrip(trip);
-//         // }   
-//     }
-// // }
+    async addTrips() {
+        for (const trip of this.trips) {
+            this.tripService.createTrip(trip)
+                .then(() => console.log('Trip test created!'))
+                .catch(err => console.log('Error during seeding DB test= ' + err));
+        }   
+    }
 
-// const trips: any[] = [
-//             {
-//                 tripName: "Test",
-//                 destination: "Los Angeles, California, United States",
-//                 imageUrl: null,
-//                 startDate: new Date('2019-03-12'),
-//                 endDate: new Date('2019-03-25'),
-//                 adminId: null
-//             }
-//         ]
-        
-//         // constructor(private tripService: TripService) {}
-    
-//         export function addTrips() {
-//             console.log(tripService);
-//             // for (const trip of this.trips) {
-//             //     this.tripService.createTrip(trip);
-//             // }   
-//         }
+    async deleteAllTrips() {
+        this.tripService.deleteAllTrips()
+            .then(() => console.log('Trips test deleted!'))
+            .catch(err => console.log('Error during seeding DB test= ' + err));   
+    }
+}

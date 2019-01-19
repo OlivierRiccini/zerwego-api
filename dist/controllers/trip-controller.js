@@ -41,8 +41,8 @@ let TripController = class TripController {
     }
     deleteTrip(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(routing_controllers_1.Param);
-            // return this.tripService.deleteTrip(Param);
+            // console.log(id);
+            return this.tripService.deleteTrip(id);
         });
     }
 };
@@ -60,7 +60,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TripController.prototype, "addTrip", null);
 __decorate([
-    routing_controllers_1.Delete(),
+    routing_controllers_1.Delete('/:id'),
     __param(0, routing_controllers_1.Param('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

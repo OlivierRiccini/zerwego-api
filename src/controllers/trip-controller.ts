@@ -21,10 +21,10 @@ export class TripController {
     return this.tripService.createTrip(request.body);
   }
 
-  @Delete()
+  @Delete('/:id')
     async deleteTrip(@Param('id') id: string): Promise<any> {
-      console.log(Param);
-    // return this.tripService.deleteTrip(Param);
+      // console.log(id);
+    return this.tripService.deleteTrip(id);
   }
  
 }

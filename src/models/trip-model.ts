@@ -1,7 +1,11 @@
 import * as mongoose from 'mongoose';
+import { ObjectID } from 'bson';
+
+delete mongoose.connection.models['Trip'];
 
 export interface ITrip extends mongoose.Document {
     id?: string,
+    _id: ObjectID,
     tripName: string,
     destination: string,
     imageUrl: string,

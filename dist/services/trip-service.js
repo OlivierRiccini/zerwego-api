@@ -24,6 +24,7 @@ let TripService = class TripService {
                 }
                 else {
                     resolve(res);
+                    console.log('//////////// FETCH ALL ////////////');
                     console.log(res);
                 }
             });
@@ -32,12 +33,33 @@ let TripService = class TripService {
     createTrip(req) {
         return new Promise((resolve, reject) => {
             let trip = new trip_model_1.default(req);
+            trip.id = trip._id;
             trip.save((err, trip) => {
                 if (err) {
                     reject(err);
                 }
                 console.log('Successfully created!');
                 resolve(trip);
+            });
+        });
+    }
+    deleteTrip(id) {
+        return new Promise((resolve, reject) => {
+            trip_model_1.default.deleteOne({ id }, err => {
+                if (err) {
+                    reject(err);
+                }
+                console.log('Successfully deleted!');
+            });
+        });
+    }
+    deleteAllTrips() {
+        return new Promise((resolve, reject) => {
+            trip_model_1.default.deleteMany({}, err => {
+                if (err) {
+                    reject(err);
+                }
+                console.log('All documents from Trip collection have been deleted!');
             });
         });
     }
