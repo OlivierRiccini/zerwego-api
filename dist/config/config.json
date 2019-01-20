@@ -1,9 +1,11 @@
 {
     "test": {
+        "DEBUG": "server, data-base, http, service, seed, test",
         "PORT": 3000,
         "MONGODB_URI": "mongodb://127.0.0.1:27017/zerwego-api-test"
     },
     "development": {
+        "DEBUG": "server, data-base, http, service",
         "PORT": 3000,
         "MONGODB_URI": "mongodb://127.0.0.1:27017/zerwego-api-dev"
     }

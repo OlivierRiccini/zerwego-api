@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
 let TripService = class TripService {
@@ -20,12 +21,27 @@ let TripService = class TripService {
                 .lean()
                 .exec((err, res) => {
                 if (err) {
+                    debug('trip-service - findById - FAILED => No trips found');
                     reject(new Error("No trips found"));
                 }
                 else {
                     resolve(res);
-                    console.log('//////////// FETCH ALL ////////////');
-                    console.log(res);
+                }
+            });
+        });
+    }
+    findById(id) {
+        return new Promise((resolve, reject) => {
+            trip_model_1.default.findOne({ id })
+                .lean()
+                .exec((err, trip) => {
+                if (err) {
+                    debug('trip-service - findById - FAILED => Trip with id => ${id} not found');
+                    reject(new Error(`Trip with id => ${id} not found`));
+                }
+                else {
+                    debug('trip-service - findById - OK => ' + JSON.stringify(trip));
+                    resolve(trip);
                 }
             });
         });
@@ -34,11 +50,15 @@ let TripService = class TripService {
         return new Promise((resolve, reject) => {
             let trip = new trip_model_1.default(req);
             trip.id = trip._id;
-            trip.save((err, trip) => {
+            trip.save((err, res) => {
                 if (err) {
+                    debug('trip-service - createTrip - FAILED => ' + err);
                     reject(err);
                 }
-                console.log('Successfully created!');
+                let trip = res.toObject();
+                trip.startDate = new Date(trip.startDate);
+                trip.endDate = new Date(trip.endDate);
+                debug('trip-service - createTrip - OK => ' + JSON.stringify(trip));
                 resolve(trip);
             });
         });
@@ -47,9 +67,10 @@ let TripService = class TripService {
         return new Promise((resolve, reject) => {
             trip_model_1.default.deleteOne({ id }, err => {
                 if (err) {
+                    debug('trip-service - deleteTrip - FAILED => ' + err);
                     reject(err);
                 }
-                console.log('Successfully deleted!');
+                debug('trip-service - deleteTrip - OK');
             });
         });
     }
@@ -57,9 +78,10 @@ let TripService = class TripService {
         return new Promise((resolve, reject) => {
             trip_model_1.default.deleteMany({}, err => {
                 if (err) {
+                    debug('trip-service - deleteAllTrips - FAILED => ' + err);
                     reject(err);
                 }
-                console.log('All documents from Trip collection have been deleted!');
+                debug('trip-service - deleteAllTrips - OK');
             });
         });
     }

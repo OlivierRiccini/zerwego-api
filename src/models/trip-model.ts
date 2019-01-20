@@ -20,8 +20,8 @@ export const TripSchema = new mongoose.Schema({
     tripName: String,
     destination: String,
     imageUrl: String,
-    startDate: Date,
-    endDate: Date,
+    startDate: { type: Date },
+    endDate: { type: Date },
     adminId: String, 
     // usersIds: [{
     //     type: String

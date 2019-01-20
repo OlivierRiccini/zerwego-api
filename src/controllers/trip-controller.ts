@@ -1,3 +1,4 @@
+const debug = require('debug')('http');
 import {JsonController, Param, Body, Get, Post, Put, Delete, Req, Res} from "routing-controllers";
 import { TripService } from "../services/trip-Service";
 import { ITrip } from "../models/trip-model";
@@ -10,21 +11,30 @@ export class TripController {
   
  
   @Get()
-  async getAll() { 
+  async getAllTrips() { 
     let trips = await this.tripService.fetchAll();
-    //  console.log(trips);
-     return trips;
+    debug('GET /trips => ' + JSON.stringify(trips));
+    return trips;
+  }
+
+  @Get('/:id')
+  async getTripById(@Param('id') id: string) { 
+    let trip = await this.tripService.findById(id);
+    debug('GET /trip by id => ' + JSON.stringify(trip));
+    return trip;
   }
 
   @Post()
-    async addTrip(@Body() trip: ITrip, @Req() request): Promise<any> {
-    return this.tripService.createTrip(request.body);
+    async addTrip(@Body() trip: ITrip, @Req() request) {
+    const newTrip = await this.tripService.createTrip(trip);
+    debug('POST /trip => ' + JSON.stringify(newTrip));
+    return newTrip;
   }
 
   @Delete('/:id')
-    async deleteTrip(@Param('id') id: string): Promise<any> {
-      // console.log(id);
-    return this.tripService.deleteTrip(id);
+    async deleteTrip(@Param('id') id: string) {
+    const response = await this.tripService.deleteTrip(id);
+    return response;
   }
  
 }

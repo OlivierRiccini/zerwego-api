@@ -1,4 +1,7 @@
-require('./config/config.js');
+require('./config/config.js')
+
+const debug = require('debug')('server');
+
 import "reflect-metadata"; // this shim is required
 import {createExpressServer} from "routing-controllers";
 import {TripController} from "./controllers/trip-controller";
@@ -16,7 +19,7 @@ mongooseConnection.init();
 app.set("port", process.env.PORT);
 
 app.listen(app.get("port"), () => {
-  console.log(`Server running on port ${app.get("port")}`);
+  debug(`Server running on port ${app.get("port")}`);
 });
 
 module.exports.app = app;

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require('./config/config.js');
+const debug = require('debug')('server');
 require("reflect-metadata"); // this shim is required
 const routing_controllers_1 = require("routing-controllers");
 const trip_controller_1 = require("./controllers/trip-controller");
@@ -14,7 +15,7 @@ const mongooseConnection = new mongoose_connection_1.MongooseConnection();
 mongooseConnection.init();
 app.set("port", process.env.PORT);
 app.listen(app.get("port"), () => {
-    console.log(`Server running on port ${app.get("port")}`);
+    debug(`Server running on port ${app.get("port")}`);
 });
 module.exports.app = app;
 //# sourceMappingURL=app.js.map

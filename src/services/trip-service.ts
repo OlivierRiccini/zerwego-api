@@ -1,53 +1,70 @@
+const debug = require('debug')('service');
 import mongoose = require('mongoose');
 import { Service } from "typedi";
 import Trip, { ITrip } from '../models/trip-model';
-import { ObjectID } from 'bson';
-import { Model } from 'mongoose';
-import { resolve } from 'url';
-import { rejects } from 'assert';
 
 @Service()
 export class TripService {
     constructor() {
     }
     
-    fetchAll(){
+    public fetchAll(){
         return new Promise((resolve, reject) => {
             Trip.find({})
             .lean()
             .exec((err: any, res: any) => {
                 if (err) {
+                    debug('trip-service - findById - FAILED => No trips found');
                     reject(new Error("No trips found"));
                 } else {
                     resolve(res);
-                    console.log('//////////// FETCH ALL ////////////');
-                    console.log(res);
                 }
             })
         });
     }
 
-    public createTrip (req: any) {          
+    public findById(id: string) {
+        return new Promise((resolve, reject) => {
+            Trip.findOne({ id })
+            .lean()
+            .exec((err: any, trip: any) => {
+                if (err) {
+                    debug('trip-service - findById - FAILED => Trip with id => ${id} not found');
+                    reject(new Error(`Trip with id => ${id} not found`));
+                } else {
+                    debug('trip-service - findById - OK => ' + JSON.stringify(trip));
+                    resolve(trip);
+                }
+            })
+        })
+    }
+
+    public createTrip(req: any) {          
         return new Promise((resolve, reject) => {
             let trip = new Trip(req);
             trip.id = trip._id
-            trip.save((err, trip) => {
+            trip.save((err, res) => {
                 if (err) {
+                    debug('trip-service - createTrip - FAILED => ' + err);
                     reject(err);
                 }    
-                console.log('Successfully created!');
+                let trip = res.toObject();
+                trip.startDate = new Date(trip.startDate);
+                trip.endDate = new Date(trip.endDate);
+                debug('trip-service - createTrip - OK => ' + JSON.stringify(trip));
                 resolve(trip);
             });
         })
     }
 
-    public deleteTrip (id: any) {          
+    public deleteTrip(id: any) {          
         return new Promise((resolve, reject) => {
             Trip.deleteOne({ id }, err => {
                 if (err) {
+                    debug('trip-service - deleteTrip - FAILED => ' + err);
                     reject(err);
-                }    
-                console.log('Successfully deleted!');
+                }
+                debug('trip-service - deleteTrip - OK');    
             });
         })
     }
@@ -56,9 +73,10 @@ export class TripService {
         return new Promise((resolve, reject) => {
             Trip.deleteMany({}, err => {
                 if (err) {
+                    debug('trip-service - deleteAllTrips - FAILED => ' + err);
                     reject(err);
                 }
-                console.log('All documents from Trip collection have been deleted!');
+                debug('trip-service - deleteAllTrips - OK');
             });
         })
     }

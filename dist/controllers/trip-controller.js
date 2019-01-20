@@ -20,6 +20,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const trip_Service_1 = require("../services/trip-Service");
 let TripController = class TripController {
@@ -27,22 +28,31 @@ let TripController = class TripController {
         this.tripService = tripService;
         this.tripService = new trip_Service_1.TripService();
     }
-    getAll() {
+    getAllTrips() {
         return __awaiter(this, void 0, void 0, function* () {
             let trips = yield this.tripService.fetchAll();
-            //  console.log(trips);
+            debug('GET /trips => ' + JSON.stringify(trips));
             return trips;
+        });
+    }
+    getTripById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let trip = yield this.tripService.findById(id);
+            debug('GET /trip by id => ' + JSON.stringify(trip));
+            return trip;
         });
     }
     addTrip(trip, request) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.tripService.createTrip(request.body);
+            const newTrip = yield this.tripService.createTrip(trip);
+            debug('POST /trip => ' + JSON.stringify(newTrip));
+            return newTrip;
         });
     }
     deleteTrip(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            // console.log(id);
-            return this.tripService.deleteTrip(id);
+            const response = yield this.tripService.deleteTrip(id);
+            return response;
         });
     }
 };
@@ -51,7 +61,14 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], TripController.prototype, "getAll", null);
+], TripController.prototype, "getAllTrips", null);
+__decorate([
+    routing_controllers_1.Get('/:id'),
+    __param(0, routing_controllers_1.Param('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], TripController.prototype, "getTripById", null);
 __decorate([
     routing_controllers_1.Post(),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Req()),

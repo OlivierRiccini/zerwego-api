@@ -1,33 +1,37 @@
+'use strict';
 process.env.NODE_ENV = 'test';
-
 var app = require('../../dist/app').app;
 
 import 'mocha';
+import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 import { TripService } from '../../src/services/trip-Service'
 import { TripSeed } from '../seed/trip-seed';
+const debug = require('debug')('test');
 
 const tripService: TripService = new TripService();
 const tripSeed: TripSeed = new TripSeed(tripService);
 
+const expect = chai.expect;
 chai.use(chaiHttp);
 chai.should();
+
 
 describe('Trips', function() {
   const request = chai.request(app).keepOpen();
 
   before('Initialize', (done) => {
     tripSeed.addTrips()
-      .then(() => console.log('Done, DB for test ready!'))
-      .catch(err => console.log('Error during seeding DB test= ' + err))
+      .then(() => debug('Done, DB for test ready!'))
+      .catch(err => debug('Error during seeding DB test= ' + err))
     done();
   });
 
   after('Clean up', (done) => {
     tripSeed.deleteAllTrips()
-      .then(() => console.log('Done, DB for test ready!'))
-      .catch(err => console.log('Error during cleaning DB test= ' + err))
+      .then(() => debug('Done, DB for test ready!'))
+      .catch(err => debug('Error during cleaning DB test= ' + err))
     done();  
   }); 
 
@@ -36,12 +40,77 @@ describe('Trips', function() {
       .get('/trips')
         .then(
           response => {
-            response.body.should.be.ok;
-            response.body.should.have.lengthOf(3);
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.lengthOf(3);
           },
           err => {
-            console.log(err)
+            debug(err)
           }
         )
-    });
+    }
+  );
+
+  it('Should create a valid trip', async () => {
+    const ObjectId = mongoose.Types.ObjectId;
+
+    const validTrip = {
+        _id: new ObjectId('000000000000000000000000'),
+        tripName: "TEST TRIP",
+        destination: "Los Angeles, California, United States",
+        imageUrl: 'testurlimage',
+        startDate: new Date('2019-03-12'),
+        endDate: new Date('2019-03-25'),
+        adminId: 'testadminid'
+    }
+
+    return request
+      .post('/trips')
+        .send(validTrip)
+        .then(
+          response => {
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('id').to.be.a('string').to.equal('000000000000000000000000');
+            expect(response.body).to.have.property('tripName');
+            expect(response.body).to.have.property('destination');
+            expect(response.body).to.have.property('imageUrl');
+            expect(response.body).to.have.property('startDate');
+            expect(response.body).to.have.property('endDate');
+            expect(response.body).to.have.property('adminId');
+          },
+          err => {
+            debug(err)
+          }
+        )
+    }
+  );
+
+  // it('Should delete a trip', async (done) => {
+  //   const ObjectId = mongoose.Types.ObjectId;
+
+  //   const trip = {
+  //       _id: new ObjectId(),
+  //       tripName: "TEST TRIP",
+  //       destination: "Los Angeles, California, United States",
+  //       imageUrl: null,
+  //       startDate: new Date('2019-03-12'),
+  //       endDate: new Date('2019-03-25'),
+  //       adminId: null
+  //   };
+
+  //   const response = await request
+  //     .post('/trips')
+  //       .send(trip)
+    
+  //   return request
+  //     .delete(`/trips/${response.body.id}`)
+  //       .then(
+  //         response => {
+  //           expect(response.status).to.equal(200);
+  //           expect(response.body).to.have.lengthOf(3);
+  //         }
+  //       )
+  //   }
+  // );
+
+
 });
