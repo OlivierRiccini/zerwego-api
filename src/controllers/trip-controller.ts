@@ -1,12 +1,12 @@
 const debug = require('debug')('http');
 import {JsonController, Param, Body, Get, Post, Put, Delete, Req, Res} from "routing-controllers";
 import { TripService } from "../services/trip-Service";
-import { ITrip } from "../models/trip-model";
+import { ITrip, TripModel } from "../models/trip-model";
 
 @JsonController('/trips')
 export class TripController {
   constructor(private tripService: TripService) {    
-    this.tripService = new TripService();
+    this.tripService = new TripService(new TripModel());
   }
   
  

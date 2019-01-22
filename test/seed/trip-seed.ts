@@ -13,14 +13,14 @@ export class TripSeed {
     async addTrips() {
         for (const trip of this.trips) {
             this.tripService.createTrip(trip)
-                .then(() => debug('Trip test created!'))
+                .then(() => {})
                 .catch(err => debug('Error during seeding DB test= ' + err));
         }   
     }
 
     async deleteAllTrips() {
         this.tripService.deleteAllTrips()
-            .then(() => debug('Trips test deleted!'))
+            .then(() => {})
             .catch(err => debug('Error during seeding DB test= ' + err));   
     }
 }

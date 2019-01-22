@@ -23,10 +23,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const trip_Service_1 = require("../services/trip-Service");
+const trip_model_1 = require("../models/trip-model");
 let TripController = class TripController {
     constructor(tripService) {
         this.tripService = tripService;
-        this.tripService = new trip_Service_1.TripService();
+        this.tripService = new trip_Service_1.TripService(new trip_model_1.TripModel());
     }
     getAllTrips() {
         return __awaiter(this, void 0, void 0, function* () {

@@ -1,5 +1,7 @@
 import * as mongoose from 'mongoose';
 import { ObjectID } from 'bson';
+import { DAOImpl } from '../persist/dao';
+import { MongooseDocument } from 'mongoose';
 
 delete mongoose.connection.models['Trip'];
 
@@ -30,3 +32,10 @@ export const TripSchema = new mongoose.Schema({
 
 const Trip = mongoose.model('Trip', TripSchema);
 export default Trip;
+
+export class TripModel extends DAOImpl<ITrip> {
+    // model = Trip;
+    constructor() {
+        super(Trip);
+    }
+}

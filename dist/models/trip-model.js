@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
+const dao_1 = require("../persist/dao");
 delete mongoose.connection.models['Trip'];
 ;
 exports.TripSchema = new mongoose.Schema({
@@ -14,4 +15,11 @@ exports.TripSchema = new mongoose.Schema({
 });
 const Trip = mongoose.model('Trip', exports.TripSchema);
 exports.default = Trip;
+class TripModel extends dao_1.DAOImpl {
+    // model = Trip;
+    constructor() {
+        super(Trip);
+    }
+}
+exports.TripModel = TripModel;
 //# sourceMappingURL=trip-model.js.map

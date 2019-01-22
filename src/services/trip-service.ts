@@ -1,11 +1,11 @@
 const debug = require('debug')('service');
 import mongoose = require('mongoose');
 import { Service } from "typedi";
-import Trip, { ITrip } from '../models/trip-model';
+import Trip, { ITrip, TripModel } from '../models/trip-model';
 
 @Service()
 export class TripService {
-    constructor() {
+    constructor(private tripModel: TripModel) {
     }
     
     public fetchAll(){
@@ -40,21 +40,7 @@ export class TripService {
     }
 
     public createTrip(req: any) {          
-        return new Promise((resolve, reject) => {
-            let trip = new Trip(req);
-            trip.id = trip._id
-            trip.save((err, res) => {
-                if (err) {
-                    debug('trip-service - createTrip - FAILED => ' + err);
-                    reject(err);
-                }    
-                let trip = res.toObject();
-                trip.startDate = new Date(trip.startDate);
-                trip.endDate = new Date(trip.endDate);
-                debug('trip-service - createTrip - OK => ' + JSON.stringify(trip));
-                resolve(trip);
-            });
-        })
+        return this.tripModel.create(req);
     }
 
     public deleteTrip(id: any) {          

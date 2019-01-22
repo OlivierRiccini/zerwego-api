@@ -8,9 +8,10 @@ import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 import { TripService } from '../../src/services/trip-Service'
 import { TripSeed } from '../seed/trip-seed';
+import { TripModel } from '../../src/models/trip-model';
 const debug = require('debug')('test');
 
-const tripService: TripService = new TripService();
+const tripService: TripService = new TripService(new TripModel());
 const tripSeed: TripSeed = new TripSeed(tripService);
 
 const expect = chai.expect;
@@ -23,14 +24,14 @@ describe('Trips', function() {
 
   before('Initialize', (done) => {
     tripSeed.addTrips()
-      .then(() => debug('Done, DB for test ready!'))
+      .then(() => debug('Done, DB for tests ready!'))
       .catch(err => debug('Error during seeding DB test= ' + err))
     done();
   });
 
   after('Clean up', (done) => {
     tripSeed.deleteAllTrips()
-      .then(() => debug('Done, DB for test ready!'))
+      .then(() => debug('Done, DB cleaned up after tests!'))
       .catch(err => debug('Error during cleaning DB test= ' + err))
     done();  
   }); 

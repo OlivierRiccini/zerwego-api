@@ -13,7 +13,8 @@ const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
 let TripService = class TripService {
-    constructor() {
+    constructor(tripModel) {
+        this.tripModel = tripModel;
     }
     fetchAll() {
         return new Promise((resolve, reject) => {
@@ -47,21 +48,7 @@ let TripService = class TripService {
         });
     }
     createTrip(req) {
-        return new Promise((resolve, reject) => {
-            let trip = new trip_model_1.default(req);
-            trip.id = trip._id;
-            trip.save((err, res) => {
-                if (err) {
-                    debug('trip-service - createTrip - FAILED => ' + err);
-                    reject(err);
-                }
-                let trip = res.toObject();
-                trip.startDate = new Date(trip.startDate);
-                trip.endDate = new Date(trip.endDate);
-                debug('trip-service - createTrip - OK => ' + JSON.stringify(trip));
-                resolve(trip);
-            });
-        });
+        return this.tripModel.create(req);
     }
     deleteTrip(id) {
         return new Promise((resolve, reject) => {
@@ -88,7 +75,7 @@ let TripService = class TripService {
 };
 TripService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [trip_model_1.TripModel])
 ], TripService);
 exports.TripService = TripService;
 //# sourceMappingURL=trip-Service.js.map
