@@ -51,6 +51,43 @@ describe('Trips', function() {
     }
   );
 
+  it('Should get a trip base on the id', async () => {
+    const ObjectId = mongoose.Types.ObjectId;
+
+    const trip = {
+        _id: new ObjectId(),
+        tripName: "TEST TRIP",
+        destination: "Los Angeles, California, United States",
+        imageUrl: null,
+        startDate: new Date('2019-03-12'),
+        endDate: new Date('2019-03-25'),
+        adminId: null
+    };
+    
+    const response = await request
+      .post('/trips')
+      .send(trip)
+    
+      return request
+      .get(`/trips/${response.body.id}`)
+        .then(
+          response => {
+            expect(response.status).to.equal(200);
+            expect(response.body).to.have.property('id').to.be.a('string').to.equal(response.body.id);
+            expect(response.body).to.have.property('tripName').to.equal('TEST TRIP');
+            expect(response.body).to.have.property('destination').to.equal('Los Angeles, California, United States');
+            expect(response.body).to.have.property('imageUrl');
+            expect(response.body).to.have.property('startDate');
+            expect(response.body).to.have.property('endDate');
+            expect(response.body).to.have.property('adminId');
+          },
+          err => {
+            debug(err)
+          }
+        )
+    }
+  );
+
   it('Should create a valid trip', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
@@ -97,17 +134,21 @@ describe('Trips', function() {
   //       endDate: new Date('2019-03-25'),
   //       adminId: null
   //   };
-
+    
   //   const response = await request
   //     .post('/trips')
-  //       .send(trip)
+  //     .send(trip)
     
-  //   return request
+  //     return request
   //     .delete(`/trips/${response.body.id}`)
   //       .then(
   //         response => {
   //           expect(response.status).to.equal(200);
   //           expect(response.body).to.have.lengthOf(3);
+  //           done();
+  //         },
+  //         err => {
+  //           debug(err)
   //         }
   //       )
   //   }

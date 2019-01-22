@@ -17,60 +17,19 @@ let TripService = class TripService {
         this.tripModel = tripModel;
     }
     fetchAll() {
-        return new Promise((resolve, reject) => {
-            trip_model_1.default.find({})
-                .lean()
-                .exec((err, res) => {
-                if (err) {
-                    debug('trip-service - findById - FAILED => No trips found');
-                    reject(new Error("No trips found"));
-                }
-                else {
-                    resolve(res);
-                }
-            });
-        });
+        return this.tripModel.getAll();
     }
     findById(id) {
-        return new Promise((resolve, reject) => {
-            trip_model_1.default.findOne({ id })
-                .lean()
-                .exec((err, trip) => {
-                if (err) {
-                    debug('trip-service - findById - FAILED => Trip with id => ${id} not found');
-                    reject(new Error(`Trip with id => ${id} not found`));
-                }
-                else {
-                    debug('trip-service - findById - OK => ' + JSON.stringify(trip));
-                    resolve(trip);
-                }
-            });
-        });
+        return this.tripModel.get(id);
     }
     createTrip(req) {
         return this.tripModel.create(req);
     }
     deleteTrip(id) {
-        return new Promise((resolve, reject) => {
-            trip_model_1.default.deleteOne({ id }, err => {
-                if (err) {
-                    debug('trip-service - deleteTrip - FAILED => ' + err);
-                    reject(err);
-                }
-                debug('trip-service - deleteTrip - OK');
-            });
-        });
+        return this.tripModel.delete(id);
     }
     deleteAllTrips() {
-        return new Promise((resolve, reject) => {
-            trip_model_1.default.deleteMany({}, err => {
-                if (err) {
-                    debug('trip-service - deleteAllTrips - FAILED => ' + err);
-                    reject(err);
-                }
-                debug('trip-service - deleteAllTrips - OK');
-            });
-        });
+        return this.tripModel.deleteAll();
     }
 };
 TripService = __decorate([

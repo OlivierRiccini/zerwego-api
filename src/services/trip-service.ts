@@ -9,34 +9,11 @@ export class TripService {
     }
     
     public fetchAll(){
-        return new Promise((resolve, reject) => {
-            Trip.find({})
-            .lean()
-            .exec((err: any, res: any) => {
-                if (err) {
-                    debug('trip-service - findById - FAILED => No trips found');
-                    reject(new Error("No trips found"));
-                } else {
-                    resolve(res);
-                }
-            })
-        });
+        return this.tripModel.getAll();
     }
 
     public findById(id: string) {
-        return new Promise((resolve, reject) => {
-            Trip.findOne({ id })
-            .lean()
-            .exec((err: any, trip: any) => {
-                if (err) {
-                    debug('trip-service - findById - FAILED => Trip with id => ${id} not found');
-                    reject(new Error(`Trip with id => ${id} not found`));
-                } else {
-                    debug('trip-service - findById - OK => ' + JSON.stringify(trip));
-                    resolve(trip);
-                }
-            })
-        })
+        return this.tripModel.get(id);
     }
 
     public createTrip(req: any) {          
@@ -44,26 +21,10 @@ export class TripService {
     }
 
     public deleteTrip(id: any) {          
-        return new Promise((resolve, reject) => {
-            Trip.deleteOne({ id }, err => {
-                if (err) {
-                    debug('trip-service - deleteTrip - FAILED => ' + err);
-                    reject(err);
-                }
-                debug('trip-service - deleteTrip - OK');    
-            });
-        })
+        return this.tripModel.delete(id);
     }
 
     public deleteAllTrips() {
-        return new Promise((resolve, reject) => {
-            Trip.deleteMany({}, err => {
-                if (err) {
-                    debug('trip-service - deleteAllTrips - FAILED => ' + err);
-                    reject(err);
-                }
-                debug('trip-service - deleteAllTrips - OK');
-            });
-        })
+        return this.tripModel.deleteAll();
     }
 }

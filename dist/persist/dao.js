@@ -18,7 +18,7 @@ class DAOImpl {
                 let trip = res.toObject();
                 trip.startDate = new Date(trip.startDate);
                 trip.endDate = new Date(trip.endDate);
-                debug('trip-service - createTrip - OK MAX => ' + JSON.stringify(trip));
+                debug('trip-service - createTrip - OK => ' + JSON.stringify(trip));
                 resolve(trip);
             });
         });

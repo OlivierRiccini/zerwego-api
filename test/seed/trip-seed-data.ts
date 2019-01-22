@@ -22,7 +22,7 @@ const TRIPS =  [
       adminId: null
     },
     {
-      _id: new ObjectId(),
+      _id: new ObjectId('oooooooooooo'),
       tripName: "MONTREAL",
       destination: "Monteal, Quebec, Canada",
       imageUrl: null,
