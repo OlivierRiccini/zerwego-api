@@ -8,10 +8,10 @@ import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 import { TripService } from '../../src/services/trip-Service'
 import { TripSeed } from '../seed/trip-seed';
-import { TripModel } from '../../src/models/trip-model';
+import { TripDAO } from '../../src/models/trip-model';
 const debug = require('debug')('test');
 
-const tripService: TripService = new TripService(new TripModel());
+const tripService: TripService = new TripService(new TripDAO());
 const tripSeed: TripSeed = new TripSeed(tripService);
 
 const expect = chai.expect;

@@ -1,30 +1,30 @@
 const debug = require('debug')('service');
 import mongoose = require('mongoose');
 import { Service } from "typedi";
-import Trip, { ITrip, TripModel } from '../models/trip-model';
+import Trip, { ITrip, TripDAO } from '../models/trip-model';
 
 @Service()
 export class TripService {
-    constructor(private tripModel: TripModel) {
+    constructor(private tripDAO: TripDAO) {
     }
     
     public fetchAll(){
-        return this.tripModel.getAll();
+        return this.tripDAO.getAll();
     }
 
     public findById(id: string) {
-        return this.tripModel.get(id);
+        return this.tripDAO.get(id);
     }
 
     public createTrip(req: any) {          
-        return this.tripModel.create(req);
+        return this.tripDAO.create(req);
     }
 
     public deleteTrip(id: any) {          
-        return this.tripModel.delete(id);
+        return this.tripDAO.delete(id);
     }
 
     public deleteAllTrips() {
-        return this.tripModel.deleteAll();
+        return this.tripDAO.deleteAll();
     }
 }

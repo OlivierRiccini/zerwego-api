@@ -33,7 +33,7 @@ export const TripSchema = new mongoose.Schema({
 const Trip = mongoose.model('Trip', TripSchema);
 export default Trip;
 
-export class TripModel extends DAOImpl<ITrip> {
+export class TripDAO extends DAOImpl<ITrip> {
     // model = Trip;
     constructor() {
         super(Trip);

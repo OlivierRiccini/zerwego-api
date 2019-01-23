@@ -15,11 +15,11 @@ exports.TripSchema = new mongoose.Schema({
 });
 const Trip = mongoose.model('Trip', exports.TripSchema);
 exports.default = Trip;
-class TripModel extends dao_1.DAOImpl {
+class TripDAO extends dao_1.DAOImpl {
     // model = Trip;
     constructor() {
         super(Trip);
     }
 }
-exports.TripModel = TripModel;
+exports.TripDAO = TripDAO;
 //# sourceMappingURL=trip-model.js.map

@@ -24,10 +24,11 @@ const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const trip_Service_1 = require("../services/trip-Service");
 const trip_model_1 = require("../models/trip-model");
+const typedi_1 = require("typedi");
 let TripController = class TripController {
     constructor(tripService) {
         this.tripService = tripService;
-        this.tripService = new trip_Service_1.TripService(new trip_model_1.TripModel());
+        this.tripService = new trip_Service_1.TripService(new trip_model_1.TripDAO());
     }
     getAllTrips() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -86,6 +87,7 @@ __decorate([
 ], TripController.prototype, "deleteTrip", null);
 TripController = __decorate([
     routing_controllers_1.JsonController('/trips'),
+    typedi_1.Service(),
     __metadata("design:paramtypes", [trip_Service_1.TripService])
 ], TripController);
 exports.TripController = TripController;

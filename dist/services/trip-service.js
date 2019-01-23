@@ -13,28 +13,28 @@ const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
 let TripService = class TripService {
-    constructor(tripModel) {
-        this.tripModel = tripModel;
+    constructor(tripDAO) {
+        this.tripDAO = tripDAO;
     }
     fetchAll() {
-        return this.tripModel.getAll();
+        return this.tripDAO.getAll();
     }
     findById(id) {
-        return this.tripModel.get(id);
+        return this.tripDAO.get(id);
     }
     createTrip(req) {
-        return this.tripModel.create(req);
+        return this.tripDAO.create(req);
     }
     deleteTrip(id) {
-        return this.tripModel.delete(id);
+        return this.tripDAO.delete(id);
     }
     deleteAllTrips() {
-        return this.tripModel.deleteAll();
+        return this.tripDAO.deleteAll();
     }
 };
 TripService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [trip_model_1.TripModel])
+    __metadata("design:paramtypes", [trip_model_1.TripDAO])
 ], TripService);
 exports.TripService = TripService;
 //# sourceMappingURL=trip-Service.js.map
