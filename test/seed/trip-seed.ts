@@ -1,25 +1,24 @@
 const debug = require('debug')('seed');
-import mongoose = require('mongoose');
-import { TripService}  from '../../src/services/trip-service';
-import TRIPS from './trip-seed-data';
+import TRIPS from './trip-data';
+import { TripDAO, ITrip } from '../../src/models/trip-model';
 
 export class TripSeed {
-    trips = [];
+    trips: ITrip[] = [];
 
-    constructor(private tripService: TripService) {
+    constructor(private tripDAO: TripDAO) {
         this.trips = TRIPS;
     }
 
     async addTrips() {
         for (const trip of this.trips) {
-            this.tripService.createTrip(trip)
+            this.tripDAO.create(trip)
                 .then(() => {})
                 .catch(err => debug('Error during seeding DB test= ' + err));
         }   
     }
 
     async deleteAllTrips() {
-        this.tripService.deleteAllTrips()
+        this.tripDAO.deleteAll()
             .then(() => {})
             .catch(err => debug('Error during seeding DB test= ' + err));   
     }

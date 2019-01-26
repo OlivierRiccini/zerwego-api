@@ -39,6 +39,7 @@ let TripController = class TripController {
     }
     getTripById(id) {
         return __awaiter(this, void 0, void 0, function* () {
+            debug('GET /trip by id');
             let trip = yield this.tripService.findById(id);
             debug('GET /trip by id => ' + JSON.stringify(trip));
             return trip;
@@ -53,7 +54,9 @@ let TripController = class TripController {
     }
     deleteTrip(id) {
         return __awaiter(this, void 0, void 0, function* () {
+            debug('DELETE /trip by id');
             const response = yield this.tripService.deleteTrip(id);
+            debug('DELETE /trip by id => ' + JSON.stringify(response));
             return response;
         });
     }

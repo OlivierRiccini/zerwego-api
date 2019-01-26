@@ -1,8 +1,9 @@
 import mongoose = require('mongoose');
+import { ITrip } from '../../src/models/trip-model';
 
 const ObjectId = mongoose.Types.ObjectId;
 
-const TRIPS =  [
+const TRIPS: ITrip[] =  [
     {
         _id: new ObjectId(),
         tripName: "LA",

@@ -6,20 +6,19 @@ import 'mocha';
 import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { TripService } from '../../src/services/trip-Service'
 import { TripSeed } from '../seed/trip-seed';
-import { TripDAO } from '../../src/models/trip-model';
+import { TripDAO, ITrip } from '../../src/models/trip-model';
 const debug = require('debug')('test');
 
-const tripService: TripService = new TripService(new TripDAO());
-const tripSeed: TripSeed = new TripSeed(tripService);
+const tripDAO: TripDAO = new TripDAO();
+const tripSeed: TripSeed = new TripSeed(tripDAO);
 
 const expect = chai.expect;
 chai.use(chaiHttp);
 chai.should();
 
-
 describe('Trips', function() {
+  
   const request = chai.request(app).keepOpen();
 
   before('Initialize', (done) => {
@@ -54,7 +53,7 @@ describe('Trips', function() {
   it('Should get a trip base on the id', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
-    const trip = {
+    const trip: ITrip = {
         _id: new ObjectId(),
         tripName: "TEST TRIP",
         destination: "Los Angeles, California, United States",
@@ -91,8 +90,8 @@ describe('Trips', function() {
   it('Should create a valid trip', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
-    const validTrip = {
-        _id: new ObjectId('000000000000000000000000'),
+    const validTrip: ITrip = {
+        _id: new ObjectId('111111111111111111111111'),
         tripName: "TEST TRIP",
         destination: "Los Angeles, California, United States",
         imageUrl: 'testurlimage',
@@ -107,7 +106,7 @@ describe('Trips', function() {
         .then(
           response => {
             expect(response.status).to.equal(200);
-            expect(response.body).to.have.property('id').to.be.a('string').to.equal('000000000000000000000000');
+            expect(response.body).to.have.property('id').to.be.a('string').to.equal('111111111111111111111111');
             expect(response.body).to.have.property('tripName');
             expect(response.body).to.have.property('destination');
             expect(response.body).to.have.property('imageUrl');
@@ -122,37 +121,39 @@ describe('Trips', function() {
     }
   );
 
-  // it('Should delete a trip', async (done) => {
-  //   const ObjectId = mongoose.Types.ObjectId;
+  it('Should delete a trip', async () => {
+    const ObjectId = mongoose.Types.ObjectId;
 
-  //   const trip = {
-  //       _id: new ObjectId(),
-  //       tripName: "TEST TRIP",
-  //       destination: "Los Angeles, California, United States",
-  //       imageUrl: null,
-  //       startDate: new Date('2019-03-12'),
-  //       endDate: new Date('2019-03-25'),
-  //       adminId: null
-  //   };
+    const trip : ITrip= {
+        _id: new ObjectId(),
+        tripName: "TEST TRIP",
+        destination: "Los Angeles, California, United States",
+        imageUrl: null,
+        startDate: new Date('2019-03-12'),
+        endDate: new Date('2019-03-25'),
+        adminId: null
+    };
     
-  //   const response = await request
-  //     .post('/trips')
-  //     .send(trip)
+    const response = await request
+      .post('/trips')
+      .send(trip)
     
-  //     return request
-  //     .delete(`/trips/${response.body.id}`)
-  //       .then(
-  //         response => {
-  //           expect(response.status).to.equal(200);
-  //           expect(response.body).to.have.lengthOf(3);
-  //           done();
-  //         },
-  //         err => {
-  //           debug(err)
-  //         }
-  //       )
-  //   }
-  // );
+    const nbOfTrips = await tripDAO.count({});
+    expect(nbOfTrips).to.equal(6);
+    return request
+      .delete(`/trips/${response.body.id}`)
+        .then(
+          async response => {
+            expect(response.status).to.equal(200);
+            const newNbOfTrips = await tripDAO.count({});
+            expect(newNbOfTrips).to.equal(nbOfTrips -1);
+          },
+          err => {
+            debug(err)
+          }
+        )
+    }  
+  );
 
 
 });

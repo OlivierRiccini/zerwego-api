@@ -1,11 +1,12 @@
 const debug = require('debug')('service');
-import mongoose = require('mongoose');
-import { Service } from "typedi";
-import Trip, { ITrip, TripDAO } from '../models/trip-model';
+import { Service, Inject } from "typedi";
+import { TripDAO } from '../models/trip-model';
 
 @Service()
 export class TripService {
+    // @Inject() tripDAO: TripDAO;
     constructor(private tripDAO: TripDAO) {
+        debug('test')
     }
     
     public fetchAll(){
@@ -22,9 +23,5 @@ export class TripService {
 
     public deleteTrip(id: any) {          
         return this.tripDAO.delete(id);
-    }
-
-    public deleteAllTrips() {
-        return this.tripDAO.deleteAll();
     }
 }

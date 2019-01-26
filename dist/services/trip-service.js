@@ -13,8 +13,10 @@ const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
 let TripService = class TripService {
+    // @Inject() tripDAO: TripDAO;
     constructor(tripDAO) {
         this.tripDAO = tripDAO;
+        debug('test');
     }
     fetchAll() {
         return this.tripDAO.getAll();
@@ -27,9 +29,6 @@ let TripService = class TripService {
     }
     deleteTrip(id) {
         return this.tripDAO.delete(id);
-    }
-    deleteAllTrips() {
-        return this.tripDAO.deleteAll();
     }
 };
 TripService = __decorate([

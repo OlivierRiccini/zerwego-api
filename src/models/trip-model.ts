@@ -1,13 +1,14 @@
 import * as mongoose from 'mongoose';
-import { ObjectID } from 'bson';
+import { ObjectID, ObjectId } from 'bson';
 import { DAOImpl } from '../persist/dao';
 import { MongooseDocument } from 'mongoose';
 
 delete mongoose.connection.models['Trip'];
 
-export interface ITrip extends mongoose.Document {
+//Interface for model
+export interface ITrip {
     id?: string,
-    _id: ObjectID,
+    _id?: ObjectID,
     tripName: string,
     destination: string,
     imageUrl: string,
@@ -17,25 +18,27 @@ export interface ITrip extends mongoose.Document {
     usersIds?: String[];
 };
 
-export const TripSchema = new mongoose.Schema({
-    id: String,
-    tripName: String,
-    destination: String,
-    imageUrl: String,
-    startDate: { type: Date },
-    endDate: { type: Date },
-    adminId: String, 
-    // usersIds: [{
-    //     type: String
-    // }]
-});
+// Document
+export interface TripDocument extends ITrip, mongoose.Document {
+    id: string,
+    _id: ObjectID
+}
 
-const Trip = mongoose.model('Trip', TripSchema);
-export default Trip;
 
-export class TripDAO extends DAOImpl<ITrip> {
-    // model = Trip;
+export class TripDAO extends DAOImpl<ITrip, TripDocument> {
     constructor() {
-        super(Trip);
+        const TripSchema = new mongoose.Schema({
+            id: String,
+            tripName: String,
+            destination: String,
+            imageUrl: String,
+            startDate: { type: Date },
+            endDate: { type: Date },
+            adminId: String, 
+            // usersIds: [{
+            //     type: String
+            // }]
+        });
+        super('Trip', TripSchema);
     }
 }

@@ -21,6 +21,7 @@ export class TripController {
 
   @Get('/:id')
   async getTripById(@Param('id') id: string) { 
+    debug('GET /trip by id');
     let trip = await this.tripService.findById(id);
     debug('GET /trip by id => ' + JSON.stringify(trip));
     return trip;
@@ -35,7 +36,9 @@ export class TripController {
 
   @Delete('/:id')
     async deleteTrip(@Param('id') id: string) {
+    debug('DELETE /trip by id');
     const response = await this.tripService.deleteTrip(id);
+    debug('DELETE /trip by id => ' + JSON.stringify(response));
     return response;
   }
  
