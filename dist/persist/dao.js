@@ -117,7 +117,7 @@ class DAOImpl {
         });
     }
     find(findOptions) {
-        console.log(findOptions);
+        // TODO: fix the find
         return new Promise((resolve, reject) => {
             this.model.find(findOptions.find)
                 .lean()

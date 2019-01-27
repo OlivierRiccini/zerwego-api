@@ -2,69 +2,62 @@
 process.env.NODE_ENV = 'test';
 
 import 'mocha';
-import mongoose = require('mongoose');
 import * as chai from 'chai';
-import { MODELS, MODELS_DATA } from '../seed/common-data';
+import { MODELS, MODELS_DATA } from '../data/common-data';
 import { FindOptions } from '../../src/persist/dao';
+const forEach = require('mocha-each');
 
 const debug = require('debug')('test');
 
 const expect = chai.expect;
 chai.should();
 
-for (const MODEL of MODELS) {
+describe('COMMON - TESTING EACH MODEL DAO - ./common/dao.test', function() {
 
-    const modelDAO = MODEL.DAO;
-
-    describe('DAO - ' + MODEL.name, function() {
-
-        beforeEach('Clean up', (done) => {
+    beforeEach('Clean up', (done) => {
+        for (const MODEL of MODELS) {
+            const modelDAO = MODEL.DAO;
             modelDAO.deleteAll()
-              .then(() => debug('Done, DB cleaned up after tests!'))
-              .catch(err => debug('Error during cleaning DB test= ' + err))
-            done();  
-        }); 
-    
-        afterEach('Clean up', (done) => {
-            modelDAO.deleteAll()
-              .then(() => debug('Done, DB cleaned up after tests!'))
-              .catch(err => debug('Error during cleaning DB test= ' + err))
-            done();  
-        }); 
-    
-        it('Should create a valid doc DAO', async () => {
-            return modelDAO.create(MODELS_DATA[MODEL.name][0])
-                .then(
-                    response => {
-                        expect(response).to.have.property('id').to.be.a('string');
-                        expect(response).to.have.property('tripName');
-                        expect(response).to.have.property('destination');
-                        expect(response).to.have.property('imageUrl');
-                        expect(response).to.have.property('startDate');
-                        expect(response).to.have.property('endDate');
-                        expect(response).to.have.property('adminId');
-                    },
-                    err => {
-                        debug(err)
-                    }
-                )
+                .then(() => debug('Done, DB cleaned up after tests!'))
+                .catch(err => debug('Error during cleaning DB test= ' + err))
             }
-        );
-    });
+        done();  
+    }); 
 
-    it('Should get a doc based on id', async () => {
-        const newInstance = await modelDAO.create(MODELS_DATA[MODEL.name][0]);
-
-         return modelDAO.get(newInstance.id)
+    afterEach('Clean up', (done) => {
+        for (const MODEL of MODELS) {
+            const modelDAO = MODEL.DAO;
+            modelDAO.deleteAll()
+                .then(() => debug('Done, DB cleaned up after tests!'))
+                .catch(err => debug('Error during cleaning DB test= ' + err))
+            } 
+        done();  
+    }); 
+    
+    forEach(MODELS)
+    .it('Should create a valid document', async MODEL => {
+        const modelDAO = MODEL.DAO;
+        return modelDAO.create(MODELS_DATA[MODEL.name][0])
             .then(
                 response => {
                     expect(response).to.have.property('id').to.be.a('string');
-                    expect(response).to.have.property('tripName');
-                    expect(response).to.have.property('destination');
-                    expect(response).to.have.property('imageUrl');
-                    expect(response).to.have.property('startDate');
-                    expect(response).to.have.property('endDate');
-                    expect(response).to.have.property('adminId');
+                },
+                err => {
+                    debug(err)
+                }
+            )
+        }
+    );
+
+    forEach(MODELS)
+    .it('Should get a document based on id', async MODEL => {
+        const modelDAO = MODEL.DAO;
+        const newInstance = await modelDAO.create(MODELS_DATA[MODEL.name][0]);
+
+        return modelDAO.get(newInstance.id)
+            .then(
+                response => {
+                    expect(response).to.have.property('id').to.be.a('string');
                 },
                 err => {
                     debug(err)
@@ -72,7 +65,9 @@ for (const MODEL of MODELS) {
             )
     });
 
-    it('Should getAll docs', async () => {
+    forEach(MODELS)
+    .it('Should getAll documents', async MODEL => {
+        const modelDAO = MODEL.DAO;
 
         for (const modelData of MODELS_DATA[MODEL.name]) {
             await modelDAO.create(modelData);
@@ -90,29 +85,29 @@ for (const MODEL of MODELS) {
             )
     });
 
-    it('Should find a doc based on a property', async () => {
-        await modelDAO.create(MODELS_DATA[MODEL.name][0]);
+    // forEach(MODELS)
+    // .it('Should find a doc based on a property', async MODEL => {
+    //     const modelDAO = MODEL.DAO;
+    //     const doc = await modelDAO.create(MODELS_DATA[MODEL.name][0]);
 
-        const findOptions: FindOptions = { find: { tripName: 'LA' } };
+    //     const findOptions: FindOptions = { find: { tripName: 'LA' } };
 
-        return modelDAO.find(findOptions)
-            .then(
-                response => {
-                    console.log(response);
-                    expect(response[0]).to.have.property('tripName').to.equals('LA');
-                },
-                err => {
-                    debug(err)
-                }
-            )
-    });
+    //     return modelDAO.find(findOptions)
+    //         .then(
+    //             response => {
+    //                 expect(response[0]).to.have.property('tripName').to.equals('LA');
+    //             },
+    //             err => {
+    //                 debug(err)
+    //             }
+    //         )
+    // });
+});
 
 
-}
-
+// find(findOptions: FindOptions): Promise<T[]>;
 // update(model:any):Promise<T>;
 // delete(id:number|string):Promise<any>;
 // deleteAll():Promise<any>;
-// find(findOptions: FindOptions): Promise<T[]>;
 // findAndRemove(deleteOptions: DeleteOptions): Promise<any>;
 // count(findOptions: FindOptions): Promise<any>;

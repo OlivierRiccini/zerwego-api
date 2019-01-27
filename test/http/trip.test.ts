@@ -6,7 +6,7 @@ import 'mocha';
 import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { TripSeed } from '../seed/trip-seed';
+import { TripSeed } from '../data/trip-seed';
 import { TripDAO, ITrip } from '../../src/models/trip-model';
 const debug = require('debug')('test');
 
@@ -17,7 +17,7 @@ const expect = chai.expect;
 chai.use(chaiHttp);
 chai.should();
 
-describe('Trips', function() {
+describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   
   const request = chai.request(app).keepOpen();
 

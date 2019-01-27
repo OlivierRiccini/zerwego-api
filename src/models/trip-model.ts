@@ -1,7 +1,6 @@
 import * as mongoose from 'mongoose';
 import { ObjectID, ObjectId } from 'bson';
 import { DAOImpl } from '../persist/dao';
-import { MongooseDocument } from 'mongoose';
 
 delete mongoose.connection.models['Trip'];
 
