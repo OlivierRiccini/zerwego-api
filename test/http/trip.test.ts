@@ -6,7 +6,7 @@ import 'mocha';
 import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { TripSeed } from '../data/trip-seed';
+import { TripSeed } from '../data-test/trip-seed';
 import { TripDAO, ITrip } from '../../src/models/trip-model';
 const debug = require('debug')('test');
 

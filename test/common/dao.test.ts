@@ -3,7 +3,7 @@ process.env.NODE_ENV = 'test';
 
 import 'mocha';
 import * as chai from 'chai';
-import { MODELS, MODELS_DATA } from '../data/common-data';
+import { MODELS, MODELS_DATA } from '../data-test/common-data';
 import { FindOptions } from '../../src/persist/dao';
 const forEach = require('mocha-each');
 
