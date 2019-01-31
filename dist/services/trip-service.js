@@ -36,4 +36,4 @@ TripService = __decorate([
     __metadata("design:paramtypes", [trip_model_1.TripDAO])
 ], TripService);
 exports.TripService = TripService;
-//# sourceMappingURL=trip-Service.js.map
+//# sourceMappingURL=trip-service.js.map
