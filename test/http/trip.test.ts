@@ -124,7 +124,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   it('Should delete a trip', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
-    const trip : ITrip= {
+    const trip : ITrip = {
         _id: new ObjectId(),
         tripName: "TEST TRIP",
         destination: "Los Angeles, California, United States",
@@ -155,5 +155,44 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     }  
   );
 
+  it('Should update a valid trip', async () => {
+    const ObjectId = mongoose.Types.ObjectId;
+
+    const trip: ITrip = {
+        _id: new ObjectId(),
+        tripName: 'TEST TRIP',
+        destination: 'Los Angeles, California, United States',
+        imageUrl: null,
+        startDate: new Date('2019-03-12'),
+        endDate: new Date('2019-03-25'),
+        adminId: null
+    };
+    
+    await request
+      .post('/trips')
+      .send(trip)
+
+    const tripToUpdate: ITrip = {
+      tripName: 'TEST TRIP EVER',
+      destination: 'Los Angeles, California, United States',
+      imageUrl: 'new image url',
+      startDate: new Date('2019-03-12'),
+      endDate: new Date('2019-03-25'),
+      adminId: 'testadminid'
+    }
+
+    const id = trip._id;
+
+    return request
+      .put(`/trips/${id}`)
+      .send(tripToUpdate)
+      .then(response => {
+        expect(response.status).to.equal(200);
+        expect(response.body.tripName).to.equal('TEST TRIP EVER');
+        expect(response.body.imageUrl).to.equal('new image url');
+      });
+    
+
+  });
 
 });

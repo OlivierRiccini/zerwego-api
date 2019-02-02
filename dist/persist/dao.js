@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const debug = require('debug')('DAO');
+const _ = require('lodash');
 ;
 ;
 // mongoose.Document
@@ -24,18 +25,18 @@ class DAOImpl {
     }
     create(model) {
         return new Promise((resolve, reject) => {
-            let trip = new this.model(model);
-            trip.id = trip._id;
-            trip.save((err, res) => {
+            let document = new this.model(model);
+            document.id = document._id;
+            document.save((err, res) => {
                 if (err) {
-                    debug('createTrip - FAILED => ' + err);
+                    debug('create a document - FAILED => ' + err);
                     reject(err);
                 }
-                let trip = res.toObject();
-                trip.startDate = new Date(trip.startDate);
-                trip.endDate = new Date(trip.endDate);
-                debug('createTrip - OK => ' + JSON.stringify(trip));
-                resolve(trip);
+                let document = res.toObject();
+                // document.startDate = new Date(document.startDate);
+                // document.endDate = new Date(document.endDate);
+                debug('create a document - OK => ' + JSON.stringify(document));
+                resolve(document);
             });
         });
     }
@@ -44,14 +45,14 @@ class DAOImpl {
         return new Promise((resolve, reject) => {
             this.model.findOne({ id })
                 .lean()
-                .exec((err, trip) => {
+                .exec((err, document) => {
                 if (err) {
-                    debug('get - FAILED => Trip with id => ${id} not found');
-                    reject(new Error(`Trip with id => ${id} not found`));
+                    debug('get - FAILED => document with id => ${id} not found');
+                    reject(new Error(`Document with id => ${id} not found`));
                 }
                 else {
-                    debug('get - OK => ' + JSON.stringify(trip));
-                    resolve(trip);
+                    debug('get - OK => ' + JSON.stringify(document));
+                    resolve(document);
                 }
             });
         });
@@ -63,8 +64,8 @@ class DAOImpl {
                 .lean()
                 .exec((err, res) => {
                 if (err) {
-                    debug('findById - FAILED => No trips found');
-                    reject(new Error("No trips found"));
+                    debug('findById - FAILED => No documents found');
+                    reject(new Error("No documents found"));
                 }
                 else {
                     resolve(res);
@@ -73,24 +74,30 @@ class DAOImpl {
         });
     }
     ;
-    update(model) {
+    update(obj, id) {
         return new Promise((resolve, reject) => {
-            let trip = new this.model(model);
-            trip.id = trip._id;
-            trip.save((err, res) => {
+            if (!_.isObject(obj)) {
+                return reject(new TypeError('DAO.update value passed is not object.'));
+            }
+            if (!id && !obj._id) {
+                return reject(new TypeError('DAO.update object passed doesn\'t have _id.'));
+            }
+            this.model.findById(id || obj._id).exec((err, found) => {
                 if (err) {
-                    debug('createTrip - FAILED => ' + err);
                     reject(err);
                 }
-                let trip = res.toObject();
-                trip.startDate = new Date(trip.startDate);
-                trip.endDate = new Date(trip.endDate);
-                debug('createTrip - OK => ' + JSON.stringify(trip));
-                resolve(trip);
+                ;
+                if (!found) {
+                    resolve(found);
+                }
+                ;
+                let updated = _.merge(found, obj);
+                updated.save((err, updated) => {
+                    err ? reject(err) : resolve(updated.toObject());
+                });
             });
         });
     }
-    ;
     delete(id) {
         return new Promise((resolve, reject) => {
             this.model.deleteOne({ id }, err => {
@@ -108,10 +115,10 @@ class DAOImpl {
         return new Promise((resolve, reject) => {
             this.model.deleteMany({}, err => {
                 if (err) {
-                    debug('deleteAllTrips - FAILED => ' + JSON.stringify(err));
+                    debug('deleteAll documents - FAILED => ' + JSON.stringify(err));
                     reject(err);
                 }
-                debug('deleteAllTrips - OK');
+                debug('deleteAll documents - OK');
                 resolve({ message: 'Deleted' });
             });
         });
@@ -123,8 +130,8 @@ class DAOImpl {
                 .lean()
                 .exec((err, res) => {
                 if (err) {
-                    debug('find - FAILED => No trips found');
-                    reject(new Error("No trips found"));
+                    debug('find - FAILED => No documents found');
+                    reject(new Error("No documents found"));
                 }
                 else {
                     resolve(res);
@@ -150,8 +157,8 @@ class DAOImpl {
                 .lean()
                 .exec((err, res) => {
                 if (err) {
-                    debug('count - FAILED => No trips found');
-                    reject(new Error("No trips found"));
+                    debug('count - FAILED => No documents found');
+                    reject(new Error("No documents found"));
                 }
                 else {
                     resolve(res);

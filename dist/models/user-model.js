@@ -3,27 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const dao_1 = require("../persist/dao");
 const validator_1 = require("validator");
-// const {SHA256} = require('crypto-js');
-// import {SHA256} as crypto from 'crypto-js';
-const crypto_js_1 = require("crypto-js");
-// const hash = SHA256()
-const data = {
-    id: 4
-};
-let token = {
-    data,
-    hash: crypto_js_1.SHA256(JSON.stringify(data) + 'somesecret').toString()
-};
-const resultHash = crypto_js_1.SHA256(JSON.stringify(token.data) + 'somesecret').toString();
-// token.data.id = 5;
-// token.hash = SHA256(JSON.stringify(token.data)).toString();
-if (resultHash === token.hash) {
-    console.log('Data was not changed');
-}
-else {
-    console.log('Data was changed do not trust');
-}
-delete mongoose.connection.models['Trip'];
+// const data = {
+//     id: 10
+// };
+// const token = jwt.sign(data, '123abc');
+// console.log(token);
+// const decoded = jwt.verify(token, '123abc');
+// console.log('decoded', decoded);
+delete mongoose.connection.models['User'];
 ;
 class UserDAO extends dao_1.DAOImpl {
     constructor() {
@@ -56,6 +43,15 @@ class UserDAO extends dao_1.DAOImpl {
                     }
                 }]
         });
+        // UserSchema.methods.generateAuthToken = function () {
+        //     const user = this;
+        //     const access = 'auth';
+        //     const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
+        //     user.tokens.concat([{access, token}]);
+        //     user.save().then(() => {
+        //         return token;
+        //     });
+        // }
         super('User', UserSchema);
     }
 }

@@ -2,33 +2,18 @@ import * as mongoose from 'mongoose';
 import { ObjectID, ObjectId } from 'bson';
 import { DAOImpl } from '../persist/dao';
 import validator from 'validator';
-// const {SHA256} = require('crypto-js');
-// import {SHA256} as crypto from 'crypto-js';
-import {SHA256} from "crypto-js";
-// const hash = SHA256()
-const data = { 
-    id: 4
-};
+import * as jwt from 'jsonwebtoken';
 
-let token = {
-    data,
-    hash: SHA256(JSON.stringify(data) + 'somesecret').toString()
-};
+// const data = {
+//     id: 10
+// };
 
-const resultHash = SHA256(JSON.stringify(token.data) + 'somesecret').toString();
+// const token = jwt.sign(data, '123abc');
+// console.log(token);
+// const decoded = jwt.verify(token, '123abc');
+// console.log('decoded', decoded);
 
-// token.data.id = 5;
-// token.hash = SHA256(JSON.stringify(token.data)).toString();
-
-if (resultHash === token.hash) {
-    console.log('Data was not changed');
-} else {
-    console.log('Data was changed do not trust');
-}
-
-
-
-delete mongoose.connection.models['Trip'];
+delete mongoose.connection.models['User'];
 
 //Interface for model
 export interface IUser {
@@ -77,6 +62,18 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                 }
             }]
         });
+
+        // UserSchema.methods.generateAuthToken = function () {
+        //     const user = this;
+        //     const access = 'auth';
+        //     const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
+
+        //     user.tokens.concat([{access, token}]);
+        //     user.save().then(() => {
+        //         return token;
+        //     });
+        // }
         super('User', UserSchema);
     }
+
 }

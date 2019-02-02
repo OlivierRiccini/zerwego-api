@@ -24,8 +24,11 @@ let TripService = class TripService {
     findById(id) {
         return this.tripDAO.get(id);
     }
-    createTrip(req) {
-        return this.tripDAO.create(req);
+    createTrip(trip) {
+        return this.tripDAO.create(trip);
+    }
+    updateTrip(trip, id) {
+        return this.tripDAO.update(trip, id);
     }
     deleteTrip(id) {
         return this.tripDAO.delete(id);

@@ -34,6 +34,13 @@ export class TripController {
     return newTrip;
   }
 
+  @Put('/:id')
+    async updateTrip(@Body() trip: ITrip, @Param('id') id: string) {
+    const updatedTrip = await this.tripService.updateTrip(trip, id);
+    debug('PUT /trip => ' + JSON.stringify(updatedTrip));
+    return updatedTrip;
+  }
+
   @Delete('/:id')
     async deleteTrip(@Param('id') id: string) {
     debug('DELETE /trip by id');

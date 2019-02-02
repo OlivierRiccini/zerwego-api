@@ -6,11 +6,12 @@ import "reflect-metadata"; // this shim is required
 import {createExpressServer} from "routing-controllers";
 import {TripController} from "./controllers/trip-controller";
 import { MongooseConnection } from './db/mongoose-connection';
+import { UserController } from "./controllers/user-controller";
  
 // creates express app, registers all controller routes and returns you express app instance
 const app = createExpressServer({
   cors: true,
-  controllers: [TripController] // we specify controllers we want to use
+  controllers: [TripController, UserController] // we specify controllers we want to use
 });
 
 const mongooseConnection = new MongooseConnection();

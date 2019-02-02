@@ -1,6 +1,6 @@
 const debug = require('debug')('service');
 import { Service, Inject } from "typedi";
-import { TripDAO } from '../models/trip-model';
+import { TripDAO, ITrip, TripDocument } from '../models/trip-model';
 
 @Service()
 export class TripService {
@@ -17,11 +17,15 @@ export class TripService {
         return this.tripDAO.get(id);
     }
 
-    public createTrip(req: any) {          
-        return this.tripDAO.create(req);
+    public createTrip(trip: ITrip) {          
+        return this.tripDAO.create(trip);
     }
 
-    public deleteTrip(id: any) {          
+    public updateTrip(trip: ITrip, id: string) {          
+        return this.tripDAO.update(trip, id);
+    }
+
+    public deleteTrip(id: string) {          
         return this.tripDAO.delete(id);
     }
 }

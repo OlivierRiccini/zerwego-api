@@ -52,6 +52,13 @@ let TripController = class TripController {
             return newTrip;
         });
     }
+    updateTrip(trip, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updatedTrip = yield this.tripService.updateTrip(trip, id);
+            debug('PUT /trip => ' + JSON.stringify(updatedTrip));
+            return updatedTrip;
+        });
+    }
     deleteTrip(id) {
         return __awaiter(this, void 0, void 0, function* () {
             debug('DELETE /trip by id');
@@ -81,6 +88,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], TripController.prototype, "addTrip", null);
+__decorate([
+    routing_controllers_1.Put('/:id'),
+    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Param('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], TripController.prototype, "updateTrip", null);
 __decorate([
     routing_controllers_1.Delete('/:id'),
     __param(0, routing_controllers_1.Param('id')),
