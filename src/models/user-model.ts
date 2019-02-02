@@ -2,7 +2,31 @@ import * as mongoose from 'mongoose';
 import { ObjectID, ObjectId } from 'bson';
 import { DAOImpl } from '../persist/dao';
 import validator from 'validator';
-const {SHA256} = require('crypto-js');
+// const {SHA256} = require('crypto-js');
+// import {SHA256} as crypto from 'crypto-js';
+import {SHA256} from "crypto-js";
+// const hash = SHA256()
+const data = { 
+    id: 4
+};
+
+let token = {
+    data,
+    hash: SHA256(JSON.stringify(data) + 'somesecret').toString()
+};
+
+const resultHash = SHA256(JSON.stringify(token.data) + 'somesecret').toString();
+
+// token.data.id = 5;
+// token.hash = SHA256(JSON.stringify(token.data)).toString();
+
+if (resultHash === token.hash) {
+    console.log('Data was not changed');
+} else {
+    console.log('Data was changed do not trust');
+}
+
+
 
 delete mongoose.connection.models['Trip'];
 
