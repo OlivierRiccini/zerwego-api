@@ -21,7 +21,11 @@ export interface IUser {
     _id?: ObjectID,
     name?: string,
     email?: string,
-    password?: string
+    password?: string,
+    tokens: [{
+        access: string,
+        token: string
+    }]
 };
 
 // Document

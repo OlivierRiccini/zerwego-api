@@ -30,9 +30,11 @@ let UserController = class UserController {
         this.userService = userService;
         this.userService = new user_Service_1.UserService(new user_model_1.UserDAO());
     }
-    createUser(user, request) {
+    createUser(user, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const newUser = yield this.userService.createUser(user);
+            const token = newUser.tokens[0].token;
+            response.header('x-auth', token);
             debug('POST /user => ' + JSON.stringify(newUser));
             return newUser;
         });
@@ -40,7 +42,7 @@ let UserController = class UserController {
 };
 __decorate([
     routing_controllers_1.Post(),
-    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Req()),
+    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
