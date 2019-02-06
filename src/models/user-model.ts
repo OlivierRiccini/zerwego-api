@@ -22,7 +22,7 @@ export interface IUser {
     name?: string,
     email?: string,
     password?: string,
-    tokens: [{
+    tokens?: [{
         access: string,
         token: string
     }]

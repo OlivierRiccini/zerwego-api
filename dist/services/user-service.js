@@ -31,27 +31,15 @@ let UserService = class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             const access = 'auth';
             const token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
-            // user.tokens.concat([{access, token}]);
             user.tokens.push({ access, token });
             const updatedUser = yield this.userDAO.update(user, user.id);
             return updatedUser;
-            // user.save().then(() => {
-            //     return token;
-            // });
         });
     }
     createUser(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            // this.userDAO.create(req).then((user) => {
-            //     const 
-            //     return user.generateAuthToken();
-            // }).then(token => {
-            //     return token;
-            // })
             const response = yield this.userDAO.create(req);
             const user = yield this.generateAuthToken(response);
-            // const user = await this.userDAO.get(response.id);
-            // const token = await this.generateAuthToken(user);
             return user;
         });
     }
