@@ -3,6 +3,7 @@ import { ObjectID, ObjectId } from 'bson';
 import { DAOImpl } from '../persist/dao';
 import validator from 'validator';
 import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcryptjs';
 
 // const data = {
 //     id: 10
@@ -25,7 +26,7 @@ export interface IUser {
     tokens?: [{
         access: string,
         token: string
-    }]
+    }?]
 };
 
 // Document
@@ -77,6 +78,19 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
         //         return token;
         //     });
         // }
+        // UserSchema.pre('save', function (next) {
+        //     const user = this;
+
+        //     if (user.isModified('password')) {
+        //         bcrypt.genSalt(10, (err, salt) => {
+        //                 bcrypt.hash(user.password, salt, (err, hash) => {
+        //                     console.log('hash => ' + hash);
+        //                 })
+        //             });
+        //     } else {    
+        //         next();
+        //     }
+        // });
         super('User', UserSchema);
     }
 

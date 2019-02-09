@@ -21,27 +21,86 @@ const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const jwt = require("jsonwebtoken");
+// const _ = require('lodash');
+// import * as _ from 'lodash';
+// const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
+const bson_1 = require("bson");
+;
 let UserService = class UserService {
-    // @Inject() tripDAO: TripDAO;
     constructor(userDAO) {
         this.userDAO = userDAO;
-        debug('test');
+        this.secret = 'abc123';
+        const password = '123abc!';
+        // bcrypt.genSalt(10, (err, salt) => {
+        //     bcrypt.hash(password, salt, (err, hash) => {
+        //         console.log('hash => ' + hash);
+        //     })
+        // });
+        // const hashPassowrd = '$2a$10$KW2g68ssJZ.WISsGk4mLmOVQBEDmyxQ23Omu0nhOpNJdPixLAqGUu';
+        // bcrypt.compare(password, hashPassowrd, (err, res) => {
+        //     console.log(res);
+        // })
+    }
+    hashPassword(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // return new Promise(resolve, reject, next)
+            // bcrypt.genSalt(10, (err, salt) => {
+            //     bcrypt.hash(user.password, salt, (err, hash) => {
+            //         hashedPassword = hash;
+            //     })
+            // });
+            return new Promise((resolve, reject) => {
+                bcrypt.genSalt(10, (err, salt) => {
+                    bcrypt.hash(user.password, salt, (err, hash) => {
+                        if (err) {
+                            debug('count - FAILED => No documents found');
+                            reject(new Error("No documents found"));
+                        }
+                        else {
+                            resolve(hash);
+                        }
+                        ;
+                    });
+                });
+            });
+        });
     }
     generateAuthToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const access = 'auth';
-            const token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
+            const token = jwt.sign({ _id: user._id.toHexString(), access }, this.secret).toString();
             user.tokens.push({ access, token });
-            const updatedUser = yield this.userDAO.update(user, user.id);
-            return updatedUser;
         });
     }
     createUser(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.userDAO.create(req);
-            const user = yield this.generateAuthToken(response);
-            return user;
+            try {
+                let user = req;
+                this.enrichUser(user);
+                yield this.generateAuthToken(user);
+                user.password = yield this.hashPassword(user);
+                console.log(user);
+                user = yield this.userDAO.create(req);
+                return this.buildUserResponse(user);
+            }
+            catch (err) {
+                console.log('Smothing went wrong while creating new user');
+            }
         });
+    }
+    buildUserResponse(user) {
+        return {
+            propToSend: {
+                id: user.id,
+                email: user.email,
+            },
+            token: user.tokens[0].token
+        };
+    }
+    enrichUser(user) {
+        user._id = new bson_1.ObjectID;
+        user.tokens = [];
     }
 };
 UserService = __decorate([

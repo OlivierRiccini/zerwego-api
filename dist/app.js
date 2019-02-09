@@ -4,13 +4,13 @@ require('./config/config.js');
 const debug = require('debug')('server');
 require("reflect-metadata"); // this shim is required
 const routing_controllers_1 = require("routing-controllers");
-const trip_controller_1 = require("./controllers/trip-controller");
 const mongoose_connection_1 = require("./db/mongoose-connection");
-const user_controller_1 = require("./controllers/user-controller");
 // creates express app, registers all controller routes and returns you express app instance
 const app = routing_controllers_1.createExpressServer({
     cors: true,
-    controllers: [trip_controller_1.TripController, user_controller_1.UserController] // we specify controllers we want to use
+    // controllers: [TripController, UserController] // we specify controllers we want to use
+    controllers: [__dirname + "/controllers/**/*.js"],
+    middlewares: [__dirname + "/middlewares/**/*.js"]
 });
 const mongooseConnection = new mongoose_connection_1.MongooseConnection();
 mongooseConnection.init();

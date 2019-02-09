@@ -20,50 +20,56 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
-const typedi_1 = require("typedi");
-const user_model_1 = require("../models/user-model");
 const user_Service_1 = require("../services/user-Service");
-const auth_middleware_1 = require("../middlewares/auth-middleware");
-let UserController = class UserController {
-    constructor(userService) {
+const jwt = require("jsonwebtoken");
+const user_model_1 = require("../models/user-model");
+// @Middleware({ type: "before" })
+class Authenticate {
+    constructor(userDAO, userService) {
+        this.userDAO = userDAO;
         this.userService = userService;
-        this.userService = new user_Service_1.UserService(new user_model_1.UserDAO());
+        this.secret = 'abc123';
+        this.userDAO = new user_model_1.UserDAO();
+        this.userService = new user_Service_1.UserService(userDAO);
     }
-    createUser(user, response) {
+    use(request, response, next) {
+        // const token = request.headers['x-auth'];
+        this.authenticate(request, response, next);
+        next();
+    }
+    authenticate(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userResponse = yield this.userService.createUser(user);
-            const token = userResponse.token;
-            response.header('x-auth', token);
-            debug('POST /user => ' + JSON.stringify(userResponse.propToSend));
-            return userResponse.propToSend;
+            const token = request.headers['x-auth'];
+            let decoded;
+            try {
+                decoded = jwt.verify(token, this.secret);
+            }
+            catch (err) {
+                console.log('err');
+                response.status(401).send('You must be authenticated');
+            }
+            const users = yield this.userDAO.find({
+                find: {
+                    'id': decoded._id,
+                    'tokens.token': token,
+                    'tokens.access': 'auth'
+                }
+            });
+            const user = users[0];
+            if (!user) {
+                response.status(401).send('User was not found');
+            }
+            // response.status(200).send(this.userService.buildUserResponse(user));
+            return this.userService.buildUserResponse(user);
         });
     }
-    getUser() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return 'WAOUuuuuuu';
-        });
-    }
-};
+}
 __decorate([
-    routing_controllers_1.Post(),
-    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.Req()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "createUser", null);
-__decorate([
-    routing_controllers_1.Get('/me'),
-    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getUser", null);
-UserController = __decorate([
-    routing_controllers_1.JsonController('/users'),
-    typedi_1.Service(),
-    __metadata("design:paramtypes", [user_Service_1.UserService])
-], UserController);
-exports.UserController = UserController;
-//# sourceMappingURL=user-controller.js.map
+    __metadata("design:paramtypes", [Object, Object, Function]),
+    __metadata("design:returntype", Object)
+], Authenticate.prototype, "use", null);
+exports.Authenticate = Authenticate;
+//# sourceMappingURL=auth-middleware.js.map

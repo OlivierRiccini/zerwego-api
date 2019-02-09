@@ -52,6 +52,18 @@ class UserDAO extends dao_1.DAOImpl {
         //         return token;
         //     });
         // }
+        // UserSchema.pre('save', function (next) {
+        //     const user = this;
+        //     if (user.isModified('password')) {
+        //         bcrypt.genSalt(10, (err, salt) => {
+        //                 bcrypt.hash(user.password, salt, (err, hash) => {
+        //                     console.log('hash => ' + hash);
+        //                 })
+        //             });
+        //     } else {    
+        //         next();
+        //     }
+        // });
         super('User', UserSchema);
     }
 }

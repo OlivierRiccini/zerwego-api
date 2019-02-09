@@ -35,7 +35,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
         .send(validUser)
         .then(
           response => {
-            console.log('MEGA RESPONSE: ' + response.body);
+            console.log('');
           },
           err => {
             debug(err)

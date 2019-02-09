@@ -11,7 +11,9 @@ import { UserController } from "./controllers/user-controller";
 // creates express app, registers all controller routes and returns you express app instance
 const app = createExpressServer({
   cors: true,
-  controllers: [TripController, UserController] // we specify controllers we want to use
+  // controllers: [TripController, UserController] // we specify controllers we want to use
+  controllers: [__dirname + "/controllers/**/*.js"],
+  middlewares: [__dirname + "/middlewares/**/*.js"]
 });
 
 const mongooseConnection = new MongooseConnection();
