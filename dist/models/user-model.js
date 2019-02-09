@@ -1,8 +1,17 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const dao_1 = require("../persist/dao");
 const validator_1 = require("validator");
+const jwt = require("jsonwebtoken");
 // const data = {
 //     id: 10
 // };
@@ -43,29 +52,31 @@ class UserDAO extends dao_1.DAOImpl {
                     }
                 }]
         });
-        // UserSchema.methods.generateAuthToken = function () {
-        //     const user = this;
-        //     const access = 'auth';
-        //     const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
-        //     user.tokens.concat([{access, token}]);
-        //     user.save().then(() => {
-        //         return token;
-        //     });
-        // }
-        // UserSchema.pre('save', function (next) {
-        //     const user = this;
-        //     if (user.isModified('password')) {
-        //         bcrypt.genSalt(10, (err, salt) => {
-        //                 bcrypt.hash(user.password, salt, (err, hash) => {
-        //                     console.log('hash => ' + hash);
-        //                 })
-        //             });
-        //     } else {    
-        //         next();
-        //     }
-        // });
         super('User', UserSchema);
     }
+    findByToken(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                var decoded;
+                try {
+                    decoded = jwt.verify(token, 'abc123');
+                }
+                catch (e) {
+                    return reject();
+                }
+                this.find({
+                    find: {
+                        '_id': decoded._id,
+                        'tokens.token': token,
+                        'tokens.access': 'auth'
+                    }
+                })
+                    .then(users => resolve(users[0]))
+                    .catch(err => reject(err));
+            });
+        });
+    }
+    ;
 }
 exports.UserDAO = UserDAO;
 //# sourceMappingURL=user-model.js.map

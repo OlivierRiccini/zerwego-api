@@ -1,13 +1,15 @@
 import * as mongoose from 'mongoose';
 import { ITrip } from 'src/models/trip-model';
+import { IUser } from 'src/models/user-model';
 const debug = require('debug')('DAO');
 const _ = require('lodash');
+import * as jwt from 'jsonwebtoken';
 
 export interface DAO<T> {
     create(model: T):Promise<T>;
     get(id: number|string): Promise<T|any>;
     getAll(): Promise<[T]>;
-    update(model: any): Promise<T>;
+    update(model: any, id?: string): Promise<T>;
     delete(id: number|string): Promise<any>;
     deleteAll(): Promise<any>;
     find(findOptions: FindOptions): Promise<T[]>;
@@ -48,7 +50,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             this.constructor['created'] = true;
         }
         this.model = this.constructor['_model'];
-    }
+    } 
 
     create(model: T):Promise<T> {
         return new Promise((resolve, reject) => {
@@ -106,13 +108,14 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     return reject(new TypeError('DAO.update value passed is not object.'));
                 }
                 if (!id && !obj._id) {
-                    return reject(new TypeError('DAO.update object passed doesn\'t have _id.'));
+                    return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
                 }
                 this.model.findById(id || obj._id).exec(
                     (err, found) => {
                         if (err) { reject(err) };
                         if (!found) { resolve(found) };
                         let updated = _.merge(found, obj);
+                        console.log(updated);
                         updated.save(
                             (err, updated) => {
                                 err ? reject(err) : resolve(updated.toObject())
@@ -193,5 +196,4 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             })
         });
     }
-
 }

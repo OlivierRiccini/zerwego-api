@@ -22,7 +22,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const routing_controllers_1 = require("routing-controllers");
 const user_Service_1 = require("../services/user-Service");
-const jwt = require("jsonwebtoken");
 const user_model_1 = require("../models/user-model");
 // @Middleware({ type: "before" })
 class Authenticate {
@@ -35,38 +34,45 @@ class Authenticate {
     }
     use(request, response, next) {
         // const token = request.headers['x-auth'];
-        this.authenticate(request, response, next);
+        // this.authenticate(request, response, next);
+        var token = request.header('x-auth');
+        this.userDAO.findByToken(token).then((user) => {
+            if (!user) {
+                // throw new Error('User was not found');
+                // response.status(401).send('User was not found');
+                return Promise.reject();
+            }
+            console.log(user);
+            request.user = user;
+            request.token = token;
+            next();
+        }).catch((e) => {
+            // throw new Error(e);
+            response.status(401).send(e);
+        });
         next();
     }
     authenticate(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            const token = request.headers['x-auth'];
-            let decoded;
-            try {
-                decoded = jwt.verify(token, this.secret);
-            }
-            catch (err) {
-                console.log('err');
-                response.status(401).send('You must be authenticated');
-            }
-            const users = yield this.userDAO.find({
-                find: {
-                    'id': decoded._id,
-                    'tokens.token': token,
-                    'tokens.access': 'auth'
+            var token = request.header('x-auth');
+            this.userDAO.findByToken(token).then((user) => {
+                if (!user) {
+                    // throw new Error('User was not found');
+                    // response.status(401).send('User was not found');
+                    return Promise.reject();
                 }
+                request.user = user;
+                request.token = token;
+                next();
+            }).catch((e) => {
+                // throw new Error(e);
+                response.status(401).send(e);
             });
-            const user = users[0];
-            if (!user) {
-                response.status(401).send('User was not found');
-            }
-            // response.status(200).send(this.userService.buildUserResponse(user));
-            return this.userService.buildUserResponse(user);
         });
     }
 }
 __decorate([
-    __param(0, routing_controllers_1.Req()),
+    __param(0, routing_controllers_1.Req()), __param(1, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object, Function]),
     __metadata("design:returntype", Object)

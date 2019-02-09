@@ -29,12 +29,16 @@ export interface IUser {
     }?]
 };
 
+export interface IUserCredentials {
+    email: string,
+    password: string
+}
+
 // Document
 export interface UserDocument extends IUser, mongoose.Document {
     id: string,
     _id: ObjectID
 }
-
 
 export class UserDAO extends DAOImpl<IUser, UserDocument> {
     constructor() {
@@ -67,31 +71,29 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                 }
             }]
         });
-
-        // UserSchema.methods.generateAuthToken = function () {
-        //     const user = this;
-        //     const access = 'auth';
-        //     const token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
-
-        //     user.tokens.concat([{access, token}]);
-        //     user.save().then(() => {
-        //         return token;
-        //     });
-        // }
-        // UserSchema.pre('save', function (next) {
-        //     const user = this;
-
-        //     if (user.isModified('password')) {
-        //         bcrypt.genSalt(10, (err, salt) => {
-        //                 bcrypt.hash(user.password, salt, (err, hash) => {
-        //                     console.log('hash => ' + hash);
-        //                 })
-        //             });
-        //     } else {    
-        //         next();
-        //     }
-        // });
+       
         super('User', UserSchema);
     }
+
+    public async findByToken(token) {
+        return new Promise((resolve, reject) => {
+            var decoded;
+            try {
+                decoded = jwt.verify(token, 'abc123');
+            } catch (e) {
+                return reject();
+            }
+            this.find({
+                find: {
+                    '_id': decoded._id,
+                    'tokens.token': token,
+                    'tokens.access': 'auth'
+                  }
+            })
+            .then(users => resolve(users[0]))
+            .catch(err => reject(err));
+        })
+    
+      };
 
 }

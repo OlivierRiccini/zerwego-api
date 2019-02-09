@@ -80,7 +80,7 @@ class DAOImpl {
                 return reject(new TypeError('DAO.update value passed is not object.'));
             }
             if (!id && !obj._id) {
-                return reject(new TypeError('DAO.update object passed doesn\'t have _id.'));
+                return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
             }
             this.model.findById(id || obj._id).exec((err, found) => {
                 if (err) {
@@ -92,6 +92,7 @@ class DAOImpl {
                 }
                 ;
                 let updated = _.merge(found, obj);
+                console.log(updated);
                 updated.save((err, updated) => {
                     err ? reject(err) : resolve(updated.toObject());
                 });

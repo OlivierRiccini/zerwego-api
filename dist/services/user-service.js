@@ -31,31 +31,14 @@ let UserService = class UserService {
     constructor(userDAO) {
         this.userDAO = userDAO;
         this.secret = 'abc123';
-        const password = '123abc!';
-        // bcrypt.genSalt(10, (err, salt) => {
-        //     bcrypt.hash(password, salt, (err, hash) => {
-        //         console.log('hash => ' + hash);
-        //     })
-        // });
-        // const hashPassowrd = '$2a$10$KW2g68ssJZ.WISsGk4mLmOVQBEDmyxQ23Omu0nhOpNJdPixLAqGUu';
-        // bcrypt.compare(password, hashPassowrd, (err, res) => {
-        //     console.log(res);
-        // })
     }
     hashPassword(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            // return new Promise(resolve, reject, next)
-            // bcrypt.genSalt(10, (err, salt) => {
-            //     bcrypt.hash(user.password, salt, (err, hash) => {
-            //         hashedPassword = hash;
-            //     })
-            // });
             return new Promise((resolve, reject) => {
                 bcrypt.genSalt(10, (err, salt) => {
                     bcrypt.hash(user.password, salt, (err, hash) => {
                         if (err) {
-                            debug('count - FAILED => No documents found');
-                            reject(new Error("No documents found"));
+                            reject(new Error("Something went wrong while hashing password"));
                         }
                         else {
                             resolve(hash);
@@ -66,6 +49,22 @@ let UserService = class UserService {
             });
         });
     }
+    ;
+    comparePassword(credentialPassword, userPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                bcrypt.compare(credentialPassword, userPassword, (err, res) => {
+                    if (res) {
+                        resolve();
+                    }
+                    else {
+                        reject("Wrong password");
+                    }
+                });
+            });
+        });
+    }
+    ;
     generateAuthToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const access = 'auth';
@@ -73,20 +72,56 @@ let UserService = class UserService {
             user.tokens.push({ access, token });
         });
     }
-    createUser(req) {
+    signUp(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
                 this.enrichUser(user);
                 yield this.generateAuthToken(user);
                 user.password = yield this.hashPassword(user);
-                console.log(user);
                 user = yield this.userDAO.create(req);
                 return this.buildUserResponse(user);
             }
             catch (err) {
                 console.log('Smothing went wrong while creating new user');
             }
+        });
+    }
+    signIn(credentials) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let users = yield this.userDAO.find({ find: { email: credentials.email } });
+                let user = users[0];
+                yield this.comparePassword(credentials.password, user.password);
+                yield this.generateAuthToken(user);
+                return this.buildUserResponse(user);
+            }
+            catch (err) {
+                console.log('Err= ' + err);
+                throw new Error('Err= ' + err);
+            }
+        });
+    }
+    ;
+    signOut(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let decoded;
+            try {
+                decoded = jwt.verify(token, 'abc123');
+            }
+            catch (err) {
+                console.log('err');
+            }
+            const users = yield this.userDAO.find({
+                find: {
+                    'id': decoded._id,
+                    'tokens.token': token,
+                    'tokens.access': 'auth'
+                }
+            });
+            let user = users[0];
+            user.tokens = [];
+            this.userDAO.update(user, user.id);
         });
     }
     buildUserResponse(user) {

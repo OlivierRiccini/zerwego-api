@@ -1,13 +1,12 @@
 const debug = require('debug')('service');
 import { Service, Inject } from "typedi";
-import { UserDAO, IUser } from '../models/user-model';
+import { UserDAO, IUser, IUserCredentials } from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
 // const _ = require('lodash');
 // import * as _ from 'lodash';
 // const bcrypt = require('bcryptjs');
 import * as bcrypt from 'bcryptjs';
 import { ObjectID } from "bson";
-import { access } from "fs";
 
 export interface IUserResponse {
     propToSend: {
@@ -36,7 +35,19 @@ export class UserService {
                 })
             });
         });
-    }
+    };
+
+    public async comparePassword(credentialPassword: string, userPassword: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(credentialPassword, userPassword, (err, res) => {
+                if (res) {
+                    resolve();
+                } else {
+                    reject("Wrong password");
+                }
+            });
+        });
+    };
 
     public async generateAuthToken(user): Promise<void> {
         const access = 'auth';
@@ -44,7 +55,7 @@ export class UserService {
         user.tokens.push({access, token});
     }
     
-    public async createUser(req: any): Promise<IUserResponse> {         
+    public async signUp(req: any): Promise<IUserResponse> {         
         try {
             let user = req;
             this.enrichUser(user);
@@ -55,6 +66,38 @@ export class UserService {
         } catch (err) {
             console.log('Smothing went wrong while creating new user');
         }
+    }
+
+    public async signIn(credentials: IUserCredentials): Promise<IUserResponse> {
+        try {
+            let users = await this.userDAO.find({find:{email: credentials.email}});
+            let user = users[0];
+            await this.comparePassword(credentials.password, user.password);
+            await this.generateAuthToken(user);
+            return this.buildUserResponse(user);
+        } catch (err) {
+            console.log('Err= ' + err);
+            throw new Error('Err= ' + err);
+        }
+    };
+
+    public async signOut(token: string): Promise<void> {
+        let decoded;
+        try {
+            decoded = jwt.verify(token, 'abc123');
+        } catch (err) {
+            console.log('err');
+        }
+        const users = await this.userDAO.find({
+            find: {
+                'id': decoded._id,
+                'tokens.token': token,
+                'tokens.access': 'auth'
+            }
+        });
+        let user: IUser = users[0];
+        user.tokens = [];
+        this.userDAO.update(user, user.id);
     }
 
     public buildUserResponse(user: IUser): IUserResponse {

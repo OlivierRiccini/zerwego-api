@@ -31,28 +31,47 @@ let UserController = class UserController {
         this.userService = userService;
         this.userService = new user_Service_1.UserService(new user_model_1.UserDAO());
     }
-    createUser(user, response) {
+    signUp(user, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userResponse = yield this.userService.createUser(user);
+            const userResponse = yield this.userService.signUp(user);
             const token = userResponse.token;
             response.header('x-auth', token);
-            debug('POST /user => ' + JSON.stringify(userResponse.propToSend));
+            debug('POST /user/signUp => ' + JSON.stringify(userResponse.propToSend));
             return userResponse.propToSend;
         });
     }
     getUser() {
         return __awaiter(this, void 0, void 0, function* () {
+            debug('Meeeeeeee');
             return 'WAOUuuuuuu';
+        });
+    }
+    signIn(credentials, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const userResponse = yield this.userService.signIn(credentials);
+            const token = userResponse.token;
+            response.header('x-auth', token);
+            debug('POST /user/signIn => ' + JSON.stringify(userResponse.propToSend));
+            return userResponse.propToSend;
+        });
+    }
+    signOut(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('POST /user/signOut => User signing out...');
+            const token = request.headers['x-auth'];
+            yield this.userService.signOut(token);
+            debug('POST /user/signOut => User disconected');
+            return 'Disconnected!';
         });
     }
 };
 __decorate([
-    routing_controllers_1.Post(),
+    routing_controllers_1.Post('/signUp'),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "createUser", null);
+], UserController.prototype, "signUp", null);
 __decorate([
     routing_controllers_1.Get('/me'),
     routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
@@ -60,6 +79,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUser", null);
+__decorate([
+    routing_controllers_1.Post('/signIn'),
+    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "signIn", null);
+__decorate([
+    routing_controllers_1.Delete('/signOut'),
+    __param(0, routing_controllers_1.Req()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "signOut", null);
 UserController = __decorate([
     routing_controllers_1.JsonController('/users'),
     typedi_1.Service(),
