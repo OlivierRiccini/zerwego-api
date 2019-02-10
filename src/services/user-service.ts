@@ -1,16 +1,14 @@
 const debug = require('debug')('service');
-import { Service, Inject } from "typedi";
+import { Service } from "typedi";
 import { UserDAO, IUser, IUserCredentials } from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
-// const _ = require('lodash');
-// import * as _ from 'lodash';
-// const bcrypt = require('bcryptjs');
 import * as bcrypt from 'bcryptjs';
 import { ObjectID } from "bson";
 
 export interface IUserResponse {
     propToSend: {
         id: string,
+        name: string,
         email: string
     },
     token: string
@@ -21,9 +19,9 @@ export class UserService {
     secret = 'abc123';
 
     constructor(private userDAO: UserDAO) {
-    }
+    };
 
-    public async hashPassword(user): Promise<string> {
+    public async hashPassword(user: IUser): Promise<string> {
         return new Promise((resolve, reject) => {
             bcrypt.genSalt(10, (err, salt) => {
                 bcrypt.hash(user.password, salt, (err, hash) => {
@@ -53,7 +51,28 @@ export class UserService {
         const access = 'auth';
         const token = jwt.sign({_id: user._id.toHexString(), access}, this.secret).toString();
         user.tokens.push({access, token});
-    }
+    };
+
+    public async findUserByToken(token: string): Promise<IUser> {
+        let decoded;
+        try {
+            decoded = jwt.verify(token, 'abc123');
+        } catch (err) {
+            console.log('err');
+        };
+
+        const results = await this.userDAO.find({
+            find: {
+                'id': decoded._id,
+                'tokens.token': token,
+                'tokens.access': 'auth'
+            }
+        });
+        if (results.length < 1) {
+            Promise.reject('User was not found');
+        };
+        return results[0];
+    };
     
     public async signUp(req: any): Promise<IUserResponse> {         
         try {
@@ -66,7 +85,7 @@ export class UserService {
         } catch (err) {
             console.log('Smothing went wrong while creating new user');
         }
-    }
+    };
 
     public async signIn(credentials: IUserCredentials): Promise<IUserResponse> {
         try {
@@ -83,37 +102,24 @@ export class UserService {
     };
 
     public async signOut(token: string): Promise<void> {
-        let decoded;
-        try {
-            decoded = jwt.verify(token, 'abc123');
-        } catch (err) {
-            console.log('err');
-        }
-        const users = await this.userDAO.find({
-            find: {
-                'id': decoded._id,
-                'tokens.token': token,
-                'tokens.access': 'auth'
-            }
-        });
-        let user: IUser = users[0];
-        user.tokens = [];
-        this.userDAO.update(user, user.id);
-    }
+        const user: IUser = await this.findUserByToken(token);
+        this.userDAO.removeToken(user.id);
+    };
 
     public buildUserResponse(user: IUser): IUserResponse {
         return {
             propToSend: {
                 id: user.id,
+                name: user.name,
                 email: user.email,
             },
             token: user.tokens[0].token
         }
-    }
+    };
 
     private enrichUser(user: IUser): void {
         user._id = new ObjectID;
         user.tokens = [];
-    }
+    };
 
 }

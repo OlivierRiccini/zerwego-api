@@ -2,8 +2,8 @@ import * as mongoose from 'mongoose';
 import { ITrip } from 'src/models/trip-model';
 import { IUser } from 'src/models/user-model';
 const debug = require('debug')('DAO');
-const _ = require('lodash');
 import * as jwt from 'jsonwebtoken';
+import * as _ from 'lodash';
 
 export interface DAO<T> {
     create(model: T):Promise<T>;
@@ -15,6 +15,7 @@ export interface DAO<T> {
     find(findOptions: FindOptions): Promise<T[]>;
     findAndRemove(deleteOptions: DeleteOptions): Promise<any>;
     count(findOptions: FindOptions): Promise<any>;
+    removeToken(id: string): Promise<T>;
 }
 
 export interface FindOptions {
@@ -62,8 +63,6 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     reject(err);
                 }
                 let document = res.toObject();
-                // document.startDate = new Date(document.startDate);
-                // document.endDate = new Date(document.endDate);
                 debug('create a document - OK => ' + JSON.stringify(document));
                 resolve(document);
             });
@@ -115,7 +114,6 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                         if (err) { reject(err) };
                         if (!found) { resolve(found) };
                         let updated = _.merge(found, obj);
-                        console.log(updated);
                         updated.save(
                             (err, updated) => {
                                 err ? reject(err) : resolve(updated.toObject())
@@ -125,7 +123,31 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 );
             }
         );
-    }
+    };
+
+    removeToken(id: string): Promise<T> {
+        return new Promise<T>(
+            (resolve: Function, reject: Function) => {
+                this.model.findById(id).exec(
+                    (err, user) => {
+                        if (err) { reject(err) };
+                        if (!user) { reject('Removing token: User was not found') };
+                        user.tokens = [];
+                        user.save(
+                            (err, user) => {
+                                if (err) {
+                                    debug('removeToken - FAILED => ' + JSON.stringify(err));
+                                    reject(err);
+                                };
+                                resolve(user.toObject()) 
+                                debug('deleteAll documents - OK');
+                            }
+                        )
+                    }
+                );
+            }
+        );
+    };
 
     delete(id:number|string): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -167,7 +189,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 }
             })
         });
-    }
+    };
 
     findAndRemove(deleteOptions: DeleteOptions): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -180,7 +202,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 resolve({ message: 'Deleted' });    
             });
         })
-    }
+    };
 
     count(findOptions: FindOptions): Promise<number> {
         return new Promise((resolve, reject) => {
@@ -195,5 +217,5 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 }
             })
         });
-    }
+    };
 }

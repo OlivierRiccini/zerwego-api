@@ -21,9 +21,6 @@ const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const jwt = require("jsonwebtoken");
-// const _ = require('lodash');
-// import * as _ from 'lodash';
-// const bcrypt = require('bcryptjs');
 const bcrypt = require("bcryptjs");
 const bson_1 = require("bson");
 ;
@@ -32,6 +29,7 @@ let UserService = class UserService {
         this.userDAO = userDAO;
         this.secret = 'abc123';
     }
+    ;
     hashPassword(user) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
@@ -72,6 +70,32 @@ let UserService = class UserService {
             user.tokens.push({ access, token });
         });
     }
+    ;
+    findUserByToken(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let decoded;
+            try {
+                decoded = jwt.verify(token, 'abc123');
+            }
+            catch (err) {
+                console.log('err');
+            }
+            ;
+            const results = yield this.userDAO.find({
+                find: {
+                    'id': decoded._id,
+                    'tokens.token': token,
+                    'tokens.access': 'auth'
+                }
+            });
+            if (results.length < 1) {
+                Promise.reject('User was not found');
+            }
+            ;
+            return results[0];
+        });
+    }
+    ;
     signUp(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -87,6 +111,7 @@ let UserService = class UserService {
             }
         });
     }
+    ;
     signIn(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -106,38 +131,27 @@ let UserService = class UserService {
     ;
     signOut(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            let decoded;
-            try {
-                decoded = jwt.verify(token, 'abc123');
-            }
-            catch (err) {
-                console.log('err');
-            }
-            const users = yield this.userDAO.find({
-                find: {
-                    'id': decoded._id,
-                    'tokens.token': token,
-                    'tokens.access': 'auth'
-                }
-            });
-            let user = users[0];
-            user.tokens = [];
-            this.userDAO.update(user, user.id);
+            const user = yield this.findUserByToken(token);
+            this.userDAO.removeToken(user.id);
         });
     }
+    ;
     buildUserResponse(user) {
         return {
             propToSend: {
                 id: user.id,
+                name: user.name,
                 email: user.email,
             },
             token: user.tokens[0].token
         };
     }
+    ;
     enrichUser(user) {
         user._id = new bson_1.ObjectID;
         user.tokens = [];
     }
+    ;
 };
 UserService = __decorate([
     typedi_1.Service(),

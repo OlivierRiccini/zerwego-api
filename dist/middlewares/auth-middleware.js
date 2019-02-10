@@ -8,22 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const user_Service_1 = require("../services/user-Service");
 const user_model_1 = require("../models/user-model");
-// @Middleware({ type: "before" })
 class Authenticate {
-    constructor(userDAO, userService) {
+    constructor(userDAO) {
         this.userDAO = userDAO;
-        this.userService = userService;
-        this.secret = 'abc123';
         this.userDAO = new user_model_1.UserDAO();
-        this.userService = new user_Service_1.UserService(userDAO);
     }
-    // use(request: any, response: any, next?: (err?: any) => any) {
-    //     // const token = request.headers['x-auth'];
-    //     this.authenticate(request, response, next);
-    //     next();
-    // }
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.authenticate(request, response, next);

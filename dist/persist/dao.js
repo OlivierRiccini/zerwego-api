@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const debug = require('debug')('DAO');
-const _ = require('lodash');
+const _ = require("lodash");
 ;
 ;
 // mongoose.Document
@@ -33,8 +33,6 @@ class DAOImpl {
                     reject(err);
                 }
                 let document = res.toObject();
-                // document.startDate = new Date(document.startDate);
-                // document.endDate = new Date(document.endDate);
                 debug('create a document - OK => ' + JSON.stringify(document));
                 resolve(document);
             });
@@ -92,13 +90,38 @@ class DAOImpl {
                 }
                 ;
                 let updated = _.merge(found, obj);
-                console.log(updated);
                 updated.save((err, updated) => {
                     err ? reject(err) : resolve(updated.toObject());
                 });
             });
         });
     }
+    ;
+    removeToken(id) {
+        return new Promise((resolve, reject) => {
+            this.model.findById(id).exec((err, user) => {
+                if (err) {
+                    reject(err);
+                }
+                ;
+                if (!user) {
+                    reject('Removing token: User was not found');
+                }
+                ;
+                user.tokens = [];
+                user.save((err, user) => {
+                    if (err) {
+                        debug('removeToken - FAILED => ' + JSON.stringify(err));
+                        reject(err);
+                    }
+                    ;
+                    resolve(user.toObject());
+                    debug('deleteAll documents - OK');
+                });
+            });
+        });
+    }
+    ;
     delete(id) {
         return new Promise((resolve, reject) => {
             this.model.deleteOne({ id }, err => {
@@ -140,6 +163,7 @@ class DAOImpl {
             });
         });
     }
+    ;
     findAndRemove(deleteOptions) {
         return new Promise((resolve, reject) => {
             this.model.deleteOne(deleteOptions, err => {
@@ -152,6 +176,7 @@ class DAOImpl {
             });
         });
     }
+    ;
     count(findOptions) {
         return new Promise((resolve, reject) => {
             this.model.countDocuments(findOptions)
@@ -167,6 +192,7 @@ class DAOImpl {
             });
         });
     }
+    ;
 }
 DAOImpl.created = false;
 exports.DAOImpl = DAOImpl;
