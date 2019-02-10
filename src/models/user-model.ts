@@ -75,25 +75,22 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
         super('User', UserSchema);
     }
 
-    public async findByToken(token) {
-        return new Promise((resolve, reject) => {
+    public async findByToken(token): Promise<IUser> {
+        // console.log('users ' + token);
             var decoded;
             try {
                 decoded = jwt.verify(token, 'abc123');
             } catch (e) {
-                return reject();
+                throw new Error(e);
             }
-            this.find({
+            const users = await this.find({
                 find: {
                     '_id': decoded._id,
                     'tokens.token': token,
                     'tokens.access': 'auth'
-                  }
+                }
             })
-            .then(users => resolve(users[0]))
-            .catch(err => reject(err));
-        })
-    
+            return users[0];
       };
 
 }

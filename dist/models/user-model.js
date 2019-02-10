@@ -56,24 +56,22 @@ class UserDAO extends dao_1.DAOImpl {
     }
     findByToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                var decoded;
-                try {
-                    decoded = jwt.verify(token, 'abc123');
+            // console.log('users ' + token);
+            var decoded;
+            try {
+                decoded = jwt.verify(token, 'abc123');
+            }
+            catch (e) {
+                throw new Error(e);
+            }
+            const users = yield this.find({
+                find: {
+                    '_id': decoded._id,
+                    'tokens.token': token,
+                    'tokens.access': 'auth'
                 }
-                catch (e) {
-                    return reject();
-                }
-                this.find({
-                    find: {
-                        '_id': decoded._id,
-                        'tokens.token': token,
-                        'tokens.access': 'auth'
-                    }
-                })
-                    .then(users => resolve(users[0]))
-                    .catch(err => reject(err));
             });
+            return users[0];
         });
     }
     ;

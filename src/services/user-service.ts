@@ -74,6 +74,7 @@ export class UserService {
             let user = users[0];
             await this.comparePassword(credentials.password, user.password);
             await this.generateAuthToken(user);
+            await this.userDAO.update(user, user.id);
             return this.buildUserResponse(user);
         } catch (err) {
             console.log('Err= ' + err);

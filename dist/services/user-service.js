@@ -94,6 +94,7 @@ let UserService = class UserService {
                 let user = users[0];
                 yield this.comparePassword(credentials.password, user.password);
                 yield this.generateAuthToken(user);
+                yield this.userDAO.update(user, user.id);
                 return this.buildUserResponse(user);
             }
             catch (err) {
