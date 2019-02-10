@@ -97,31 +97,6 @@ class DAOImpl {
         });
     }
     ;
-    removeToken(id) {
-        return new Promise((resolve, reject) => {
-            this.model.findById(id).exec((err, user) => {
-                if (err) {
-                    reject(err);
-                }
-                ;
-                if (!user) {
-                    reject('Removing token: User was not found');
-                }
-                ;
-                user.tokens = [];
-                user.save((err, user) => {
-                    if (err) {
-                        debug('removeToken - FAILED => ' + JSON.stringify(err));
-                        reject(err);
-                    }
-                    ;
-                    resolve(user.toObject());
-                    debug('deleteAll documents - OK');
-                });
-            });
-        });
-    }
-    ;
     delete(id) {
         return new Promise((resolve, reject) => {
             this.model.deleteOne({ id }, err => {

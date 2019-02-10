@@ -53,26 +53,26 @@ export class UserService {
         user.tokens.push({access, token});
     };
 
-    public async findUserByToken(token: string): Promise<IUser> {
-        let decoded;
-        try {
-            decoded = jwt.verify(token, 'abc123');
-        } catch (err) {
-            console.log('err');
-        };
+    // public async findUserByToken(token: string): Promise<IUser> {
+    //     let decoded;
+    //     try {
+    //         decoded = jwt.verify(token, 'abc123');
+    //     } catch (err) {
+    //         console.log('err');
+    //     };
 
-        const results = await this.userDAO.find({
-            find: {
-                'id': decoded._id,
-                'tokens.token': token,
-                'tokens.access': 'auth'
-            }
-        });
-        if (results.length < 1) {
-            Promise.reject('User was not found');
-        };
-        return results[0];
-    };
+    //     const results = await this.userDAO.find({
+    //         find: {
+    //             'id': decoded._id,
+    //             'tokens.token': token,
+    //             'tokens.access': 'auth'
+    //         }
+    //     });
+    //     if (results.length < 1) {
+    //         Promise.reject('User was not found');
+    //     };
+    //     return results[0];
+    // };
     
     public async signUp(req: any): Promise<IUserResponse> {         
         try {
@@ -102,8 +102,8 @@ export class UserService {
     };
 
     public async signOut(token: string): Promise<void> {
-        const user: IUser = await this.findUserByToken(token);
-        this.userDAO.removeToken(user.id);
+        const user: IUser = await this.userDAO.findByToken(token);
+        await this.userDAO.removeToken(user.id);
     };
 
     public buildUserResponse(user: IUser): IUserResponse {

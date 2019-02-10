@@ -31,7 +31,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
   let validUserToken: string;
 
-  it('Should signup a user and get token set in the header response', async () => {
+  it('Should signUp a user and get token back set in the header', async () => {
     const response = await request
       .post('/users/signUp')
       .send(validUser);
@@ -39,9 +39,9 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     const user = response.body;
 
     expect(response.status).to.equal(200);
+    expect(user).to.have.property('id');
     expect(user).to.have.property('name');
     expect(user).to.have.property('email');
-    expect(user).to.have.property('id');
     expect(response.header).to.have.property('x-auth');
     // Assign id to validUser to reuse in other tests
     validUser.id = user.id;
@@ -57,6 +57,20 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     expect(response.status).to.equal(200);
     expect(response.body).to.equal('Disconnected!');
+    
+  });
+
+  it('Should signIn a user and get a token back set in the header', async () => {
+    const response = await request
+      .post('/users/signIn')
+      .send({email: validUser.email, password: validUser.password});
+
+    const user = response.body;
+    expect(response.status).to.equal(200);
+    expect(user).to.have.property('id');
+    expect(user).to.have.property('name');
+    expect(user).to.have.property('email');
+    expect(response.header).to.have.property('x-auth');
     
   });
 

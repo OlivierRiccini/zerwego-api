@@ -4,15 +4,7 @@ import { DAOImpl } from '../persist/dao';
 import validator from 'validator';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
-
-// const data = {
-//     id: 10
-// };
-
-// const token = jwt.sign(data, '123abc');
-// console.log(token);
-// const decoded = jwt.verify(token, '123abc');
-// console.log('decoded', decoded);
+const debug = require('debug')('DAO');
 
 delete mongoose.connection.models['User'];
 
@@ -76,21 +68,43 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
     }
 
     public async findByToken(token): Promise<IUser> {
-        // console.log('users ' + token);
-            var decoded;
-            try {
-                decoded = jwt.verify(token, 'abc123');
-            } catch (e) {
-                throw new Error(e);
+        var decoded: any;
+        try {
+            decoded = jwt.verify(token, 'abc123');
+        } catch (e) {
+            throw new Error(e);
+        }
+        const users = await this.find({
+            find: {
+                '_id': decoded._id,
+                'tokens.token': token,
+                'tokens.access': 'auth'
             }
-            const users = await this.find({
-                find: {
-                    '_id': decoded._id,
-                    'tokens.token': token,
-                    'tokens.access': 'auth'
-                }
-            })
-            return users[0];
-      };
+        })
+        return users[0];
+    };
 
+    public removeToken(id: string): Promise<any> {
+        return new Promise<any>(
+            (resolve: Function, reject: Function) => {
+                this.model.findById(id).exec(
+                    (err, user) => {
+                        if (err) { reject(err) };
+                        if (!user) { reject('Removing token: User was not found') };
+                        user.tokens = [];
+                        user.save(
+                            (err, user) => {
+                                if (err) {
+                                    debug('removeToken - FAILED => ' + JSON.stringify(err));
+                                    reject(err);
+                                };
+                                debug('removeToken - OK');
+                                resolve(user.toObject()) 
+                            }
+                        )
+                    }
+                );
+            }
+        );
+    };
 }

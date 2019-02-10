@@ -71,31 +71,25 @@ let UserService = class UserService {
         });
     }
     ;
-    findUserByToken(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let decoded;
-            try {
-                decoded = jwt.verify(token, 'abc123');
-            }
-            catch (err) {
-                console.log('err');
-            }
-            ;
-            const results = yield this.userDAO.find({
-                find: {
-                    'id': decoded._id,
-                    'tokens.token': token,
-                    'tokens.access': 'auth'
-                }
-            });
-            if (results.length < 1) {
-                Promise.reject('User was not found');
-            }
-            ;
-            return results[0];
-        });
-    }
-    ;
+    // public async findUserByToken(token: string): Promise<IUser> {
+    //     let decoded;
+    //     try {
+    //         decoded = jwt.verify(token, 'abc123');
+    //     } catch (err) {
+    //         console.log('err');
+    //     };
+    //     const results = await this.userDAO.find({
+    //         find: {
+    //             'id': decoded._id,
+    //             'tokens.token': token,
+    //             'tokens.access': 'auth'
+    //         }
+    //     });
+    //     if (results.length < 1) {
+    //         Promise.reject('User was not found');
+    //     };
+    //     return results[0];
+    // };
     signUp(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -131,8 +125,8 @@ let UserService = class UserService {
     ;
     signOut(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.findUserByToken(token);
-            this.userDAO.removeToken(user.id);
+            const user = yield this.userDAO.findByToken(token);
+            yield this.userDAO.removeToken(user.id);
         });
     }
     ;

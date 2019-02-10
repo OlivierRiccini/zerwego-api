@@ -15,7 +15,7 @@ export interface DAO<T> {
     find(findOptions: FindOptions): Promise<T[]>;
     findAndRemove(deleteOptions: DeleteOptions): Promise<any>;
     count(findOptions: FindOptions): Promise<any>;
-    removeToken(id: string): Promise<T>;
+    // removeToken(id: string): Promise<T>;
 }
 
 export interface FindOptions {
@@ -117,30 +117,6 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                         updated.save(
                             (err, updated) => {
                                 err ? reject(err) : resolve(updated.toObject())
-                            }
-                        )
-                    }
-                );
-            }
-        );
-    };
-
-    removeToken(id: string): Promise<T> {
-        return new Promise<T>(
-            (resolve: Function, reject: Function) => {
-                this.model.findById(id).exec(
-                    (err, user) => {
-                        if (err) { reject(err) };
-                        if (!user) { reject('Removing token: User was not found') };
-                        user.tokens = [];
-                        user.save(
-                            (err, user) => {
-                                if (err) {
-                                    debug('removeToken - FAILED => ' + JSON.stringify(err));
-                                    reject(err);
-                                };
-                                resolve(user.toObject()) 
-                                debug('deleteAll documents - OK');
                             }
                         )
                     }

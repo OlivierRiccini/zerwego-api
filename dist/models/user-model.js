@@ -12,13 +12,7 @@ const mongoose = require("mongoose");
 const dao_1 = require("../persist/dao");
 const validator_1 = require("validator");
 const jwt = require("jsonwebtoken");
-// const data = {
-//     id: 10
-// };
-// const token = jwt.sign(data, '123abc');
-// console.log(token);
-// const decoded = jwt.verify(token, '123abc');
-// console.log('decoded', decoded);
+const debug = require('debug')('DAO');
 delete mongoose.connection.models['User'];
 ;
 class UserDAO extends dao_1.DAOImpl {
@@ -56,7 +50,6 @@ class UserDAO extends dao_1.DAOImpl {
     }
     findByToken(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            // console.log('users ' + token);
             var decoded;
             try {
                 decoded = jwt.verify(token, 'abc123');
@@ -72,6 +65,31 @@ class UserDAO extends dao_1.DAOImpl {
                 }
             });
             return users[0];
+        });
+    }
+    ;
+    removeToken(id) {
+        return new Promise((resolve, reject) => {
+            this.model.findById(id).exec((err, user) => {
+                if (err) {
+                    reject(err);
+                }
+                ;
+                if (!user) {
+                    reject('Removing token: User was not found');
+                }
+                ;
+                user.tokens = [];
+                user.save((err, user) => {
+                    if (err) {
+                        debug('removeToken - FAILED => ' + JSON.stringify(err));
+                        reject(err);
+                    }
+                    ;
+                    debug('removeToken - OK');
+                    resolve(user.toObject());
+                });
+            });
         });
     }
     ;
