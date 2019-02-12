@@ -14,7 +14,7 @@ export interface ITrip {
     startDate: Date;
     endDate: Date;
     adminId: String, 
-    usersIds?: String[];
+    userIds?: String[];
 };
 
 // Document
@@ -34,9 +34,9 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
             startDate: { type: Date },
             endDate: { type: Date },
             adminId: String, 
-            // usersIds: [{
-            //     type: String
-            // }]
+            userIds: [{
+                type: String
+            }]
         });
         super('Trip', TripSchema);
     }

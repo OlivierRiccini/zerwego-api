@@ -6,12 +6,17 @@ import 'mocha';
 import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { TripSeed } from '../data-test/trip-seed';
+import { TripHelper, UserHelper } from '../data-test/helpers-data';
 import { TripDAO, ITrip } from '../../src/models/trip-model';
+import { IUser, UserDAO } from '../../src/models/user-model';
+import { MODELS_DATA } from '../data-test/common-data';
+
 const debug = require('debug')('test');
 
 const tripDAO: TripDAO = new TripDAO();
-const tripSeed: TripSeed = new TripSeed(tripDAO);
+const userDAO: UserDAO = new UserDAO();
+const tripHelper: TripHelper = new TripHelper(tripDAO);
+const userHelper: UserHelper = new UserHelper(userDAO);
 
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -21,17 +26,25 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   
   const request = chai.request(app).keepOpen();
 
-  before('Initialize', (done) => {
-    tripSeed.addTrips()
-      .then(() => debug('Done, DB for tests ready!'))
-      .catch(err => debug('Error during seeding DB test= ' + err))
+  let USER: IUser;
+  let USER_TOKEN: string;
+
+  before('Initialize', async (done) => {
+    tripHelper.addTrips().then(() => {}).catch(() => {});
+    request
+      .post('/users/signUp')
+      .send(MODELS_DATA.User[0])
+      .then(response => {
+        USER = response.body;
+        USER_TOKEN = response.header['x-auth'];
+      })
+      .catch(err => console.log(err));
     done();
   });
 
-  after('Clean up', (done) => {
-    tripSeed.deleteAllTrips()
-      .then(() => debug('Done, DB cleaned up after tests!'))
-      .catch(err => debug('Error during cleaning DB test= ' + err))
+  after('Clean up', async (done) => {
+    tripHelper.deleteAllTrips().then(() => {}).catch(() => {});;
+    userHelper.deleteAllUsers().then(() => {}).catch(() => {});;
     done();  
   }); 
 
@@ -89,7 +102,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
 
   it('Should create a valid trip', async () => {
     const ObjectId = mongoose.Types.ObjectId;
-
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
         tripName: "TEST TRIP",
@@ -192,7 +204,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         expect(response.body.imageUrl).to.equal('new image url');
       });
     
-
   });
 
 });

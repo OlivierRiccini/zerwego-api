@@ -24,7 +24,7 @@ export interface IUser {
 export interface IUserCredentials {
     email: string,
     password: string
-}
+};
 
 // Document
 export interface UserDocument extends IUser, mongoose.Document {
