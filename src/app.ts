@@ -4,9 +4,7 @@ const debug = require('debug')('server');
 
 import "reflect-metadata"; // this shim is required
 import {createExpressServer} from "routing-controllers";
-import {TripController} from "./controllers/trip-controller";
 import { MongooseConnection } from './db/mongoose-connection';
-import { UserController } from "./controllers/user-controller";
  
 // creates express app, registers all controller routes and returns you express app instance
 const app = createExpressServer({

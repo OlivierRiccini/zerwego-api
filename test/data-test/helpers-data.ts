@@ -15,8 +15,10 @@ export class TripHelper {
         this.trips = TRIPS;
     }
 
-    public async addTrips() {
+    public async addTrips(user, userToken) {
         for (const trip of this.trips) {
+            trip.adminId = user.id;
+            trip.userIds = [ user.id ];
             await this.tripDAO.create(trip);
         }   
     }

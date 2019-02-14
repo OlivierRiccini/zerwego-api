@@ -22,17 +22,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
-const trip_Service_1 = require("../services/trip-Service");
+const trip_service_1 = require("../services/trip-service");
 const trip_model_1 = require("../models/trip-model");
 const typedi_1 = require("typedi");
+const auth_middleware_1 = require("../middlewares/auth-middleware");
+const user_model_1 = require("../models/user-model");
 let TripController = class TripController {
     constructor(tripService) {
         this.tripService = tripService;
-        this.tripService = new trip_Service_1.TripService(new trip_model_1.TripDAO());
+        this.tripService = new trip_service_1.TripService(new trip_model_1.TripDAO(), new user_model_1.UserDAO());
     }
-    getAllTrips() {
+    getAllTrips(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            let trips = yield this.tripService.fetchAll();
+            const token = request.headers['x-auth'];
+            let trips = yield this.tripService.findTrips(token);
             debug('GET /trips => ' + JSON.stringify(trips));
             return trips;
         });
@@ -70,12 +73,15 @@ let TripController = class TripController {
 };
 __decorate([
     routing_controllers_1.Get(),
+    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
+    __param(0, routing_controllers_1.Req()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], TripController.prototype, "getAllTrips", null);
 __decorate([
     routing_controllers_1.Get('/:id'),
+    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
     __param(0, routing_controllers_1.Param('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -83,6 +89,7 @@ __decorate([
 ], TripController.prototype, "getTripById", null);
 __decorate([
     routing_controllers_1.Post(),
+    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Req()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
@@ -90,6 +97,7 @@ __decorate([
 ], TripController.prototype, "addTrip", null);
 __decorate([
     routing_controllers_1.Put('/:id'),
+    routing_controllers_1.UseBefore(auth_middleware_1.AdminOnly),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Param('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
@@ -97,6 +105,7 @@ __decorate([
 ], TripController.prototype, "updateTrip", null);
 __decorate([
     routing_controllers_1.Delete('/:id'),
+    routing_controllers_1.UseBefore(auth_middleware_1.AdminOnly),
     __param(0, routing_controllers_1.Param('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -105,7 +114,7 @@ __decorate([
 TripController = __decorate([
     routing_controllers_1.JsonController('/trips'),
     typedi_1.Service(),
-    __metadata("design:paramtypes", [trip_Service_1.TripService])
+    __metadata("design:paramtypes", [trip_service_1.TripService])
 ], TripController);
 exports.TripController = TripController;
 //# sourceMappingURL=trip-controller.js.map

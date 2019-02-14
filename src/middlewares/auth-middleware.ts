@@ -1,9 +1,9 @@
-import { ExpressMiddlewareInterface } from "routing-controllers";
+import { ExpressMiddlewareInterface, Middleware } from "routing-controllers";
 import { UserDAO } from "../models/user-model";
 
 export class Authenticate implements ExpressMiddlewareInterface {
 
-    constructor(private userDAO: UserDAO) {
+    constructor(private userDAO: UserDAO, private isAdmin: boolean) {
         this.userDAO = new UserDAO();
     }
 
@@ -25,5 +25,12 @@ export class Authenticate implements ExpressMiddlewareInterface {
             response.status(401).send('opopopopo');
             return;
         }); 
+    }
+}
+
+// @Middleware()
+export class AdminOnly extends Authenticate implements ExpressMiddlewareInterface {
+    constructor() {
+        super(new UserDAO(), true);
     }
 }

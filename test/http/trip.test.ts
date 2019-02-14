@@ -32,13 +32,13 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   let USER_2_TOKEN: string;
 
   before('Initialize', async () => {
-    tripHelper.addTrips().then(() => {}).catch(() => {});
     const user1 = await userHelper.getUserAndToken(MODELS_DATA.User[0]);
     USER = user1.user;
     USER_TOKEN = user1.token;
     const user2 = await userHelper.getUserAndToken(MODELS_DATA.User[1]);
     USER_2 = user2.user;
     USER_2_TOKEN = user2.token;
+    tripHelper.addTrips(USER, USER_TOKEN).then(() => {}).catch(() => {});
   });
 
   after('Clean up', async (done) => {
@@ -48,12 +48,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   }); 
 
   it('Should retrieve all trips if user authenticated', async () => {
-    console.log(USER);
     return request
       .get('/trips')
       .set('x-auth', USER_TOKEN)
       .then(
         response => {
+          console.log(response.body);
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
         })
@@ -72,8 +72,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         adminId: USER.id,
         userIds: [USER.id, USER_2.id]
     };
-
-    console.log(USER_2);
     
     const response = await request
       .post('/trips')
@@ -191,7 +189,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       )
   });
 
-  it('Should delete a trip if user is Admin only', async () => {
+  it.skip('Should delete a trip if user is Admin only', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {
         _id: new ObjectId(),
@@ -226,7 +224,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       )
   });
 
-  it('Should not delete a trip if user is not Admin', async () => {
+  it.skip('Should not delete a trip if user is not Admin', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {
         _id: new ObjectId(),

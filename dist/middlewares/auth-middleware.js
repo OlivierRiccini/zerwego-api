@@ -10,8 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const user_model_1 = require("../models/user-model");
 class Authenticate {
-    constructor(userDAO) {
+    constructor(userDAO, isAdmin) {
         this.userDAO = userDAO;
+        this.isAdmin = isAdmin;
         this.userDAO = new user_model_1.UserDAO();
     }
     use(request, response, next) {
@@ -37,4 +38,11 @@ class Authenticate {
     }
 }
 exports.Authenticate = Authenticate;
+// @Middleware()
+class AdminOnly extends Authenticate {
+    constructor() {
+        super(new user_model_1.UserDAO(), true);
+    }
+}
+exports.AdminOnly = AdminOnly;
 //# sourceMappingURL=auth-middleware.js.map
