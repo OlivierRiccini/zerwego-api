@@ -12,6 +12,7 @@ const mongoose = require("mongoose");
 const dao_1 = require("../persist/dao");
 const validator_1 = require("validator");
 const jwt = require("jsonwebtoken");
+const routing_controllers_1 = require("routing-controllers");
 const debug = require('debug')('DAO');
 delete mongoose.connection.models['User'];
 ;
@@ -56,7 +57,7 @@ class UserDAO extends dao_1.DAOImpl {
                 decoded = jwt.verify(token, 'abc123');
             }
             catch (e) {
-                throw new Error(e);
+                throw new routing_controllers_1.HttpError(400, 'Invalid token BLA');
             }
             const users = yield this.find({
                 find: {

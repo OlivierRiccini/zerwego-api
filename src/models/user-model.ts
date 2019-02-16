@@ -4,6 +4,7 @@ import { DAOImpl } from '../persist/dao';
 import validator from 'validator';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
+import { HttpError } from 'routing-controllers';
 const debug = require('debug')('DAO');
 
 delete mongoose.connection.models['User'];
@@ -72,7 +73,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
         try {
             decoded = jwt.verify(token, 'abc123');
         } catch (e) {
-            throw new Error(e);
+            throw new HttpError(400, 'Invalid token BLA');
         }
         const users = await this.find({
             find: {
@@ -80,7 +81,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                 'tokens.token': token,
                 'tokens.access': 'auth'
             }
-        })
+        });
         return users[0];
     };
 

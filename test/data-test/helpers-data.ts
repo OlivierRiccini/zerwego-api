@@ -15,7 +15,7 @@ export class TripHelper {
         this.trips = TRIPS;
     }
 
-    public async addTrips(user, userToken) {
+    public async addTrips(user) {
         for (const trip of this.trips) {
             trip.adminId = user.id;
             trip.userIds = [ user.id ];

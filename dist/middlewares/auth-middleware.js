@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const routing_controllers_1 = require("routing-controllers");
 const user_model_1 = require("../models/user-model");
 const trip_model_1 = require("../models/trip-model");
 class Authenticate {
@@ -17,44 +18,44 @@ class Authenticate {
         this.isAdmin = isAdmin;
         this.userDAO = new user_model_1.UserDAO();
         this.tripDAO = new trip_model_1.TripDAO();
-        // this.isAdmin = isAdmin;
     }
     use(request, response, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.authenticate(request, response, next);
-        });
-    }
-    authenticate(request, response, next) {
         var token = request.header('x-auth');
         this.userDAO.findByToken(token).then((user) => __awaiter(this, void 0, void 0, function* () {
             if (!user) {
-                response.status(401).send('User was not found');
-                return;
+                throw new routing_controllers_1.NotFoundError('User not authenticated');
             }
             ;
-            // console.log('ABLLAAAAAa ' + request + this.isAdmin);
-            if (request.url.includes('/trips') && this.isAdmin) {
-                // console.log(user);
-                const isAdminOfThisTrip = yield this.isUserTripAdmin(user.id, request.params.id);
-                // console.log('ABLLAAAAAa ' + isAdminOfThisTrip);
+            if (request.url.includes('/trips')) {
+                // if (!(await this.isUserPartOfTheTrip(user.id, request.params.id))) {
+                //     throw new HttpError(401, 'You are not part of this trip, you are not authorized to perfrom this task');
+                // };
+                if (this.isAdmin && !(yield this.isUserTripAdmin(user.id, request.params.id))) {
+                    throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
+                }
+                ;
             }
-            ;
-            if (this.isAdmin && user)
-                request.user = user;
+            request.user = user;
             request.token = token;
             next();
-        })).catch((e) => {
-            response.status(401).send('opopopopo');
-            return;
+        })).catch((err) => {
+            response.status(err.httpCode).send(err);
         });
     }
     isUserTripAdmin(userId, tripId) {
         return __awaiter(this, void 0, void 0, function* () {
-            // console.log('user ' + userId);
-            // console.log('trip ' + tripId);
             const result = yield this.tripDAO.find({ find: {
                     id: tripId,
                     adminId: userId
+                } });
+            return result.length > 0;
+        });
+    }
+    isUserPartOfTheTrip(userId, tripId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.tripDAO.find({ find: {
+                    id: tripId,
+                    userIds: userId
                 } });
             return result.length > 0;
         });

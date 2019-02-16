@@ -97,7 +97,7 @@ __decorate([
 ], TripController.prototype, "addTrip", null);
 __decorate([
     routing_controllers_1.Put('/:id'),
-    routing_controllers_1.UseBefore(auth_middleware_1.AdminOnly),
+    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Param('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),

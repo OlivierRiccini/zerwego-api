@@ -41,7 +41,7 @@ export class TripController {
   }
 
   @Put('/:id')
-  @UseBefore(AdminOnly)
+  @UseBefore(Authenticate)
   async updateTrip(@Body() trip: ITrip, @Param('id') id: string) {
     const updatedTrip = await this.tripService.updateTrip(trip, id);
     debug('PUT /trip => ' + JSON.stringify(updatedTrip));

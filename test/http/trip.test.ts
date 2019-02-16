@@ -10,6 +10,7 @@ import { TripHelper, UserHelper } from '../data-test/helpers-data';
 import { TripDAO, ITrip } from '../../src/models/trip-model';
 import { IUser, UserDAO } from '../../src/models/user-model';
 import { MODELS_DATA } from '../data-test/common-data';
+import { reporters } from 'mocha';
 
 const debug = require('debug')('test');
 
@@ -38,10 +39,13 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     const user2 = await userHelper.getUserAndToken(MODELS_DATA.User[1]);
     USER_2 = user2.user;
     USER_2_TOKEN = user2.token;
-    await tripHelper.addTrips(USER, USER_TOKEN);
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
+    // await tripHelper.addTrips(USER);
   });
+
+  afterEach('Clean up', async () => {
+    await tripHelper.deleteAllTrips();
+    // await userHelper.deleteAllUsers();
+  }); 
 
   after('Clean up', async () => {
     await tripHelper.deleteAllTrips();
@@ -49,8 +53,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   }); 
 
   it('Should retrieve all trips if user authenticated', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
+    await tripHelper.addTrips(USER); // create 3 trips fron mocks
     return request
       .get('/trips')
       .set('x-auth', USER_TOKEN)
@@ -63,8 +66,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   );
 
   it('Should get a trip base on the id if user authenticated', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
     const trip: ITrip = {
         _id: new ObjectId(),
@@ -82,13 +83,15 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .set('x-auth', USER_TOKEN)
       .send(trip)
     
-    return request
-      .get(`/trips/${response.body.id}`)
+    const tripId = response.body.id;
+    
+    request
+      .get(`/trips/${tripId}`)
       .set('x-auth', USER_TOKEN)
         .then(
           response => {
             expect(response.status).to.equal(200);
-            expect(response.body).to.have.property('id').to.be.a('string').to.equal(response.body.id);
+            expect(response.body).to.have.property('id').to.be.a('string').to.equal(tripId);
             expect(response.body).to.have.property('tripName').to.equal('TEST TRIP');
             expect(response.body).to.have.property('destination').to.equal('Los Angeles, California, United States');
             expect(response.body).to.have.property('imageUrl');
@@ -99,12 +102,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           err => {
             debug(err);
           }
-        )
+        );
+
+    await request 
+      .del(`/trips/${tripId}`)
+      .set('x-auth', USER_TOKEN);
   });
 
   it('Should not get a trip if user not authenticated', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
 
     const trip: ITrip = {
@@ -137,8 +142,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   );
 
   it('Should create a valid trip if user authenticated', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
@@ -172,8 +175,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   });
 
   it('Should not create a valid trip if user not authenticated', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
     const generatedId = new ObjectId();
     const validTrip: ITrip = {
@@ -200,8 +201,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   });
 
   it('Should delete a trip if user is Admin only', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
+    
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {
         _id: new ObjectId(),
@@ -220,7 +220,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .send(trip)
     
     const nbOfTrips = await tripDAO.count({});
-    expect(nbOfTrips).to.equal(6);
+    expect(nbOfTrips).to.equal(1);
     return request
       .delete(`/trips/${response.body.id}`)
       .set('x-auth', USER_TOKEN) // USER is admin
@@ -236,9 +236,8 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       )
   });
 
+  // See why catching errors in then block
   it.skip('Should not delete a trip if user is not Admin', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {
         _id: new ObjectId(),
@@ -256,24 +255,22 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .set('x-auth', USER_TOKEN)
       .send(trip)
     
-    const nbOfTrips = await tripDAO.count({});
-    expect(nbOfTrips).to.equal(6);
+    let nbOfTrips = await tripDAO.count({});
+    expect(nbOfTrips).to.equal(1);
     return request
       .delete(`/trips/${response.body.id}`)
       .set('x-auth', USER_2_TOKEN) // USER_2 is not admin of this trip
-        .then(
-          () => {
-            // chai.assert.equal(1, 2, 'Should not delete trip')
-          },
-          response => {
-            expect(response.status).to.equal(401);
-          }
-        )
+      .then(
+        (response) => {
+          console.log(response.body);
+          // chai.assert.equal(1, 2, 'Should not delete trip');
+      })
+      .catch(response => {
+        console.log(response);
+      });
   });
 
   it('Should update a valid trip if authenticated and part of the trip', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
 
     const trip: ITrip = {
@@ -316,8 +313,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   });
 
   it('Should not update a trip if not authenticated and/or part of the trip', async () => {
-    console.log('1 ' + JSON.stringify(USER));
-    console.log('2 ' + JSON.stringify(USER_2));
     const ObjectId = mongoose.Types.ObjectId;
 
     const trip: ITrip = {

@@ -8,6 +8,7 @@ const mongoose_connection_1 = require("./db/mongoose-connection");
 // creates express app, registers all controller routes and returns you express app instance
 const app = routing_controllers_1.createExpressServer({
     cors: true,
+    // defaultErrorHandler: false,
     // controllers: [TripController, UserController] // we specify controllers we want to use
     controllers: [__dirname + "/controllers/**/*.js"],
     middlewares: [__dirname + "/middlewares/**/*.js"]
