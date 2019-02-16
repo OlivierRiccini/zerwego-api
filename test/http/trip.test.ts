@@ -38,13 +38,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     const user2 = await userHelper.getUserAndToken(MODELS_DATA.User[1]);
     USER_2 = user2.user;
     USER_2_TOKEN = user2.token;
-    tripHelper.addTrips(USER, USER_TOKEN).then(() => {}).catch(() => {});
+    await tripHelper.addTrips(USER, USER_TOKEN);
   });
 
-  after('Clean up', async (done) => {
-    tripHelper.deleteAllTrips().then(() => {}).catch(() => {});;
-    userHelper.deleteAllUsers().then(() => {}).catch(() => {});;
-    done();  
+  after('Clean up', async () => {
+    await tripHelper.deleteAllTrips();
+    await userHelper.deleteAllUsers();
   }); 
 
   it('Should retrieve all trips if user authenticated', async () => {
@@ -53,7 +52,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .set('x-auth', USER_TOKEN)
       .then(
         response => {
-          console.log(response.body);
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
         })
@@ -93,7 +91,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
             expect(response.body).to.have.property('adminId');
           },
           err => {
-            debug(err)
+            debug(err);
           }
         )
   });
