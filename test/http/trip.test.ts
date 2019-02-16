@@ -62,8 +62,21 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
         })
-    }
-  );
+  });
+
+  // Try to catch error in catch block and not in then
+  it.skip('Should not be able to retrieve any trips if not authenticated', async () => {
+    await tripHelper.addTrips(USER); // create 3 trips fron mocks
+    return request
+      .get('/trips')
+      // Not token provided
+      .then(
+        response => {
+          console.log(response);
+          expect(response.status).to.equal(200);
+          expect(response.body).to.have.lengthOf(3);
+        })
+  });
 
   it('Should get a trip base on the id if user authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;

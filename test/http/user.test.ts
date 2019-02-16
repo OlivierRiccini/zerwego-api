@@ -26,7 +26,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   };
 
   after('Cleaning DB', async () => {
-    await userDAO.findAndRemove({find: {id: validUser.id}});
+    await userDAO.delete(validUser.id);
   });
 
   let validUserToken: string;

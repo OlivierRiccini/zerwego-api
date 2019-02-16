@@ -13,7 +13,7 @@ export interface DAO<T> {
     delete(id: number|string): Promise<any>;
     deleteAll(): Promise<any>;
     find(findOptions: FindOptions): Promise<T[]>;
-    findAndRemove(deleteOptions: DeleteOptions): Promise<any>;
+    // findAndRemove(deleteOptions: DeleteOptions): Promise<any>;
     count(findOptions: FindOptions): Promise<any>;
     // removeToken(id: string): Promise<T>;
 }
@@ -167,18 +167,18 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
         });
     };
 
-    findAndRemove(deleteOptions: DeleteOptions): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.model.deleteOne(deleteOptions, err => {
-                if (err) {
-                    debug('findAndRemove - FAILED => ' + JSON.stringify(err));
-                    reject(err);
-                }
-                debug('findAndRemove - OK', JSON.stringify('rr'));
-                resolve({ message: 'Deleted' });    
-            });
-        })
-    };
+    // findAndRemove(deleteOptions: DeleteOptions): Promise<any> {
+    //     return new Promise((resolve, reject) => {
+    //         this.model.deleteOne(deleteOptions, err => {
+    //             if (err) {
+    //                 debug('findAndRemove - FAILED => ' + JSON.stringify(err));
+    //                 reject(err);
+    //             }
+    //             debug('findAndRemove - OK', JSON.stringify('rr'));
+    //             resolve({ message: 'Deleted' });    
+    //         });
+    //     })
+    // };
 
     count(findOptions: FindOptions): Promise<number> {
         return new Promise((resolve, reject) => {

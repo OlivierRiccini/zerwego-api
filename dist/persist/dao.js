@@ -139,19 +139,18 @@ class DAOImpl {
         });
     }
     ;
-    findAndRemove(deleteOptions) {
-        return new Promise((resolve, reject) => {
-            this.model.deleteOne(deleteOptions, err => {
-                if (err) {
-                    debug('findAndRemove - FAILED => ' + JSON.stringify(err));
-                    reject(err);
-                }
-                debug('findAndRemove - OK', JSON.stringify('rr'));
-                resolve({ message: 'Deleted' });
-            });
-        });
-    }
-    ;
+    // findAndRemove(deleteOptions: DeleteOptions): Promise<any> {
+    //     return new Promise((resolve, reject) => {
+    //         this.model.deleteOne(deleteOptions, err => {
+    //             if (err) {
+    //                 debug('findAndRemove - FAILED => ' + JSON.stringify(err));
+    //                 reject(err);
+    //             }
+    //             debug('findAndRemove - OK', JSON.stringify('rr'));
+    //             resolve({ message: 'Deleted' });    
+    //         });
+    //     })
+    // };
     count(findOptions) {
         return new Promise((resolve, reject) => {
             this.model.countDocuments(findOptions)
