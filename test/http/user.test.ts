@@ -33,7 +33,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
   it('Should signUp a user and get token back set in the header', async () => {
     const response = await request
-      .post('/users/signUp')
+      .post('/users/register')
       .send(validUser);
     
     const user = response.body;
@@ -52,7 +52,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
   it('Should signOut a user by removing token', async () => {
     const response = await request
-      .del('/users/signOut')
+      .del('/users/logout')
       .set('x-auth', validUserToken);
 
     expect(response.status).to.equal(200);
@@ -62,7 +62,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
   it('Should signIn a user and get a token back set in the header', async () => {
     const response = await request
-      .post('/users/signIn')
+      .post('/users/login')
       .send({email: validUser.email, password: validUser.password});
 
     const user = response.body;

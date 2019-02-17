@@ -61,6 +61,9 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         response => {
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
+          expect(response.body[0].userIds).to.include(USER.id);
+          expect(response.body[1].userIds).to.include(USER.id);
+          expect(response.body[2].userIds).to.include(USER.id);
         })
   });
 
@@ -72,7 +75,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       // Not token provided
       .then(
         response => {
-          console.log(response);
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
         })
@@ -110,7 +112,9 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
             expect(response.body).to.have.property('imageUrl');
             expect(response.body).to.have.property('startDate');
             expect(response.body).to.have.property('endDate');
-            expect(response.body).to.have.property('adminId');
+            expect(response.body).to.have.property('adminId').to.equal(USER.id);
+            expect(response.body).to.have.property('userIds').to.include(USER.id);
+            expect(response.body).to.have.property('userIds').to.include(USER_2.id);
           },
           err => {
             debug(err);
@@ -163,7 +167,8 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: 'testurlimage',
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: 'testadminid'
+        adminId: USER.id,
+        userIds: [USER.id, USER_2.id]
     }
 
     return request
@@ -179,7 +184,9 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.body).to.have.property('imageUrl');
           expect(response.body).to.have.property('startDate');
           expect(response.body).to.have.property('endDate');
-          expect(response.body).to.have.property('adminId');
+          expect(response.body).to.have.property('adminId').to.equal(USER.id);
+          expect(response.body).to.have.property('userIds').to.include(USER.id);
+          expect(response.body).to.have.property('userIds').to.include(USER_2.id);
         },
         err => {
           debug(err)
@@ -303,12 +310,13 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .send(trip)
 
     const tripToUpdate: ITrip = {
-      tripName: 'TEST TRIP EVER',
+      tripName: 'TEST TRIP UPDATED',
       destination: 'Los Angeles, California, United States',
       imageUrl: 'new image url',
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: 'testadminid'
+      adminId: USER_2.id,
+      userIds: [USER.id, USER_2.id]
     }
 
     const id = trip._id;
@@ -319,13 +327,16 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .send(tripToUpdate)
       .then(response => {
         expect(response.status).to.equal(200);
-        expect(response.body.tripName).to.equal('TEST TRIP EVER');
+        expect(response.body.tripName).to.equal('TEST TRIP UPDATED');
         expect(response.body.imageUrl).to.equal('new image url');
+        expect(response.body).to.have.property('adminId').to.equal(USER_2.id);
+        expect(response.body).to.have.property('userIds').to.include(USER.id);
+        expect(response.body).to.have.property('userIds').to.include(USER_2.id);
       });
     
   });
 
-  it('Should not update a trip if not authenticated and/or part of the trip', async () => {
+  it.skip('Should not update a trip if not authenticated and/or part of the trip', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
     const trip: ITrip = {

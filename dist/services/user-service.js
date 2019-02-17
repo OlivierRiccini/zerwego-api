@@ -27,7 +27,7 @@ const bson_1 = require("bson");
 let UserService = class UserService {
     constructor(userDAO) {
         this.userDAO = userDAO;
-        this.secret = 'abc123';
+        this.secret = process.env.JWT_SECRET;
     }
     ;
     hashPassword(user) {
@@ -74,7 +74,7 @@ let UserService = class UserService {
     // public async findUserByToken(token: string): Promise<IUser> {
     //     let decoded;
     //     try {
-    //         decoded = jwt.verify(token, 'abc123');
+    //         decoded = jwt.verify(token, process.env.JWT_SECRET);
     //     } catch (err) {
     //         console.log('err');
     //     };
@@ -90,7 +90,7 @@ let UserService = class UserService {
     //     };
     //     return results[0];
     // };
-    signUp(req) {
+    register(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
@@ -106,7 +106,7 @@ let UserService = class UserService {
         });
     }
     ;
-    signIn(credentials) {
+    login(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let users = yield this.userDAO.find({ find: { email: credentials.email } });
@@ -123,7 +123,7 @@ let UserService = class UserService {
         });
     }
     ;
-    signOut(token) {
+    logout(token) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.userDAO.findByToken(token);
             yield this.userDAO.removeToken(user.id);

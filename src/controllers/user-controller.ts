@@ -14,37 +14,30 @@ export class UserController {
       this.userService = new UserService(new UserDAO());
     }
 
-  @Post('/signUp')
-  async signUp(@Body() user: IUser, @Res() response: any) {
-    const userResponse: IUserResponse = await this.userService.signUp(user);
+  @Post('/register')
+  async registerUser(@Body() user: IUser, @Res() response: any) {
+    const userResponse: IUserResponse = await this.userService.register(user);
     const token = userResponse.token;
     response.header('x-auth', token);
-    debug('POST /user/signUp => ' + JSON.stringify(userResponse.propToSend));
+    debug('POST /user/register => ' + JSON.stringify(userResponse.propToSend));
     return userResponse.propToSend;
   }
 
-  @Get('/me')
-  @UseBefore(Authenticate)
-  async getUser() {
-    debug('Meeeeeeee');
-    return 'WAOUuuuuuu';
-  }
-
-  @Post('/signIn')
-  async signIn(@Body() credentials: IUserCredentials, @Res() response: any) {
-    const userResponse: IUserResponse = await this.userService.signIn(credentials);
+  @Post('/login')
+  async login(@Body() credentials: IUserCredentials, @Res() response: any) {
+    const userResponse: IUserResponse = await this.userService.login(credentials);
     const token = userResponse.token;
     response.header('x-auth', token);
-    debug('POST /user/signIn => ' + JSON.stringify(userResponse.propToSend));
+    debug('POST /user/login => ' + JSON.stringify(userResponse.propToSend));
     return userResponse.propToSend;
   }
 
-  @Delete('/signOut')
-  async signOut(@Req() request: any) {
-    debug('POST /user/signOut => User signing out...');
+  @Delete('/logout')
+  async logout(@Req() request: any) {
+    debug('POST /user/logout => User signing out...');
     const token: string = request.headers['x-auth'];
-    await this.userService.signOut(token);
-    debug('POST /user/signOut => User disconected');
+    await this.userService.logout(token);
+    debug('POST /user/logout => User disconected');
     return 'Disconnected!';
   }
 

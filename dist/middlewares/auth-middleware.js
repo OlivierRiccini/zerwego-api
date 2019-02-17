@@ -27,10 +27,8 @@ class Authenticate {
             }
             ;
             if (request.url.includes('/trips')) {
-                // if (!(await this.isUserPartOfTheTrip(user.id, request.params.id))) {
-                //     throw new HttpError(401, 'You are not part of this trip, you are not authorized to perfrom this task');
-                // };
-                if (this.isAdmin && !(yield this.isUserTripAdmin(user.id, request.params.id))) {
+                const tripId = request.params.id;
+                if (this.isAdmin && !(yield this.isUserTripAdmin(user.id, tripId))) {
                     throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
                 }
                 ;
@@ -47,15 +45,6 @@ class Authenticate {
             const result = yield this.tripDAO.find({ find: {
                     id: tripId,
                     adminId: userId
-                } });
-            return result.length > 0;
-        });
-    }
-    isUserPartOfTheTrip(userId, tripId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.tripDAO.find({ find: {
-                    id: tripId,
-                    userIds: userId
                 } });
             return result.length > 0;
         });

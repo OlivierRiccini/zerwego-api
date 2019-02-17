@@ -25,74 +25,60 @@ const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const user_Service_1 = require("../services/user-Service");
-const auth_middleware_1 = require("../middlewares/auth-middleware");
 let UserController = class UserController {
     constructor(userService) {
         this.userService = userService;
         this.userService = new user_Service_1.UserService(new user_model_1.UserDAO());
     }
-    signUp(user, response) {
+    registerUser(user, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userResponse = yield this.userService.signUp(user);
+            const userResponse = yield this.userService.register(user);
             const token = userResponse.token;
             response.header('x-auth', token);
-            debug('POST /user/signUp => ' + JSON.stringify(userResponse.propToSend));
+            debug('POST /user/register => ' + JSON.stringify(userResponse.propToSend));
             return userResponse.propToSend;
         });
     }
-    getUser() {
+    login(credentials, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            debug('Meeeeeeee');
-            return 'WAOUuuuuuu';
-        });
-    }
-    signIn(credentials, response) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const userResponse = yield this.userService.signIn(credentials);
+            const userResponse = yield this.userService.login(credentials);
             const token = userResponse.token;
             response.header('x-auth', token);
-            debug('POST /user/signIn => ' + JSON.stringify(userResponse.propToSend));
+            debug('POST /user/login => ' + JSON.stringify(userResponse.propToSend));
             return userResponse.propToSend;
         });
     }
-    signOut(request) {
+    logout(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            debug('POST /user/signOut => User signing out...');
+            debug('POST /user/logout => User signing out...');
             const token = request.headers['x-auth'];
-            yield this.userService.signOut(token);
-            debug('POST /user/signOut => User disconected');
+            yield this.userService.logout(token);
+            debug('POST /user/logout => User disconected');
             return 'Disconnected!';
         });
     }
 };
 __decorate([
-    routing_controllers_1.Post('/signUp'),
+    routing_controllers_1.Post('/register'),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "signUp", null);
+], UserController.prototype, "registerUser", null);
 __decorate([
-    routing_controllers_1.Get('/me'),
-    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], UserController.prototype, "getUser", null);
-__decorate([
-    routing_controllers_1.Post('/signIn'),
+    routing_controllers_1.Post('/login'),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "signIn", null);
+], UserController.prototype, "login", null);
 __decorate([
-    routing_controllers_1.Delete('/signOut'),
+    routing_controllers_1.Delete('/logout'),
     __param(0, routing_controllers_1.Req()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "signOut", null);
+], UserController.prototype, "logout", null);
 UserController = __decorate([
     routing_controllers_1.JsonController('/users'),
     typedi_1.Service(),

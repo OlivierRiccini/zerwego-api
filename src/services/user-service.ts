@@ -16,7 +16,7 @@ export interface IUserResponse {
 
 @Service()
 export class UserService {
-    secret = 'abc123';
+    secret = process.env.JWT_SECRET;
 
     constructor(private userDAO: UserDAO) {
     };
@@ -56,7 +56,7 @@ export class UserService {
     // public async findUserByToken(token: string): Promise<IUser> {
     //     let decoded;
     //     try {
-    //         decoded = jwt.verify(token, 'abc123');
+    //         decoded = jwt.verify(token, process.env.JWT_SECRET);
     //     } catch (err) {
     //         console.log('err');
     //     };
@@ -74,7 +74,7 @@ export class UserService {
     //     return results[0];
     // };
     
-    public async signUp(req: any): Promise<IUserResponse> {         
+    public async register(req: any): Promise<IUserResponse> {         
         try {
             let user = req;
             this.enrichUser(user);
@@ -87,7 +87,7 @@ export class UserService {
         }
     };
 
-    public async signIn(credentials: IUserCredentials): Promise<IUserResponse> {
+    public async login(credentials: IUserCredentials): Promise<IUserResponse> {
         try {
             let users = await this.userDAO.find({find:{email: credentials.email}});
             let user = users[0];
@@ -101,7 +101,7 @@ export class UserService {
         }
     };
 
-    public async signOut(token: string): Promise<void> {
+    public async logout(token: string): Promise<void> {
         const user: IUser = await this.userDAO.findByToken(token);
         await this.userDAO.removeToken(user.id);
     };

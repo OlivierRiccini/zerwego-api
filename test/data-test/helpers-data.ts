@@ -36,7 +36,7 @@ export class UserHelper {
         const newUser = user ? user : MODELS_DATA.User[0];
         const request = chai.request(app).keepOpen();
         const response = await request
-            .post('/users/signUp')
+            .post('/users/register')
             .send(newUser)
         
         const userResponse = response.body;

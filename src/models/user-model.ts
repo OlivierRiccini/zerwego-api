@@ -71,7 +71,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
     public async findByToken(token): Promise<IUser> {
         var decoded: any;
         try {
-            decoded = jwt.verify(token, 'abc123');
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
         } catch (e) {
             throw new HttpError(400, 'Invalid token BLA');
         }
