@@ -34,7 +34,8 @@ let UserController = class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             const userResponse = yield this.userService.register(user);
             const token = userResponse.token;
-            response.header('x-auth', token);
+            const headers = { 'x-auth': token, 'Access-Control-Expose-Headers': 'x-auth' };
+            response.header(headers);
             debug('POST /user/register => ' + JSON.stringify(userResponse.propToSend));
             return userResponse.propToSend;
         });
@@ -43,14 +44,15 @@ let UserController = class UserController {
         return __awaiter(this, void 0, void 0, function* () {
             const userResponse = yield this.userService.login(credentials);
             const token = userResponse.token;
-            response.header('x-auth', token);
+            const headers = { 'x-auth': token, 'Access-Control-Expose-Headers': 'x-auth' };
+            response.header(headers);
             debug('POST /user/login => ' + JSON.stringify(userResponse.propToSend));
             return userResponse.propToSend;
         });
     }
     logout(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            debug('POST /user/logout => User signing out...');
+            debug('DELETE /user/logout => User signing out...');
             const token = request.headers['x-auth'];
             yield this.userService.logout(token);
             debug('POST /user/logout => User disconected');

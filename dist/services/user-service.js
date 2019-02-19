@@ -71,25 +71,6 @@ let UserService = class UserService {
         });
     }
     ;
-    // public async findUserByToken(token: string): Promise<IUser> {
-    //     let decoded;
-    //     try {
-    //         decoded = jwt.verify(token, process.env.JWT_SECRET);
-    //     } catch (err) {
-    //         console.log('err');
-    //     };
-    //     const results = await this.userDAO.find({
-    //         find: {
-    //             'id': decoded._id,
-    //             'tokens.token': token,
-    //             'tokens.access': 'auth'
-    //         }
-    //     });
-    //     if (results.length < 1) {
-    //         Promise.reject('User was not found');
-    //     };
-    //     return results[0];
-    // };
     register(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -117,7 +98,6 @@ let UserService = class UserService {
                 return this.buildUserResponse(user);
             }
             catch (err) {
-                console.log('Err= ' + err);
                 throw new Error('Err= ' + err);
             }
         });

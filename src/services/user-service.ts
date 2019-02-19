@@ -52,27 +52,6 @@ export class UserService {
         const token = jwt.sign({_id: user._id.toHexString(), access}, this.secret).toString();
         user.tokens.push({access, token});
     };
-
-    // public async findUserByToken(token: string): Promise<IUser> {
-    //     let decoded;
-    //     try {
-    //         decoded = jwt.verify(token, process.env.JWT_SECRET);
-    //     } catch (err) {
-    //         console.log('err');
-    //     };
-
-    //     const results = await this.userDAO.find({
-    //         find: {
-    //             'id': decoded._id,
-    //             'tokens.token': token,
-    //             'tokens.access': 'auth'
-    //         }
-    //     });
-    //     if (results.length < 1) {
-    //         Promise.reject('User was not found');
-    //     };
-    //     return results[0];
-    // };
     
     public async register(req: any): Promise<IUserResponse> {         
         try {
@@ -96,7 +75,6 @@ export class UserService {
             await this.userDAO.update(user, user.id);
             return this.buildUserResponse(user);
         } catch (err) {
-            console.log('Err= ' + err);
             throw new Error('Err= ' + err);
         }
     };
