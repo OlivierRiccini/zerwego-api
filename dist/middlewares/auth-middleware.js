@@ -8,18 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const routing_controllers_1 = require("routing-controllers");
 const user_model_1 = require("../models/user-model");
 const trip_model_1 = require("../models/trip-model");
+const jwt = require("jsonwebtoken");
 class Authenticate {
     constructor(userDAO, tripDAO, isAdmin) {
         this.userDAO = userDAO;
         this.tripDAO = tripDAO;
         this.isAdmin = isAdmin;
+        this.secret = process.env.JWT_SECRET;
         this.userDAO = new user_model_1.UserDAO();
         this.tripDAO = new trip_model_1.TripDAO();
     }
     use(request, response, next) {
-        // var token = request.header('x-auth');
+        var token = request.header('x-auth');
         // this.userDAO.findByToken(token).then( async (user) => {
         //     if (!user) {
         //         throw new NotFoundError('User not authenticated');
@@ -36,17 +39,34 @@ class Authenticate {
         // }).catch((err) => {
         //     response.status(err.httpCode).send(err);
         // });
-        const bearerHeader = request.header('authorization');
-        if (typeof bearerHeader !== 'undefined') {
-            const bearer = bearerHeader.split(' ');
-            const bearerToken = bearer[1];
-            request.token = bearerToken;
+        // });
+        // try {
+        //     const decoded = await jwt.verify(token, this.secret, null);
+        //     console.log(decoded);
+        // } catch (err) {
+        //     response.status(err.httpCode).send(err);
+        // }
+        jwt.verify(token, this.secret, null, (err, decoded) => {
+            const user = decoded['user'];
+            if (err) {
+                response.status(403).send(err);
+            }
+            if (request.url.includes('/trips') && this.isAdmin) {
+                const tripId = request.params.id;
+                this.isUserTripAdmin(user.id, tripId).then(isTripAdmin => {
+                    if (isTripAdmin) {
+                        throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
+                    }
+                    ;
+                });
+            }
+            request.user = user;
+            request.token = token;
+            //    if (Date.now() / 1000 > exp) {
+            //     return false;
+            //     }    
             next();
-        }
-        else {
-            // response.status(err.httpCode).send(err);
-            console.log('err');
-        }
+        });
     }
     isUserTripAdmin(userId, tripId) {
         return __awaiter(this, void 0, void 0, function* () {

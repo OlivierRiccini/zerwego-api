@@ -34,8 +34,7 @@ let TripController = class TripController {
     }
     getAllTrips(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            const token = request.headers['x-auth'];
-            let trips = yield this.tripService.findTrips(token);
+            let trips = yield this.tripService.findTrips(request.user.id);
             debug('GET /trips => ' + JSON.stringify(trips));
             return trips;
         });

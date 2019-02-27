@@ -17,8 +17,7 @@ export class TripController {
   @Get()
   @UseBefore(Authenticate)
   async getAllTrips(@Req() request) {
-    const token = request.headers['x-auth'];
-    let trips = await this.tripService.findTrips(token);
+    let trips = await this.tripService.findTrips(request.user.id);
     debug('GET /trips => ' + JSON.stringify(trips));
     return trips;
   }

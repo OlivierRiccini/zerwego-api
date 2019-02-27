@@ -28,12 +28,12 @@ let TripService = class TripService {
         this.userDAO = userDAO;
         debug('test');
     }
-    findTrips(token) {
+    findTrips(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.userDAO.findByToken(token);
+            // const user: IUser = await this.userDAO.find({find: });
             return this.tripDAO.find({
                 find: {
-                    userIds: user.id
+                    userIds: userId
                 }
             });
         });

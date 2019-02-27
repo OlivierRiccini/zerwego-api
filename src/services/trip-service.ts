@@ -10,11 +10,11 @@ export class TripService {
         debug('test')
     }
     
-    public async findTrips(token: string){
-        const user: IUser = await this.userDAO.findByToken(token);
+    public async findTrips(userId: string){
+        // const user: IUser = await this.userDAO.find({find: });
         return this.tripDAO.find({
             find: {
-                userIds: user.id
+                userIds: userId
             }
         });
     }

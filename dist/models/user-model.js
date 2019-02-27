@@ -37,16 +37,6 @@ class UserDAO extends dao_1.DAOImpl {
                 require: true,
                 minlength: 6
             },
-            tokens: [{
-                    access: {
-                        type: String,
-                        required: true
-                    },
-                    token: {
-                        type: String,
-                        required: true
-                    }
-                }]
         });
         super('User', UserSchema);
     }

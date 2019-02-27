@@ -60,7 +60,7 @@ export class UserService {
         // console.log(token);
         // return token;
         // const access = 'auth';
-        return await jwt.sign({user: user}, this.secret, { expiresIn: '30s' }).toString();
+        return await jwt.sign({user}, this.secret, { expiresIn: '30s' }).toString();
         // user.tokens.push({access, token});
     };
 
