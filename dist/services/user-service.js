@@ -65,9 +65,19 @@ let UserService = class UserService {
     ;
     generateAuthToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const access = 'auth';
-            const token = jwt.sign({ _id: user._id.toHexString(), access }, this.secret).toString();
-            user.tokens.push({ access, token });
+            // let token: string;
+            // jwt.sign({user: user}, this.secret, (err, token) => {
+            //     if(err)  {
+            //         throw new HttpError(404, 'Something went wrong while generating token');
+            //     } else {
+            //         Promise.resolve(token);
+            //     }
+            // });
+            // console.log(token);
+            // return token;
+            // const access = 'auth';
+            return yield jwt.sign({ user: user }, this.secret, { expiresIn: '30s' }).toString();
+            // user.tokens.push({access, token});
         });
     }
     ;
@@ -75,11 +85,12 @@ let UserService = class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
-                this.enrichUser(user);
+                // this.enrichUser(user);
                 yield this.generateAuthToken(user);
                 user.password = yield this.hashPassword(user);
                 user = yield this.userDAO.create(req);
-                return this.buildUserResponse(user);
+                const token = yield this.generateAuthToken(user);
+                return this.buildUserResponse(user, token);
             }
             catch (err) {
                 console.log('Smothing went wrong while creating new user');
@@ -93,9 +104,10 @@ let UserService = class UserService {
                 let users = yield this.userDAO.find({ find: { email: credentials.email } });
                 let user = users[0];
                 yield this.comparePassword(credentials.password, user.password);
-                yield this.generateAuthToken(user);
-                yield this.userDAO.update(user, user.id);
-                return this.buildUserResponse(user);
+                const token = yield this.generateAuthToken(user);
+                console.log(token);
+                // await this.userDAO.update(user, user.id);
+                return this.buildUserResponse(user, token);
             }
             catch (err) {
                 throw new Error('Err= ' + err);
@@ -110,14 +122,14 @@ let UserService = class UserService {
         });
     }
     ;
-    buildUserResponse(user) {
+    buildUserResponse(user, token) {
         return {
             propToSend: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
             },
-            token: user.tokens[0].token
+            token
         };
     }
     ;

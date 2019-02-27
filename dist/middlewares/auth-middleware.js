@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const routing_controllers_1 = require("routing-controllers");
 const user_model_1 = require("../models/user-model");
 const trip_model_1 = require("../models/trip-model");
 class Authenticate {
@@ -20,25 +19,34 @@ class Authenticate {
         this.tripDAO = new trip_model_1.TripDAO();
     }
     use(request, response, next) {
-        var token = request.header('x-auth');
-        this.userDAO.findByToken(token).then((user) => __awaiter(this, void 0, void 0, function* () {
-            if (!user) {
-                throw new routing_controllers_1.NotFoundError('User not authenticated');
-            }
-            ;
-            if (request.url.includes('/trips')) {
-                const tripId = request.params.id;
-                if (this.isAdmin && !(yield this.isUserTripAdmin(user.id, tripId))) {
-                    throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
-                }
-                ;
-            }
-            request.user = user;
-            request.token = token;
+        // var token = request.header('x-auth');
+        // this.userDAO.findByToken(token).then( async (user) => {
+        //     if (!user) {
+        //         throw new NotFoundError('User not authenticated');
+        //     };
+        //     if (request.url.includes('/trips')) {
+        //         const tripId: string = request.params.id;
+        //         if (this.isAdmin && !(await this.isUserTripAdmin(user.id, tripId))) {               
+        //             throw new HttpError(401, 'Only administrator can perform this task');
+        //         };
+        //     }
+        //     request.user = user;
+        //     request.token = token;
+        //     next();
+        // }).catch((err) => {
+        //     response.status(err.httpCode).send(err);
+        // });
+        const bearerHeader = request.header('authorization');
+        if (typeof bearerHeader !== 'undefined') {
+            const bearer = bearerHeader.split(' ');
+            const bearerToken = bearer[1];
+            request.token = bearerToken;
             next();
-        })).catch((err) => {
-            response.status(err.httpCode).send(err);
-        });
+        }
+        else {
+            // response.status(err.httpCode).send(err);
+            console.log('err');
+        }
     }
     isUserTripAdmin(userId, tripId) {
         return __awaiter(this, void 0, void 0, function* () {

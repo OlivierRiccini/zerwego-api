@@ -4,6 +4,7 @@ import { UserDAO, IUser, IUserCredentials } from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { ObjectID } from "bson";
+import { HttpError } from "routing-controllers";
 
 export interface IUserResponse {
     propToSend: {
@@ -47,20 +48,32 @@ export class UserService {
         });
     };
 
-    public async generateAuthToken(user): Promise<void> {
-        const access = 'auth';
-        const token = jwt.sign({_id: user._id.toHexString(), access}, this.secret).toString();
-        user.tokens.push({access, token});
+    public async generateAuthToken(user): Promise<any> {
+        // let token: string;
+        // jwt.sign({user: user}, this.secret, (err, token) => {
+        //     if(err)  {
+        //         throw new HttpError(404, 'Something went wrong while generating token');
+        //     } else {
+        //         Promise.resolve(token);
+        //     }
+        // });
+        // console.log(token);
+        // return token;
+        // const access = 'auth';
+        return await jwt.sign({user: user}, this.secret, { expiresIn: '30s' }).toString();
+        // user.tokens.push({access, token});
     };
+
     
     public async register(req: any): Promise<IUserResponse> {         
         try {
             let user = req;
-            this.enrichUser(user);
+            // this.enrichUser(user);
             await this.generateAuthToken(user);
             user.password = await this.hashPassword(user);
             user = await this.userDAO.create(req);
-            return this.buildUserResponse(user);
+            const token = await this.generateAuthToken(user);
+            return this.buildUserResponse(user, token);
         } catch (err) {
             console.log('Smothing went wrong while creating new user');
         }
@@ -71,9 +84,10 @@ export class UserService {
             let users = await this.userDAO.find({find:{email: credentials.email}});
             let user = users[0];
             await this.comparePassword(credentials.password, user.password);
-            await this.generateAuthToken(user);
-            await this.userDAO.update(user, user.id);
-            return this.buildUserResponse(user);
+            const token = await this.generateAuthToken(user);
+            console.log(token);
+            // await this.userDAO.update(user, user.id);
+            return this.buildUserResponse(user, token);
         } catch (err) {
             throw new Error('Err= ' + err);
         }
@@ -84,14 +98,14 @@ export class UserService {
         await this.userDAO.removeToken(user.id);
     };
 
-    public buildUserResponse(user: IUser): IUserResponse {
+    public buildUserResponse(user: IUser, token: string): IUserResponse {
         return {
             propToSend: {
                 id: user.id,
                 name: user.name,
                 email: user.email,
             },
-            token: user.tokens[0].token
+            token
         }
     };
 
