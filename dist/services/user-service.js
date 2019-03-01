@@ -76,7 +76,7 @@ let UserService = class UserService {
             // console.log(token);
             // return token;
             // const access = 'auth';
-            return yield jwt.sign({ user }, this.secret, { expiresIn: '30s' }).toString();
+            return yield jwt.sign({ user }, this.secret, { expiresIn: '10s' }).toString();
             // user.tokens.push({access, token});
         });
     }
@@ -105,7 +105,6 @@ let UserService = class UserService {
                 let user = users[0];
                 yield this.comparePassword(credentials.password, user.password);
                 const token = yield this.generateAuthToken(user);
-                console.log(token);
                 // await this.userDAO.update(user, user.id);
                 return this.buildUserResponse(user, token);
             }

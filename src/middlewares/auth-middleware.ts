@@ -11,7 +11,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
         this.tripDAO = new TripDAO();
     }  
     
-    use(request: any, response: any, next: (err?: any) => Promise<any>) {
+    async use(request: any, response: any, next: (err?: any) => Promise<any>) {
         var token = request.header('x-auth');
         // this.userDAO.findByToken(token).then( async (user) => {
         //     if (!user) {
@@ -32,34 +32,83 @@ export class Authenticate implements ExpressMiddlewareInterface {
         //     response.status(err.httpCode).send(err);
         // });
         // });
-        // try {
-        //     const decoded = await jwt.verify(token, this.secret, null);
-        //     console.log(decoded);
-        // } catch (err) {
-        //     response.status(err.httpCode).send(err);
-        // }
-       jwt.verify(token, this.secret, null, (err, decoded) => {
+
+        // jwt.verify(token, this.secret, null).then(decode => {
+
+        // })
+        
+        try {
+            if (!token) {
+                throw new HttpError(401, 'Only administrator can perform this task');
+            }
+
+            const decoded =  jwt.verify(token, this.secret, null);
+
+            if (typeof decoded === 'undefined') {
+                throw new HttpError(401, 'Only administrator can perform this task');
+            };
+
            const user = decoded['user'];
-           if (err) {
-                response.status(403).send(err);
-           }
+           const expirationToken = decoded['ita'];
+          
+           if (!user) {
+                throw new HttpError(401, 'Only administrator can perform this task');
+           };
+
            if (request.url.includes('/trips') && this.isAdmin) {
-            const tripId: string = request.params.id;
-                this.isUserTripAdmin(user.id, tripId).then(
-                    isTripAdmin => {
-                        if (isTripAdmin) {               
-                            throw new HttpError(401, 'Only administrator can perform this task');
-                        };
-                    }
-                )
+                const tripId: string = request.params.id;
+                const isTripAdmin = await this.isUserTripAdmin(user.id, tripId);
+                if (!isTripAdmin) { 
+                    throw new HttpError(401, 'Only administrator can perform this task');             
+                    // throw new HttpError(401, 'Only administrator can perform this task');
+                };
             }
             request.user = user;
             request.token = token;
-        //    if (Date.now() / 1000 > exp) {
-        //     return false;
-        //     }    
-           next();
-       });
+        //    if (Date.now() / 1000 > expirationToken) {
+        //         return false;
+        //     }
+        next(); 
+        } catch(err) {
+            response.status(err.httpCode).send(err);
+        }
+        
+    //    jwt.verify(token, this.secret, null, (err, decoded) => {
+    //        if (typeof decoded === 'undefined') {
+    //             response.status(403).send('Error while decoded token');
+    //             return;
+    //        };
+
+    //        const user = decoded['user'];
+    //        const expirationToken = decoded['ita'];
+    //        if (err) {
+    //             response.status(403).send(err);
+    //             return; 
+    //        }
+    //        if (!user) {
+    //             response.status(403).send('User not auth');
+    //             return; 
+    //        };
+
+    //        if (request.url.includes('/trips') && this.isAdmin) {
+    //             const tripId: string = request.params.id;
+    //             this.isUserTripAdmin(user.id, tripId).then(
+    //                 isTripAdmin => {
+    //                     if (isTripAdmin) { 
+    //                         response.status(401).send('Only administrator can perform this task');
+    //                         return;               
+    //                         // throw new HttpError(401, 'Only administrator can perform this task');
+    //                     };
+    //                 }
+    //             )
+    //         }
+    //         request.user = user;
+    //         request.token = token;
+    //     //    if (Date.now() / 1000 > expirationToken) {
+    //     //         return false;
+    //     //     }    
+    // });
+    // next();
         
     }
 

@@ -60,7 +60,7 @@ export class UserService {
         // console.log(token);
         // return token;
         // const access = 'auth';
-        return await jwt.sign({user}, this.secret, { expiresIn: '30s' }).toString();
+        return await jwt.sign({user}, this.secret, { expiresIn: '10s' }).toString();
         // user.tokens.push({access, token});
     };
 
@@ -85,7 +85,6 @@ export class UserService {
             let user = users[0];
             await this.comparePassword(credentials.password, user.password);
             const token = await this.generateAuthToken(user);
-            console.log(token);
             // await this.userDAO.update(user, user.id);
             return this.buildUserResponse(user, token);
         } catch (err) {

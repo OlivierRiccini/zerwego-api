@@ -65,7 +65,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.body[1].userIds).to.include(USER.id);
           expect(response.body[2].userIds).to.include(USER.id);
         })
-  });
+  }).timeout(20000);
 
   // Try to catch error in catch block and not in then
   it.skip('Should not be able to retrieve any trips if not authenticated', async () => {
@@ -139,7 +139,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         adminId: USER.id,
         userIds: [USER.id, USER_2.id]
     };
-    // console.log('From test ' + USER.id);
     const response = await request
       .post('/trips')
       .set('x-auth', USER_TOKEN)

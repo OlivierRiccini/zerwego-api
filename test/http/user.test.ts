@@ -50,7 +50,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     validUserToken = response.header['x-auth'];
   });
 
-  it('Should signOut a user by removing token', async () => {
+  it.skip('Should signOut a user by removing token', async () => {
     const response = await request
       .del('/users/logout')
       .set('x-auth', validUserToken);
