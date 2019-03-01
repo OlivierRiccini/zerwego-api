@@ -52,8 +52,9 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     await userHelper.deleteAllUsers();
   }); 
 
-  it('Should retrieve all trips if user authenticated', async () => {
+  it.only('Should retrieve all trips if user authenticated', async () => {
     await tripHelper.addTrips(USER); // create 3 trips fron mocks
+    
     return request
       .get('/trips')
       .set('x-auth', USER_TOKEN)
@@ -65,7 +66,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.body[1].userIds).to.include(USER.id);
           expect(response.body[2].userIds).to.include(USER.id);
         })
-  }).timeout(20000);
+  });
 
   // Try to catch error in catch block and not in then
   it.skip('Should not be able to retrieve any trips if not authenticated', async () => {

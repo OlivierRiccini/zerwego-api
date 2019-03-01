@@ -12,31 +12,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
     }  
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
-        var token = request.header('x-auth');
-        // this.userDAO.findByToken(token).then( async (user) => {
-        //     if (!user) {
-        //         throw new NotFoundError('User not authenticated');
-        //     };
-
-        //     if (request.url.includes('/trips')) {
-        //         const tripId: string = request.params.id;
-        //         if (this.isAdmin && !(await this.isUserTripAdmin(user.id, tripId))) {               
-        //             throw new HttpError(401, 'Only administrator can perform this task');
-        //         };
-        //     }
-
-        //     request.user = user;
-        //     request.token = token;
-        //     next();
-        // }).catch((err) => {
-        //     response.status(err.httpCode).send(err);
-        // });
-        // });
-
-        // jwt.verify(token, this.secret, null).then(decode => {
-
-        // })
-        
+        var token = request.header('x-auth');        
         try {
             if (!token) {
                 throw new HttpError(401, 'Only administrator can perform this task');
@@ -60,56 +36,18 @@ export class Authenticate implements ExpressMiddlewareInterface {
                 const isTripAdmin = await this.isUserTripAdmin(user.id, tripId);
                 if (!isTripAdmin) { 
                     throw new HttpError(401, 'Only administrator can perform this task');             
-                    // throw new HttpError(401, 'Only administrator can perform this task');
                 };
             }
             request.user = user;
             request.token = token;
-        //    if (Date.now() / 1000 > expirationToken) {
-        //         return false;
-        //     }
+            if (Date.now() / 1000 > expirationToken) {
+                throw new HttpError(401, 'Token expired');             
+            }
         next(); 
         } catch(err) {
             response.status(err.httpCode).send(err);
         }
-        
-    //    jwt.verify(token, this.secret, null, (err, decoded) => {
-    //        if (typeof decoded === 'undefined') {
-    //             response.status(403).send('Error while decoded token');
-    //             return;
-    //        };
 
-    //        const user = decoded['user'];
-    //        const expirationToken = decoded['ita'];
-    //        if (err) {
-    //             response.status(403).send(err);
-    //             return; 
-    //        }
-    //        if (!user) {
-    //             response.status(403).send('User not auth');
-    //             return; 
-    //        };
-
-    //        if (request.url.includes('/trips') && this.isAdmin) {
-    //             const tripId: string = request.params.id;
-    //             this.isUserTripAdmin(user.id, tripId).then(
-    //                 isTripAdmin => {
-    //                     if (isTripAdmin) { 
-    //                         response.status(401).send('Only administrator can perform this task');
-    //                         return;               
-    //                         // throw new HttpError(401, 'Only administrator can perform this task');
-    //                     };
-    //                 }
-    //             )
-    //         }
-    //         request.user = user;
-    //         request.token = token;
-    //     //    if (Date.now() / 1000 > expirationToken) {
-    //     //         return false;
-    //     //     }    
-    // });
-    // next();
-        
     }
 
     private async isUserTripAdmin(userId: string, tripId: string): Promise<boolean> {
