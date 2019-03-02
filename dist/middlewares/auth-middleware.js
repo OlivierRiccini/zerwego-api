@@ -40,6 +40,7 @@ let Authenticate = class Authenticate {
                     // Remove Bearer from string
                     token = token.slice(7, token.length);
                 }
+                console.log(token);
                 const decoded = jwt.verify(token, constants_1.CONSTANTS.JWT_SECRET, null);
                 if (typeof decoded === 'undefined') {
                     throw new routing_controllers_1.HttpError(401, 'Authorizationt oken cannot be decoded');
@@ -67,7 +68,7 @@ let Authenticate = class Authenticate {
                 next();
             }
             catch (err) {
-                response.status(err.httpCode).send(err);
+                response.status(err.httpCode >= 100 && err.httpCode < 600 ? err.code : 401).send(err);
             }
         });
     }

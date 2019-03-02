@@ -23,7 +23,8 @@ export class Authenticate implements ExpressMiddlewareInterface {
                 token = token.slice(7, token.length);
             }
 
-            const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+            console.log(token);
+            const decoded = jwt.verify(token, CONSTANTS.JWT_SECRET, null);
 
             if (typeof decoded === 'undefined') {
                 throw new HttpError(401, 'Authorizationt oken cannot be decoded');
@@ -50,7 +51,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
             }
         next(); 
         } catch(err) {
-            response.status(err.httpCode).send(err);
+            response.status(err.httpCode >= 100 && err.httpCode < 600 ? err.code : 401).send(err);
         }
 
     }
