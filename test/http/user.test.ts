@@ -7,6 +7,9 @@ import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 import { UserDAO, IUser } from '../../src/models/user-model';
+import { CONSTANTS } from '../../src/persist/constants';
+import * as jwt from 'jsonwebtoken';
+
 const debug = require('debug')('test');
 
 const userDAO: UserDAO = new UserDAO();
@@ -36,13 +39,20 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       .post('/users/register')
       .send(validUser);
     
-    const user = response.body;
+    expect(response.header).to.have.property('authorization');
+
+    let token = response.header['authorization'];
+    if (token.startsWith('Bearer ')) {
+      // Remove Bearer from string
+      token = token.slice(7, token.length);
+    }
+    const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+    const user = decoded['payload'];
 
     expect(response.status).to.equal(200);
     expect(user).to.have.property('id');
     expect(user).to.have.property('name');
     expect(user).to.have.property('email');
-    expect(response.header).to.have.property('authorization');
     // Assign id to validUser to reuse in other tests
     validUser.id = user.id;
     validUser.tokens = user.tokens;
@@ -65,12 +75,25 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       .post('/users/login')
       .send({email: validUser.email, password: validUser.password});
 
-    const user = response.body;
+    expect(response.header).to.have.property('authorization');
+    
+    let token = response.header['authorization'];
+    if (token.startsWith('Bearer ')) {
+      // Remove Bearer from string
+      token = token.slice(7, token.length);
+    }
+    const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+    const user = decoded['payload'];
+
     expect(response.status).to.equal(200);
     expect(user).to.have.property('id');
     expect(user).to.have.property('name');
     expect(user).to.have.property('email');
-    expect(response.header).to.have.property('authorization');
+    // Assign id to validUser to reuse in other tests
+    validUser.id = user.id;
+    validUser.tokens = user.tokens;
+    // Save token to reuse in other tests
+    validUserToken = response.header['authorization'];
     
   });
 

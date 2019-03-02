@@ -5,6 +5,9 @@ import { UserDAO, IUser } from '../../src/models/user-model';
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
 import { MODELS_DATA } from './common-data';
+import * as jwt from 'jsonwebtoken';
+import { CONSTANTS } from '../../src/persist/constants';
+
 chai.use(chaiHttp);
 var app = require('../../dist/app').app;
 
@@ -39,8 +42,15 @@ export class UserHelper {
             .post('/users/register')
             .send(newUser)
         
-        const userResponse = response.body;
-        const token = response.header['authorization'];
+        let token = response.header['authorization'];
+
+        if (token.startsWith('Bearer ')) {
+            // Remove Bearer from string
+            token = token.slice(7, token.length);
+        }
+
+        const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+        const userResponse = decoded['payload'];
         return { user: userResponse, token };
     }
 

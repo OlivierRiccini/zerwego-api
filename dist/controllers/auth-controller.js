@@ -25,7 +25,7 @@ const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const auth_service_1 = require("../services/auth-service");
-let UserController = class UserController {
+let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
         this.authService = new auth_service_1.AuthService(new user_model_1.UserDAO());
@@ -55,18 +55,18 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "registerUser", null);
+], AuthController.prototype, "registerUser", null);
 __decorate([
     routing_controllers_1.Post('/login'),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
-], UserController.prototype, "login", null);
-UserController = __decorate([
+], AuthController.prototype, "login", null);
+AuthController = __decorate([
     routing_controllers_1.JsonController('/users'),
     typedi_1.Service(),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
-], UserController);
-exports.UserController = UserController;
-//# sourceMappingURL=user-controller.js.map
+], AuthController);
+exports.AuthController = AuthController;
+//# sourceMappingURL=auth-controller.js.map

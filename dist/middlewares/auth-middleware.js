@@ -22,30 +22,33 @@ const user_model_1 = require("../models/user-model");
 const trip_model_1 = require("../models/trip-model");
 const jwt = require("jsonwebtoken");
 const typedi_1 = require("typedi");
+const constants_1 = require("../persist/constants");
 let Authenticate = class Authenticate {
     constructor(userDAO, tripDAO, isAdmin) {
         this.userDAO = userDAO;
         this.tripDAO = tripDAO;
         this.isAdmin = isAdmin;
-        this.secret = process.env.JWT_SECRET;
     }
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            var token = request.header('Authorization');
-            // console.log(token)
+            let token = request.header('Authorization');
             try {
                 if (!token) {
-                    throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
+                    throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
                 }
-                const decoded = jwt.verify(token, this.secret, null);
+                if (token.startsWith('Bearer ')) {
+                    // Remove Bearer from string
+                    token = token.slice(7, token.length);
+                }
+                const decoded = jwt.verify(token, constants_1.CONSTANTS.JWT_SECRET, null);
                 if (typeof decoded === 'undefined') {
-                    throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
+                    throw new routing_controllers_1.HttpError(401, 'Authorizationt oken cannot be decoded');
                 }
                 ;
-                const user = decoded['user'];
+                const user = decoded['payload'];
                 const expirationToken = decoded['ita'];
                 if (!user) {
-                    throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
+                    throw new routing_controllers_1.HttpError(401, 'This token is not related to any user');
                 }
                 ;
                 if (request.url.includes('/trips') && this.isAdmin) {

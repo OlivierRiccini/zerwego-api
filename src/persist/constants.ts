@@ -1,0 +1,3 @@
+export const CONSTANTS = {
+    JWT_SECRET: process.env.JWT_SECRET
+};

@@ -53,7 +53,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
 
   it('Should retrieve all trips if user authenticated', async () => {
     await tripHelper.addTrips(USER); // create 3 trips fron mocks
-    
     return request
       .get('/trips')
       .set('Authorization', USER_TOKEN)

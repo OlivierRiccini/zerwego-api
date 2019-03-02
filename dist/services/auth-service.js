@@ -21,11 +21,10 @@ const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-;
-let UserService = class UserService {
+const constants_1 = require("../persist/constants");
+let AuthService = class AuthService {
     constructor(userDAO) {
         this.userDAO = userDAO;
-        this.secret = process.env.JWT_SECRET;
     }
     ;
     hashPassword(user) {
@@ -68,7 +67,7 @@ let UserService = class UserService {
                 name: user.name,
                 email: user.email
             };
-            return yield jwt.sign({ payload }, this.secret, { expiresIn: '10s' }).toString();
+            return yield jwt.sign({ payload }, constants_1.CONSTANTS.JWT_SECRET, { expiresIn: '10s' }).toString();
         });
     }
     ;
@@ -103,9 +102,9 @@ let UserService = class UserService {
     }
     ;
 };
-UserService = __decorate([
+AuthService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [user_model_1.UserDAO])
-], UserService);
-exports.UserService = UserService;
-//# sourceMappingURL=user-service.js.map
+], AuthService);
+exports.AuthService = AuthService;
+//# sourceMappingURL=auth-service.js.map

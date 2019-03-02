@@ -2,19 +2,10 @@ import { Service } from "typedi";
 import { UserDAO, IUser, IUserCredentials } from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
-
-export interface IUserResponse {
-    propToSend: {
-        id: string,
-        name: string,
-        email: string
-    },
-    token: string
-};
+import { CONSTANTS } from "../persist/constants";
 
 @Service()
-export class UserService {
-    secret = process.env.JWT_SECRET;
+export class AuthService {
 
     constructor(private userDAO: UserDAO) {
     };
@@ -51,10 +42,9 @@ export class UserService {
             name: user.name,
             email: user.email
         };
-        return await jwt.sign({payload}, this.secret, { expiresIn: '10s' }).toString();
+        return await jwt.sign({payload}, CONSTANTS.JWT_SECRET, { expiresIn: '10s' }).toString();
     };
 
-    
     public async register(req: any): Promise<string> {         
         try {
             let user = req;
