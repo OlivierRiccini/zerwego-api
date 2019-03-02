@@ -18,7 +18,7 @@ export class UserController {
   async registerUser(@Body() user: IUser, @Res() response: any) {
     const userResponse: IUserResponse = await this.userService.register(user);
     const token = userResponse.token;
-    const headers = { 'x-auth': token, 'Access-Control-Expose-Headers': 'x-auth'};
+    const headers = { 'Authorization': token, 'Access-Control-Allow-Headers': 'Authorization'};
     response.header(headers);
     debug('POST /user/register => ' + JSON.stringify(userResponse.propToSend));
     return userResponse.propToSend;
@@ -28,7 +28,7 @@ export class UserController {
   async login(@Body() credentials: IUserCredentials, @Res() response: any) {
     const userResponse: IUserResponse = await this.userService.login(credentials);
     const token = userResponse.token;
-    const headers = { 'x-auth': token, 'Access-Control-Expose-Headers': 'x-auth'};
+    const headers = { 'Authorization': token, 'Access-Control-Allow-Headers': 'Authorization'};
     response.header(headers);
     debug('POST /user/login => ' + JSON.stringify(userResponse.propToSend));
     return userResponse.propToSend;
@@ -37,7 +37,7 @@ export class UserController {
   @Delete('/logout')
   async logout(@Req() request: any) {
     debug('DELETE /user/logout => User signing out...');
-    const token: string = request.headers['x-auth'];
+    const token: string = request.headers['Authorization'];
     await this.userService.logout(token);
     debug('POST /user/logout => User disconected');
     return 'Disconnected!';

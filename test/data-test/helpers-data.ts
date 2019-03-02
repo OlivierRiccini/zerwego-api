@@ -40,7 +40,7 @@ export class UserHelper {
             .send(newUser)
         
         const userResponse = response.body;
-        const token = response.header['x-auth'];
+        const token = response.header['authorization'];
         return { user: userResponse, token };
     }
 

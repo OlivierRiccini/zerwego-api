@@ -69,7 +69,7 @@ export class UserService {
         try {
             let user = req;
             // this.enrichUser(user);
-            await this.generateAuthToken(user);
+            // await this.generateAuthToken(user);
             user.password = await this.hashPassword(user);
             user = await this.userDAO.create(req);
             const token = await this.generateAuthToken(user);

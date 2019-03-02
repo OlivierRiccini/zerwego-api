@@ -2,17 +2,18 @@ import { ExpressMiddlewareInterface, HttpError, NotFoundError } from "routing-co
 import { UserDAO } from "../models/user-model";
 import { TripDAO } from "../models/trip-model";
 import * as jwt from 'jsonwebtoken';
+import { Service } from "typedi";
 
+@Service()
 export class Authenticate implements ExpressMiddlewareInterface {
     secret = process.env.JWT_SECRET;
 
     constructor(private userDAO: UserDAO, private tripDAO: TripDAO, private isAdmin: boolean) {
-        this.userDAO = new UserDAO();
-        this.tripDAO = new TripDAO();
     }  
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
-        var token = request.header('x-auth');        
+        var token = request.header('Authorization');        
+        // console.log(token)
         try {
             if (!token) {
                 throw new HttpError(401, 'Only administrator can perform this task');

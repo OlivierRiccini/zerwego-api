@@ -42,18 +42,18 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(user).to.have.property('id');
     expect(user).to.have.property('name');
     expect(user).to.have.property('email');
-    expect(response.header).to.have.property('x-auth');
+    expect(response.header).to.have.property('authorization');
     // Assign id to validUser to reuse in other tests
     validUser.id = user.id;
     validUser.tokens = user.tokens;
     // Save token to reuse in other tests
-    validUserToken = response.header['x-auth'];
+    validUserToken = response.header['authorization'];
   });
 
   it.skip('Should signOut a user by removing token', async () => {
     const response = await request
       .del('/users/logout')
-      .set('x-auth', validUserToken);
+      .set('authorization', validUserToken);
 
     expect(response.status).to.equal(200);
     expect(response.body).to.equal('Disconnected!');
@@ -70,7 +70,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(user).to.have.property('id');
     expect(user).to.have.property('name');
     expect(user).to.have.property('email');
-    expect(response.header).to.have.property('x-auth');
+    expect(response.header).to.have.property('authorization');
     
   });
 

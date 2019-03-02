@@ -10,7 +10,6 @@ import { TripHelper, UserHelper } from '../data-test/helpers-data';
 import { TripDAO, ITrip } from '../../src/models/trip-model';
 import { IUser, UserDAO } from '../../src/models/user-model';
 import { MODELS_DATA } from '../data-test/common-data';
-import { reporters } from 'mocha';
 
 const debug = require('debug')('test');
 
@@ -52,12 +51,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     await userHelper.deleteAllUsers();
   }); 
 
-  it.only('Should retrieve all trips if user authenticated', async () => {
+  it('Should retrieve all trips if user authenticated', async () => {
     await tripHelper.addTrips(USER); // create 3 trips fron mocks
     
     return request
       .get('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .then(
         response => {
           expect(response.status).to.equal(200);
@@ -96,14 +95,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     
     const response = await request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(trip)
     
     const tripId = response.body.id;
     
     request
       .get(`/trips/${tripId}`)
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
         .then(
           response => {
             expect(response.status).to.equal(200);
@@ -124,7 +123,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
 
     await request 
       .del(`/trips/${tripId}`)
-      .set('x-auth', USER_TOKEN);
+      .set('Authorization', USER_TOKEN);
   });
 
   it('Should not get a trip if user not authenticated', async () => {
@@ -142,7 +141,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     };
     const response = await request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(trip)
     
     return request
@@ -173,7 +172,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
 
     return request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(validTrip)
       .then(
         response => {
@@ -236,14 +235,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     
     const response = await request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(trip)
     
     const nbOfTrips = await tripDAO.count({});
     expect(nbOfTrips).to.equal(1);
     return request
       .delete(`/trips/${response.body.id}`)
-      .set('x-auth', USER_TOKEN) // USER is admin
+      .set('Authorization', USER_TOKEN) // USER is admin
       .then(
         async response => {
           expect(response.status).to.equal(200);
@@ -272,14 +271,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     
     const response = await request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(trip)
     
     let nbOfTrips = await tripDAO.count({});
     expect(nbOfTrips).to.equal(1);
     return request
       .delete(`/trips/${response.body.id}`)
-      .set('x-auth', USER_2_TOKEN) // USER_2 is not admin of this trip
+      .set('Authorization', USER_2_TOKEN) // USER_2 is not admin of this trip
       .then(
         (response) => {
           console.log(response.body);
@@ -306,7 +305,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     
     await request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(trip)
 
     const tripToUpdate: ITrip = {
@@ -323,7 +322,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
 
     return request
       .put(`/trips/${id}`)
-      .set('x-auth', USER_2_TOKEN)
+      .set('Authorization', USER_2_TOKEN)
       .send(tripToUpdate)
       .then(response => {
         expect(response.status).to.equal(200);
@@ -352,7 +351,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     
     await request
       .post('/trips')
-      .set('x-auth', USER_TOKEN)
+      .set('Authorization', USER_TOKEN)
       .send(trip)
 
     const tripToUpdate: ITrip = {

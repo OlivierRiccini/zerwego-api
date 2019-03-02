@@ -86,7 +86,7 @@ let UserService = class UserService {
             try {
                 let user = req;
                 // this.enrichUser(user);
-                yield this.generateAuthToken(user);
+                // await this.generateAuthToken(user);
                 user.password = yield this.hashPassword(user);
                 user = yield this.userDAO.create(req);
                 const token = yield this.generateAuthToken(user);

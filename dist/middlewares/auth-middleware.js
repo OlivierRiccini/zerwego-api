@@ -1,4 +1,13 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -12,18 +21,18 @@ const routing_controllers_1 = require("routing-controllers");
 const user_model_1 = require("../models/user-model");
 const trip_model_1 = require("../models/trip-model");
 const jwt = require("jsonwebtoken");
-class Authenticate {
+const typedi_1 = require("typedi");
+let Authenticate = class Authenticate {
     constructor(userDAO, tripDAO, isAdmin) {
         this.userDAO = userDAO;
         this.tripDAO = tripDAO;
         this.isAdmin = isAdmin;
         this.secret = process.env.JWT_SECRET;
-        this.userDAO = new user_model_1.UserDAO();
-        this.tripDAO = new trip_model_1.TripDAO();
     }
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            var token = request.header('x-auth');
+            var token = request.header('Authorization');
+            // console.log(token)
             try {
                 if (!token) {
                     throw new routing_controllers_1.HttpError(401, 'Only administrator can perform this task');
@@ -49,9 +58,9 @@ class Authenticate {
                 }
                 request.user = user;
                 request.token = token;
-                //    if (Date.now() / 1000 > expirationToken) {
-                //         return false;
-                //     }
+                if (Date.now() / 1000 > expirationToken) {
+                    throw new routing_controllers_1.HttpError(401, 'Token expired');
+                }
                 next();
             }
             catch (err) {
@@ -68,7 +77,11 @@ class Authenticate {
             return result.length > 0;
         });
     }
-}
+};
+Authenticate = __decorate([
+    typedi_1.Service(),
+    __metadata("design:paramtypes", [user_model_1.UserDAO, trip_model_1.TripDAO, Boolean])
+], Authenticate);
 exports.Authenticate = Authenticate;
 // @Middleware()
 class AdminOnly extends Authenticate {
