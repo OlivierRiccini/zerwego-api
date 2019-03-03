@@ -23,7 +23,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
                 token = token.slice(7, token.length);
             }
 
-            console.log(token);
             const decoded = jwt.verify(token, CONSTANTS.JWT_SECRET, null);
 
             if (typeof decoded === 'undefined') {
@@ -31,7 +30,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
             };
 
            const user = decoded['payload'];
-           const expirationToken = decoded['ita'];
           
            if (!user) {
                 throw new HttpError(401, 'This token is not related to any user');
@@ -46,12 +44,9 @@ export class Authenticate implements ExpressMiddlewareInterface {
             }
             request.user = user;
             request.token = token;
-            if (Date.now() / 1000 > expirationToken) {
-                throw new HttpError(401, 'Token expired');             
-            }
-        next(); 
+            next(); 
         } catch(err) {
-            response.status(err.httpCode >= 100 && err.httpCode < 600 ? err.code : 401).send(err);
+            response.status(err.httpCode ? err.httpCode : 401).send(err)
         }
 
     }

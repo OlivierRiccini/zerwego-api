@@ -40,14 +40,12 @@ let Authenticate = class Authenticate {
                     // Remove Bearer from string
                     token = token.slice(7, token.length);
                 }
-                console.log(token);
                 const decoded = jwt.verify(token, constants_1.CONSTANTS.JWT_SECRET, null);
                 if (typeof decoded === 'undefined') {
                     throw new routing_controllers_1.HttpError(401, 'Authorizationt oken cannot be decoded');
                 }
                 ;
                 const user = decoded['payload'];
-                const expirationToken = decoded['ita'];
                 if (!user) {
                     throw new routing_controllers_1.HttpError(401, 'This token is not related to any user');
                 }
@@ -62,13 +60,11 @@ let Authenticate = class Authenticate {
                 }
                 request.user = user;
                 request.token = token;
-                if (Date.now() / 1000 > expirationToken) {
-                    throw new routing_controllers_1.HttpError(401, 'Token expired');
-                }
                 next();
             }
             catch (err) {
-                response.status(err.httpCode >= 100 && err.httpCode < 600 ? err.code : 401).send(err);
+                response.status(err.httpCode ? err.httpCode : 401).send(err);
+                // response.status(err.httpCode >= 100 && err.httpCode < 600 ? err.code : 401).send(err);
             }
         });
     }
