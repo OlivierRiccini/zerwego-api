@@ -64,7 +64,6 @@ let Authenticate = class Authenticate {
             }
             catch (err) {
                 response.status(err.httpCode ? err.httpCode : 401).send(err);
-                // response.status(err.httpCode >= 100 && err.httpCode < 600 ? err.code : 401).send(err);
             }
         });
     }

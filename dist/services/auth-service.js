@@ -22,6 +22,7 @@ const user_model_1 = require("../models/user-model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const constants_1 = require("../persist/constants");
+const routing_controllers_1 = require("routing-controllers");
 let AuthService = class AuthService {
     constructor(userDAO) {
         this.userDAO = userDAO;
@@ -81,6 +82,7 @@ let AuthService = class AuthService {
                 return token;
             }
             catch (err) {
+                throw new routing_controllers_1.HttpError(400, 'Smothing went wrong while creating new user');
                 console.log('Smothing went wrong while creating new user');
             }
         });

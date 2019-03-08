@@ -3,6 +3,7 @@ import { UserDAO, IUser, IUserCredentials } from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { CONSTANTS } from "../persist/constants";
+import { HttpError } from "routing-controllers";
 
 @Service()
 export class AuthService {
@@ -53,7 +54,7 @@ export class AuthService {
             const token = await this.generateAuthToken(user);
             return token;
         } catch (err) {
-            console.log('Smothing went wrong while creating new user');
+            throw new HttpError(400, 'Smothing went wrong while creating new user');
         }
     };
 

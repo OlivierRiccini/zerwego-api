@@ -60,7 +60,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             document.save((err, res) => {
                 if (err) {
                     debug('create a document - FAILED => ' + err);
-                    reject(err);
+                    return reject(err);
                 }
                 let document = res.toObject();
                 debug('create a document - OK => ' + JSON.stringify(document));
