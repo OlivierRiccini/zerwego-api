@@ -18,18 +18,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const routing_controllers_1 = require("routing-controllers");
-const user_model_1 = require("../models/user-model");
 const trip_model_1 = require("../models/trip-model");
 const jwt = require("jsonwebtoken");
 const typedi_1 = require("typedi");
 const constants_1 = require("../persist/constants");
 const secure_service_1 = require("../services/secure-service");
-const secure_model_1 = require("../models/secure-model");
 let Authenticate = class Authenticate {
-    constructor(secureService, userDAO, tripDAO, isAdmin) {
-        this.secureService = secureService;
-        this.userDAO = userDAO;
-        this.tripDAO = tripDAO;
+    constructor(isAdmin) {
         this.isAdmin = isAdmin;
     }
     use(request, response, next) {
@@ -43,9 +38,10 @@ let Authenticate = class Authenticate {
                     // Remove Bearer from string
                     token = token.slice(7, token.length);
                 }
-                // if (token && this.secureService.tokenIsExpired(token)) {
-                //     token = await this.secureService.refreshToken(token);
-                // }
+                if (token && this.secureService.tokenIsExpired(token)) {
+                    console.log('middleware');
+                    token = yield this.secureService.refreshToken(token);
+                }
                 const decoded = jwt.verify(token, constants_1.CONSTANTS.JWT_SECRET, null);
                 if (typeof decoded === 'undefined') {
                     throw new routing_controllers_1.HttpError(401, 'Authorizationt token cannot be decoded');
@@ -66,11 +62,10 @@ let Authenticate = class Authenticate {
                 }
                 request.user = user;
                 request.token = token;
+                response.set('Authorization', token);
                 next();
             }
             catch (err) {
-                console.log('////////////////////////////////////////');
-                console.log(err);
                 response.status(err.httpCode ? err.httpCode : 401).send(err);
             }
         });
@@ -85,15 +80,23 @@ let Authenticate = class Authenticate {
         });
     }
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", secure_service_1.SecureService)
+], Authenticate.prototype, "secureService", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", trip_model_1.TripDAO)
+], Authenticate.prototype, "tripDAO", void 0);
 Authenticate = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [secure_service_1.SecureService, user_model_1.UserDAO, trip_model_1.TripDAO, Boolean])
+    __metadata("design:paramtypes", [Boolean])
 ], Authenticate);
 exports.Authenticate = Authenticate;
 // @Middleware()
 class AdminOnly extends Authenticate {
     constructor() {
-        super(new secure_service_1.SecureService(new secure_model_1.SecureDAO()), new user_model_1.UserDAO(), new trip_model_1.TripDAO(), true);
+        super(true);
     }
 }
 exports.AdminOnly = AdminOnly;

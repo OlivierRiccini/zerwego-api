@@ -13,32 +13,46 @@ export class SecureService {
 
     public async generateAuthToken(user: IUser): Promise<any> {
         try {
-            const refreshToken = await this.findRefreshTokenByUserId(user.id);
-            if (!refreshToken) {
-                await this.generateRefreshToken(user.id);
-            }
             const payload = {
                 id: user.id,
                 name: user.name,
                 email: user.email,
             };
-            const access_token = await jwt.sign({payload}, CONSTANTS.JWT_SECRET, { expiresIn: '60s' }).toString();
+            const access_token = await jwt.sign({payload}, CONSTANTS.JWT_SECRET, { expiresIn: '10s' }).toString();
+            
+            const refreshToken = await this.findRefreshTokenByTokenOrUserId(user.id, null);
+            if (!refreshToken) {
+                await this.generateRefreshToken(user, access_token);
+            } else {
+                await this.updateRefreshToken(refreshToken, access_token);
+            }
             return access_token;
         } catch (err) {
             throw new HttpError(401, err);
         }
     };
 
-    async generateRefreshToken(userId: string): Promise<void> {
-        const refresh_token = await jwt.sign({_userId: userId}, CONSTANTS.JWT_SECRET, { expiresIn: '7d' }).toString();
-        await this.secureDAO.create({refresh_token, _userId: userId});
+    async generateRefreshToken(user: IUser, _accessToken: string): Promise<void> {
+        const payload = { user, _accessToken };
+        const refreshToken = await jwt.sign({payload}, CONSTANTS.JWT_SECRET, { expiresIn: '7d' }).toString();
+        await this.secureDAO.create({refreshToken, _accessToken, _userId: user.id});
+    }
+
+    async updateRefreshToken(refreshToken: ISecure, access_token: string) {
+        try {
+            console.log('updateRefreshToken');
+            refreshToken._accessToken = access_token;
+            await this.secureDAO.update(refreshToken, refreshToken.id);
+        } catch (err) {
+            throw new HttpError(400, err);
+        }
     }
 
     async refreshToken(expiredToken: string) {
         try {
-            const decodedExpiredToken = jwt.verify(expiredToken, CONSTANTS.JWT_SECRET, null);
-            const userId = decodedExpiredToken['payload'].id;
-            const refreshToken = await this.findRefreshTokenByUserId(userId);
+            console.log('refreshToken');
+            let refreshToken = await this.findRefreshTokenByTokenOrUserId(expiredToken);
+            console.log(refreshToken);
             if (!refreshToken) {
                 throw new Error('No refresh token was found for this token');
             }
@@ -46,7 +60,8 @@ export class SecureService {
                 await this.secureDAO.delete(refreshToken.id);
                 throw new Error('Refresh token is exipred, user has to login');
             }
-            const user = decodedExpiredToken['payload'];
+            const user = refreshToken['payload'].user;
+            console.log(user);
             const newToken = await this.generateAuthToken(user);
             return newToken;
         } catch (err) {
@@ -55,13 +70,21 @@ export class SecureService {
     }
 
     tokenIsExpired(token): boolean {
-        const decodedToken = jwt.verify(token, CONSTANTS.JWT_SECRET, null);
-        const dateNow = new Date();
-        return decodedToken['exp'] < dateNow.getTime()/1000;
+        try {
+            jwt.verify(token, CONSTANTS.JWT_SECRET, null)
+        } catch (err) {
+            return err.name && err.name === 'TokenExpiredError'
+        }
+        return false;
     }
 
-    async findRefreshTokenByUserId(UserId: string) {
-        const tokens = await this.secureDAO.find({find:{_userId: UserId}});
+    async findRefreshTokenByTokenOrUserId(userId?: string, token?: string) {
+        let tokens: ISecure[];
+        if (token) {
+            tokens = await this.secureDAO.find({find:{_accessToken: token}});
+        } else {
+            tokens = await this.secureDAO.find({find:{_userId: userId}});
+        }
         return tokens.length <= 0 ? null : tokens[0];
     }
 

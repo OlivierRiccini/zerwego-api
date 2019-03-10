@@ -2,15 +2,20 @@ import { ExpressMiddlewareInterface, HttpError, NotFoundError } from "routing-co
 import { UserDAO } from "../models/user-model";
 import { TripDAO } from "../models/trip-model";
 import * as jwt from 'jsonwebtoken';
-import { Service } from "typedi";
+import { Service, Inject } from "typedi";
 import { CONSTANTS } from '../persist/constants'
 import { SecureService } from "../services/secure-service";
 import { SecureDAO } from "../models/secure-model";
 
 @Service()
 export class Authenticate implements ExpressMiddlewareInterface {
+    @Inject() private secureService: SecureService;
+    @Inject() private tripDAO: TripDAO;
 
-    constructor(private secureService: SecureService, private userDAO: UserDAO, private tripDAO: TripDAO, private isAdmin: boolean) {
+    private isAdmin: boolean;
+
+    constructor(isAdmin: boolean) {
+        this.isAdmin = isAdmin;
     }  
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
@@ -23,11 +28,12 @@ export class Authenticate implements ExpressMiddlewareInterface {
             if (token.startsWith('Bearer ')) {
                 // Remove Bearer from string
                 token = token.slice(7, token.length);
-            }
+            }   
 
-            // if (token && this.secureService.tokenIsExpired(token)) {
-            //     token = await this.secureService.refreshToken(token);
-            // }
+            if (token && this.secureService.tokenIsExpired(token)) {
+                console.log('middleware');
+                token = await this.secureService.refreshToken(token);
+            }
 
             const decoded = jwt.verify(token, CONSTANTS.JWT_SECRET, null);
 
@@ -50,10 +56,9 @@ export class Authenticate implements ExpressMiddlewareInterface {
             }
             request.user = user;
             request.token = token;
+            response.set('Authorization', token);
             next(); 
         } catch(err) {
-            console.log('////////////////////////////////////////');
-            console.log(err);
             response.status(err.httpCode ? err.httpCode : 401).send(err)
         }
 
@@ -72,6 +77,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
 // @Middleware()
 export class AdminOnly extends Authenticate implements ExpressMiddlewareInterface {
     constructor() {
-        super(new SecureService(new SecureDAO()), new UserDAO(), new TripDAO(), true);
+        super(true);
     }
 }

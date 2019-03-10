@@ -5,6 +5,8 @@ const debug = require('debug')('server');
 require("reflect-metadata"); // this shim is required
 const routing_controllers_1 = require("routing-controllers");
 const mongoose_connection_1 = require("./db/mongoose-connection");
+const typedi_1 = require("typedi");
+routing_controllers_1.useContainer(typedi_1.Container);
 // creates express app, registers all controller routes and returns you express app instance
 const app = routing_controllers_1.createExpressServer({
     cors: true,

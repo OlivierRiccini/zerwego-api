@@ -51,7 +51,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     await userHelper.deleteAllUsers();
   }); 
 
-  it('Should retrieve all trips if user authenticated', async () => {
+  it('POSITIVE - Should retrieve all trips if user authenticated', async () => {
     await tripHelper.addTrips(USER); // create 3 trips fron mocks
     return request
       .get('/trips')
@@ -67,7 +67,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
   });
 
   // Try to catch error in catch block and not in then
-  it.skip('Should not be able to retrieve any trips if not authenticated', async () => {
+  it.skip('NEGATIVE - Should not be able to retrieve any trips if not authenticated', async () => {
     await tripHelper.addTrips(USER); // create 3 trips fron mocks
     return request
       .get('/trips')
@@ -77,6 +77,9 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
         })
+        .catch(
+          err => console.log(err)
+        )
   });
 
   it('Should get a trip base on the id if user authenticated', async () => {
@@ -125,7 +128,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .set('Authorization', USER_TOKEN);
   });
 
-  it('Should not get a trip if user not authenticated', async () => {
+  it('NEGATIVE - Should not get a trip if user not authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
     const trip: ITrip = {
@@ -146,17 +149,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     return request
       .get(`/trips/${response.body.id}`)
       // No token provided
-        .then(() => {
-          // chai.assert.equal(1, 0, 'Should not be able to get trip');
-        },
-          response => {
-            expect(response.status).to.equal(401);
-          }
-        )
+        .then(response => {
+          expect(response.status).to.equal(401);
+        }
+      )
     }
   );
 
-  it('Should create a valid trip if user authenticated', async () => {
+  it('POSITIVE - Should create a valid trip if user authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
@@ -192,7 +192,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       )
   });
 
-  it('Should not create a valid trip if user not authenticated', async () => {
+  it('NEGATIVE - Should not create a valid trip if user not authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const generatedId = new ObjectId();
     const validTrip: ITrip = {
@@ -209,16 +209,13 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .post('/trips')
        // No token provided
       .send(validTrip)
-      .then(() => {
-        // chai.assert.equal(1, 0, 'Should not be able to get trip');
-      },
-        response => {
-          expect(response.status).to.equal(401);
-        }
+      .then(response => {
+        expect(response.status).to.equal(401);
+      }
       )
   });
 
-  it('Should delete a trip if user is Admin only', async () => {
+  it('POSITIVE - Should delete a trip if user is Admin only', async () => {
     
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {
@@ -288,7 +285,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       });
   });
 
-  it('Should update a valid trip if authenticated and part of the trip', async () => {
+  it('POSITIVE - Should update a valid trip if authenticated and part of the trip', async () => {
     const ObjectId = mongoose.Types.ObjectId;
 
     const trip: ITrip = {

@@ -8,7 +8,8 @@ class SecureDAO extends dao_1.DAOImpl {
     constructor() {
         const SecureSchema = new mongoose.Schema({
             id: String,
-            refresh_token: String,
+            refreshToken: String,
+            _accessToken: String,
             _userId: String
         });
         super('Secure', SecureSchema);

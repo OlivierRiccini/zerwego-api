@@ -8,7 +8,8 @@ delete mongoose.connection.models['Secure'];
 export interface ISecure {
     id?: string,
     _id?: ObjectID,
-    refresh_token: string,
+    refreshToken: string,
+    _accessToken: string,
     _userId: string
 };
 
@@ -22,7 +23,8 @@ export class SecureDAO extends DAOImpl<ISecure, UserDocument> {
     constructor() {
         const SecureSchema = new mongoose.Schema({
             id: String,
-            refresh_token: String,
+            refreshToken: String,
+            _accessToken: String,
             _userId: String
         });
        
