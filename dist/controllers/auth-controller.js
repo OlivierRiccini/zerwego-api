@@ -25,10 +25,13 @@ const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const auth_service_1 = require("../services/auth-service");
+const secure_service_1 = require("../services/secure-service");
+const secure_model_1 = require("../models/secure-model");
 let AuthController = class AuthController {
-    constructor(authService) {
+    constructor(authService, secureDAO) {
         this.authService = authService;
-        this.authService = new auth_service_1.AuthService(new user_model_1.UserDAO());
+        this.secureDAO = secureDAO;
+        this.authService = new auth_service_1.AuthService(new secure_service_1.SecureService(new secure_model_1.SecureDAO()), new user_model_1.UserDAO());
     }
     registerUser(user, response) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -66,7 +69,7 @@ __decorate([
 AuthController = __decorate([
     routing_controllers_1.JsonController('/users'),
     typedi_1.Service(),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService, secure_model_1.SecureDAO])
 ], AuthController);
 exports.AuthController = AuthController;
 //# sourceMappingURL=auth-controller.js.map

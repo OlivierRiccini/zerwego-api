@@ -19,71 +19,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const constants_1 = require("../persist/constants");
 const routing_controllers_1 = require("routing-controllers");
+const secure_service_1 = require("./secure-service");
 let AuthService = class AuthService {
-    constructor(userDAO) {
+    constructor(secureService, userDAO) {
+        this.secureService = secureService;
         this.userDAO = userDAO;
-    }
-    ;
-    hashPassword(user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(user.password, salt, (err, hash) => {
-                        if (err) {
-                            reject(new Error("Something went wrong while hashing password"));
-                        }
-                        else {
-                            resolve(hash);
-                        }
-                        ;
-                    });
-                });
-            });
-        });
-    }
-    ;
-    comparePassword(credentialPassword, userPassword) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                bcrypt.compare(credentialPassword, userPassword, (err, res) => {
-                    if (res) {
-                        resolve();
-                    }
-                    else {
-                        reject("Wrong password");
-                    }
-                });
-            });
-        });
-    }
-    ;
-    generateAuthToken(user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const payload = {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            };
-            return yield jwt.sign({ payload }, constants_1.CONSTANTS.JWT_SECRET, { expiresIn: '10s' }).toString();
-        });
     }
     ;
     register(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
-                user.password = yield this.hashPassword(user);
+                user.password = yield this.secureService.hashPassword(user);
                 user = yield this.userDAO.create(req);
-                const token = yield this.generateAuthToken(user);
+                const token = yield this.secureService.generateAuthToken(user);
                 return token;
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, 'Smothing went wrong while creating new user');
-                console.log('Smothing went wrong while creating new user');
             }
         });
     }
@@ -93,12 +47,12 @@ let AuthService = class AuthService {
             try {
                 let users = yield this.userDAO.find({ find: { email: credentials.email } });
                 let user = users[0];
-                yield this.comparePassword(credentials.password, user.password);
-                const token = yield this.generateAuthToken(user);
+                yield this.secureService.comparePassword(credentials.password, user.password);
+                const token = yield this.secureService.generateAuthToken(user);
                 return token;
             }
             catch (err) {
-                throw new Error('Err= ' + err);
+                throw new routing_controllers_1.HttpError(400, err);
             }
         });
     }
@@ -106,7 +60,7 @@ let AuthService = class AuthService {
 };
 AuthService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [user_model_1.UserDAO])
+    __metadata("design:paramtypes", [secure_service_1.SecureService, user_model_1.UserDAO])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth-service.js.map

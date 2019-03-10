@@ -1,57 +1,20 @@
 import { Service } from "typedi";
-import { UserDAO, IUser, IUserCredentials } from '../models/user-model';
-import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcryptjs';
-import { CONSTANTS } from "../persist/constants";
+import { UserDAO, IUserCredentials } from '../models/user-model';
 import { HttpError } from "routing-controllers";
+import { SecureService } from "./secure-service";
 
 @Service()
 export class AuthService {
 
-    constructor(private userDAO: UserDAO) {
-    };
-
-    public async hashPassword(user: IUser): Promise<string> {
-        return new Promise((resolve, reject) => {
-            bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(user.password, salt, (err, hash) => {
-                    if (err) {
-                        reject(new Error("Something went wrong while hashing password"));
-                    } else {
-                        resolve(hash);
-                    };
-                })
-            });
-        });
-    };
-
-    public async comparePassword(credentialPassword: string, userPassword: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            bcrypt.compare(credentialPassword, userPassword, (err, res) => {
-                if (res) {
-                    resolve();
-                } else {
-                    reject("Wrong password");
-                }
-            });
-        });
-    };
-
-    public async generateAuthToken(user): Promise<any> {
-        const payload = {
-            id: user.id,
-            name: user.name,
-            email: user.email
-        };
-        return await jwt.sign({payload}, CONSTANTS.JWT_SECRET, { expiresIn: '10s' }).toString();
+    constructor(private secureService: SecureService, private userDAO: UserDAO) {
     };
 
     public async register(req: any): Promise<string> {         
         try {
             let user = req;
-            user.password = await this.hashPassword(user);
+            user.password = await this.secureService.hashPassword(user);
             user = await this.userDAO.create(req);
-            const token = await this.generateAuthToken(user);
+            const token = await this.secureService.generateAuthToken(user)
             return token;
         } catch (err) {
             throw new HttpError(400, 'Smothing went wrong while creating new user');
@@ -62,11 +25,11 @@ export class AuthService {
         try {
             let users = await this.userDAO.find({find:{email: credentials.email}});
             let user = users[0];
-            await this.comparePassword(credentials.password, user.password);
-            const token = await this.generateAuthToken(user);
+            await this.secureService.comparePassword(credentials.password, user.password);
+            const token = await this.secureService.generateAuthToken(user);
             return token;
         } catch (err) {
-            throw new Error('Err= ' + err);
+            throw new HttpError(400, err);
         }
     };
 }

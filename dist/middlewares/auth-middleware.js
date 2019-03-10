@@ -23,8 +23,11 @@ const trip_model_1 = require("../models/trip-model");
 const jwt = require("jsonwebtoken");
 const typedi_1 = require("typedi");
 const constants_1 = require("../persist/constants");
+const secure_service_1 = require("../services/secure-service");
+const secure_model_1 = require("../models/secure-model");
 let Authenticate = class Authenticate {
-    constructor(userDAO, tripDAO, isAdmin) {
+    constructor(secureService, userDAO, tripDAO, isAdmin) {
+        this.secureService = secureService;
         this.userDAO = userDAO;
         this.tripDAO = tripDAO;
         this.isAdmin = isAdmin;
@@ -40,9 +43,12 @@ let Authenticate = class Authenticate {
                     // Remove Bearer from string
                     token = token.slice(7, token.length);
                 }
+                // if (token && this.secureService.tokenIsExpired(token)) {
+                //     token = await this.secureService.refreshToken(token);
+                // }
                 const decoded = jwt.verify(token, constants_1.CONSTANTS.JWT_SECRET, null);
                 if (typeof decoded === 'undefined') {
-                    throw new routing_controllers_1.HttpError(401, 'Authorizationt oken cannot be decoded');
+                    throw new routing_controllers_1.HttpError(401, 'Authorizationt token cannot be decoded');
                 }
                 ;
                 const user = decoded['payload'];
@@ -63,6 +69,8 @@ let Authenticate = class Authenticate {
                 next();
             }
             catch (err) {
+                console.log('////////////////////////////////////////');
+                console.log(err);
                 response.status(err.httpCode ? err.httpCode : 401).send(err);
             }
         });
@@ -79,13 +87,13 @@ let Authenticate = class Authenticate {
 };
 Authenticate = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [user_model_1.UserDAO, trip_model_1.TripDAO, Boolean])
+    __metadata("design:paramtypes", [secure_service_1.SecureService, user_model_1.UserDAO, trip_model_1.TripDAO, Boolean])
 ], Authenticate);
 exports.Authenticate = Authenticate;
 // @Middleware()
 class AdminOnly extends Authenticate {
     constructor() {
-        super(new user_model_1.UserDAO(), new trip_model_1.TripDAO(), true);
+        super(new secure_service_1.SecureService(new secure_model_1.SecureDAO()), new user_model_1.UserDAO(), new trip_model_1.TripDAO(), true);
     }
 }
 exports.AdminOnly = AdminOnly;
