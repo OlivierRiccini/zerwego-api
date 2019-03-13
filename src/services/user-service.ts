@@ -14,7 +14,7 @@ export interface IUserResponse {
 
 @Service()
 export class UserService {
-    secret = process.env.JWT_SECRET;
+    secret = process.env.ACCESS_TOKEN_SECRET;
 
     constructor(private userDAO: UserDAO) {
     };

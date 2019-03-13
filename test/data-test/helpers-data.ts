@@ -49,7 +49,7 @@ export class UserHelper {
             token = token.slice(7, token.length);
         }
 
-        const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+        const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
         const userResponse = decoded['payload'];
         return { user: userResponse, token };
     }

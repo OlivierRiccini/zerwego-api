@@ -25,7 +25,7 @@ const bcrypt = require("bcryptjs");
 let UserService = class UserService {
     constructor(userDAO) {
         this.userDAO = userDAO;
-        this.secret = process.env.JWT_SECRET;
+        this.secret = process.env.ACCESS_TOKEN_SECRET;
     }
     ;
     hashPassword(user) {

@@ -3,13 +3,15 @@
       "DEBUG": "server, data-base, http, service, seed, test, DAO",
       "PORT": 3000,
       "MONGODB_URI": "mongodb://127.0.0.1:27017/zerwego-api-test",
-      "JWT_SECRET": "guyg6Wfty898xvx7!!!HXjgV"
+      "ACCESS_TOKEN_SECRET": "cjze!9XN!HJKCÀKkd!!!HXjgV",
+      "REFRESH_TOKEN_SECRET": "guyg6Wfty898xvx7!!!HXjgV"
     },
     "development": {
       "DEBUG": "server, data-base, http, service, DAO",
       "PORT": 3000,
       "MONGODB_URI": "mongodb://127.0.0.1:27017/zerwego-api-dev",
-      "JWT_SECRET": "skjgsc!87YhhGHH§6TFVTÈXu"
+      "ACCESS_TOKEN_SECRET": "dzidkpaz0akzncHHdkn('cazza",
+      "REFRESH_TOKEN_SECRET": "skjgsc!87YhhGHH§6TFVTÈXu"
     }
 }
   

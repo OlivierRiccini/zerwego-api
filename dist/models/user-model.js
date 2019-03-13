@@ -44,7 +44,7 @@ class UserDAO extends dao_1.DAOImpl {
         return __awaiter(this, void 0, void 0, function* () {
             var decoded;
             try {
-                decoded = jwt.verify(token, process.env.JWT_SECRET);
+                decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             }
             catch (e) {
                 throw new routing_controllers_1.HttpError(400, 'Invalid token BLA');

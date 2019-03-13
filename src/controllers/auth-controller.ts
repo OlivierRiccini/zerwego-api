@@ -17,19 +17,21 @@ export class AuthController {
 
   @Post('/register')
   async registerUser(@Body() user: IUser, @Res() response: any) {
-    const token: string = await this.authService.register(user);
-    const headers = { 'Authorization': token, 'Access-Control-Allow-Headers': 'Authorization'};
+    const tokens = await this.authService.register(user);
+    const headers = { 'Authorization': tokens.accessToken, 'Access-Control-Allow-Headers': 'Authorization'};
     response.header(headers);
-    debug('POST /user/register => ' + token);
+    response.header({'Refresh_token': tokens.refreshToken, 'Access-Control-Allow-Headers': 'Refresh_token'});
+    debug('POST /user/register => ' + tokens.accessToken);
     return 'Successfully registered!';
   }
 
   @Post('/login')
   async login(@Body() credentials: IUserCredentials, @Res() response: any) {
-    const token: string = await this.authService.login(credentials);
-    const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': 'Authorization'};
+    const tokens = await this.authService.login(credentials);
+    const headers = { 'Authorization': tokens.accessToken, 'Access-Control-Expose-Headers': '*'};
     response.header(headers);
-    debug('POST /user/login => ' + token);
+    response.header({'Refresh_token': tokens.refreshToken});
+    debug('POST /user/login => ' + tokens.accessToken);
     return 'Successfully logged in!';
   }
  

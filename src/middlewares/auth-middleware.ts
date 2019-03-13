@@ -19,23 +19,24 @@ export class Authenticate implements ExpressMiddlewareInterface {
     }  
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
-        let token = request.header('Authorization');        
+        let accessToken = request.header('Authorization');  
+        let refreshToken = request.header('Refresh_token');  
         try {
-            if (!token) {
+            if (!accessToken) {
                 throw new HttpError(401, 'No authorization token provided');
             }
 
-            if (token.startsWith('Bearer ')) {
+            if (accessToken.startsWith('Bearer ')) {
                 // Remove Bearer from string
-                token = token.slice(7, token.length);
+                accessToken = accessToken.slice(7, accessToken.length);
             }   
 
-            if (token && this.secureService.tokenIsExpired(token)) {
-                console.log('middleware');
-                token = await this.secureService.refreshToken(token);
+            if (accessToken && await this.secureService.accessTokenIsExpired(accessToken)) {
+                const tokens = await this.secureService.refreshTokens(refreshToken);
+                refreshToken = tokens.refreshToken;
             }
 
-            const decoded = jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+            const decoded = jwt.verify(accessToken, CONSTANTS.ACCESS_TOKEN_SECRET, null);
 
             if (typeof decoded === 'undefined') {
                 throw new HttpError(401, 'Authorizationt token cannot be decoded');
@@ -55,8 +56,9 @@ export class Authenticate implements ExpressMiddlewareInterface {
                 };
             }
             request.user = user;
-            request.token = token;
-            response.set('Authorization', token);
+            request.token = accessToken;
+            response.set('Authorization', accessToken);
+            response.set('Refresh_token', refreshToken);
             next(); 
         } catch(err) {
             response.status(err.httpCode ? err.httpCode : 401).send(err)

@@ -29,20 +29,21 @@ let Authenticate = class Authenticate {
     }
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
-            let token = request.header('Authorization');
+            let accessToken = request.header('Authorization');
+            let refreshToken = request.header('Refresh_token');
             try {
-                if (!token) {
+                if (!accessToken) {
                     throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
                 }
-                if (token.startsWith('Bearer ')) {
+                if (accessToken.startsWith('Bearer ')) {
                     // Remove Bearer from string
-                    token = token.slice(7, token.length);
+                    accessToken = accessToken.slice(7, accessToken.length);
                 }
-                if (token && this.secureService.tokenIsExpired(token)) {
-                    console.log('middleware');
-                    token = yield this.secureService.refreshToken(token);
+                if (accessToken && (yield this.secureService.accessTokenIsExpired(accessToken))) {
+                    const tokens = yield this.secureService.refreshTokens(refreshToken);
+                    refreshToken = tokens.refreshToken;
                 }
-                const decoded = jwt.verify(token, constants_1.CONSTANTS.JWT_SECRET, null);
+                const decoded = jwt.verify(accessToken, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
                 if (typeof decoded === 'undefined') {
                     throw new routing_controllers_1.HttpError(401, 'Authorizationt token cannot be decoded');
                 }
@@ -61,8 +62,9 @@ let Authenticate = class Authenticate {
                     ;
                 }
                 request.user = user;
-                request.token = token;
-                response.set('Authorization', token);
+                request.token = accessToken;
+                response.set('Authorization', accessToken);
+                response.set('Refresh_token', refreshToken);
                 next();
             }
             catch (err) {

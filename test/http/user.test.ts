@@ -46,7 +46,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       // Remove Bearer from string
       token = token.slice(7, token.length);
     }
-    const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+    const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
     const user = decoded['payload'];
 
     expect(response.status).to.equal(200);
@@ -82,7 +82,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       // Remove Bearer from string
       token = token.slice(7, token.length);
     }
-    const decoded =  jwt.verify(token, CONSTANTS.JWT_SECRET, null);
+    const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
     const user = decoded['payload'];
 
     expect(response.status).to.equal(200);
