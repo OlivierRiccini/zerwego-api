@@ -30,7 +30,7 @@ let Authenticate = class Authenticate {
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let accessToken = request.header('Authorization');
-            let refreshToken = request.header('Refresh_token');
+            // let refreshToken = request.header('Refresh_token');  
             try {
                 if (!accessToken) {
                     throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
@@ -40,8 +40,8 @@ let Authenticate = class Authenticate {
                     accessToken = accessToken.slice(7, accessToken.length);
                 }
                 if (accessToken && (yield this.secureService.accessTokenIsExpired(accessToken))) {
-                    const tokens = yield this.secureService.refreshTokens(refreshToken);
-                    refreshToken = tokens.refreshToken;
+                    accessToken = yield this.secureService.refreshTokens(accessToken);
+                    // refreshToken = tokens.refreshToken;
                 }
                 const decoded = jwt.verify(accessToken, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
                 if (typeof decoded === 'undefined') {
@@ -64,10 +64,11 @@ let Authenticate = class Authenticate {
                 request.user = user;
                 request.token = accessToken;
                 response.set('Authorization', accessToken);
-                response.set('Refresh_token', refreshToken);
+                // response.set('Refresh_token', refreshToken);
                 next();
             }
             catch (err) {
+                console.log(err);
                 response.status(err.httpCode ? err.httpCode : 401).send(err);
             }
         });

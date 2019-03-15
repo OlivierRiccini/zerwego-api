@@ -9,8 +9,8 @@ export interface ISecure {
     id?: string,
     _id?: ObjectID,
     refreshToken: string,
-    _accessToken: string,
-    _userId: string
+    _accessToken: string
+    // _userId: string,
 };
 
 // Document
@@ -24,8 +24,8 @@ export class SecureDAO extends DAOImpl<ISecure, UserDocument> {
         const SecureSchema = new mongoose.Schema({
             id: String,
             refreshToken: String,
-            _accessToken: String,
-            _userId: String
+            _accessToken: String
+            // _userId: String
         });
        
         super('Secure', SecureSchema);

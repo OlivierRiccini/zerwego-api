@@ -35,7 +35,7 @@ let AuthService = class AuthService {
                 user = yield this.userDAO.create(req);
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 // const token = await this.secureService.generateAuthToken(user)
-                return tokens;
+                return tokens.accessToken;
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, 'Smothing went wrong while creating new user');
@@ -51,7 +51,7 @@ let AuthService = class AuthService {
                 yield this.secureService.comparePassword(credentials.password, user.password);
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 // const token = await this.secureService.generateAuthToken(user);
-                return tokens;
+                return tokens.accessToken;
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, err);

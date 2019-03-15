@@ -35,21 +35,21 @@ let AuthController = class AuthController {
     }
     registerUser(user, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tokens = yield this.authService.register(user);
-            const headers = { 'Authorization': tokens.accessToken, 'Access-Control-Allow-Headers': 'Authorization' };
+            const token = yield this.authService.register(user);
+            const headers = { 'Authorization': token, 'Access-Control-Allow-Headers': 'Authorization' };
             response.header(headers);
-            response.header({ 'Refresh_token': tokens.refreshToken, 'Access-Control-Allow-Headers': 'Refresh_token' });
-            debug('POST /user/register => ' + tokens.accessToken);
+            // response.header({'Refresh_token': tokens.refreshToken, 'Access-Control-Allow-Headers': 'Refresh_token'});
+            debug('POST /user/register => ' + token);
             return 'Successfully registered!';
         });
     }
     login(credentials, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tokens = yield this.authService.login(credentials);
-            const headers = { 'Authorization': tokens.accessToken, 'Access-Control-Expose-Headers': '*' };
+            const token = yield this.authService.login(credentials);
+            const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
             response.header(headers);
-            response.header({ 'Refresh_token': tokens.refreshToken });
-            debug('POST /user/login => ' + tokens.accessToken);
+            // response.header({'Refresh_token': tokens.refreshToken});
+            debug('POST /user/login => ' + token);
             return 'Successfully logged in!';
         });
     }

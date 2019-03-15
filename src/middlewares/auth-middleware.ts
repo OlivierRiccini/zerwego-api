@@ -20,7 +20,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
         let accessToken = request.header('Authorization');  
-        let refreshToken = request.header('Refresh_token');  
+        // let refreshToken = request.header('Refresh_token');  
         try {
             if (!accessToken) {
                 throw new HttpError(401, 'No authorization token provided');
@@ -32,8 +32,8 @@ export class Authenticate implements ExpressMiddlewareInterface {
             }   
 
             if (accessToken && await this.secureService.accessTokenIsExpired(accessToken)) {
-                const tokens = await this.secureService.refreshTokens(refreshToken);
-                refreshToken = tokens.refreshToken;
+                accessToken = await this.secureService.refreshTokens(accessToken);
+                // refreshToken = tokens.refreshToken;
             }
 
             const decoded = jwt.verify(accessToken, CONSTANTS.ACCESS_TOKEN_SECRET, null);
@@ -58,9 +58,10 @@ export class Authenticate implements ExpressMiddlewareInterface {
             request.user = user;
             request.token = accessToken;
             response.set('Authorization', accessToken);
-            response.set('Refresh_token', refreshToken);
+            // response.set('Refresh_token', refreshToken);
             next(); 
         } catch(err) {
+            console.log(err);
             response.status(err.httpCode ? err.httpCode : 401).send(err)
         }
 
