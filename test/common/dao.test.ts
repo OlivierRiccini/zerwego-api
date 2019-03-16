@@ -22,7 +22,7 @@ describe('COMMON - TESTING EACH MODEL DAO - ./common/dao.test', function() {
                 .catch(err => debug('Error during cleaning DB test= ' + err))
             }
         done();  
-    }); 
+    });
 
     afterEach('Clean up', (done) => {
         for (const MODEL of MODELS) {

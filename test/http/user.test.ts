@@ -34,8 +34,6 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   let validUserToken: string;
 
   before('Create user', async () => {
-    // await userDAO.deleteAll(); // In case some are still in DB
-
     const response = await request
       .post('/auth/register')
       .send(validUser);
@@ -45,7 +43,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       // Remove Bearer from string
       token = token.slice(7, token.length);
     }
-    
+
     const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
     const user = decoded['payload'];
     // Assign id to validUser to reuse in other tests
