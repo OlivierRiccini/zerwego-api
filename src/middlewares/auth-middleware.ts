@@ -61,7 +61,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
             request.token = accessToken;
             next(); 
         } catch(err) {
-            console.log(err);
             response.status(err.httpCode ? err.httpCode : 401).send(err)
         }
 

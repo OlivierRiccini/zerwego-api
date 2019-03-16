@@ -7,7 +7,7 @@ import { AuthService } from "../services/auth-service";
 import { SecureService } from "../services/secure-service";
 import { SecureDAO } from "../models/secure-model";
 
-@JsonController('/users')
+@JsonController('/auth')
 @Service()
 export class AuthController {
 

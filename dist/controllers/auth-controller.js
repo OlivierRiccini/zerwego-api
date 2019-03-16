@@ -83,7 +83,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 AuthController = __decorate([
-    routing_controllers_1.JsonController('/users'),
+    routing_controllers_1.JsonController('/auth'),
     typedi_1.Service(),
     __metadata("design:paramtypes", [auth_service_1.AuthService, secure_model_1.SecureDAO])
 ], AuthController);

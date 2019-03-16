@@ -14,12 +14,12 @@ export interface ISecure {
 };
 
 // Document
-export interface UserDocument extends ISecure, mongoose.Document {
+export interface SecureDocument extends ISecure, mongoose.Document {
     id: string,
     _id: ObjectID
 }
 
-export class SecureDAO extends DAOImpl<ISecure, UserDocument> {
+export class SecureDAO extends DAOImpl<ISecure, SecureDocument> {
     constructor() {
         const SecureSchema = new mongoose.Schema({
             id: String,

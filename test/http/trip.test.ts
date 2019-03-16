@@ -6,7 +6,7 @@ import 'mocha';
 import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { TripHelper, UserHelper } from '../data-test/helpers-data';
+import { TripHelper, UserHelper, GeneralHelper } from '../data-test/helpers-data';
 import { TripDAO, ITrip } from '../../src/models/trip-model';
 import { IUser, UserDAO } from '../../src/models/user-model';
 import { MODELS_DATA } from '../data-test/common-data';
@@ -15,6 +15,8 @@ const debug = require('debug')('test');
 
 const tripDAO: TripDAO = new TripDAO();
 const userDAO: UserDAO = new UserDAO();
+const generalHelper: GeneralHelper = new GeneralHelper();
+// const secureDAO: SecureDAO = new SecureDAO();
 const tripHelper: TripHelper = new TripHelper(tripDAO);
 const userHelper: UserHelper = new UserHelper(userDAO);
 
@@ -38,17 +40,15 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     const user2 = await userHelper.getUserAndToken(MODELS_DATA.User[1]);
     USER_2 = user2.user;
     USER_2_TOKEN = user2.token;
-    // await tripHelper.addTrips(USER);
   });
 
   afterEach('Clean up', async () => {
     await tripHelper.deleteAllTrips();
-    // await userHelper.deleteAllUsers();
+    await userHelper.deleteAllUsers();
   }); 
 
   after('Clean up', async () => {
-    await tripHelper.deleteAllTrips();
-    await userHelper.deleteAllUsers();
+    generalHelper.cleanDB()
   }); 
 
   it('POSITIVE - Should retrieve all trips if user authenticated', async () => {
@@ -151,6 +151,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       // No token provided
         .then(response => {
           expect(response.status).to.equal(401);
+          expect(response.body.message).to.equal('No authorization token provided');
         }
       )
     }
@@ -211,6 +212,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .send(validTrip)
       .then(response => {
         expect(response.status).to.equal(401);
+        expect(response.body.message).to.equal('No authorization token provided');
       }
       )
   });

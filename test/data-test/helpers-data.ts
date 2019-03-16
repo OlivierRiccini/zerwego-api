@@ -7,9 +7,20 @@ import chaiHttp = require('chai-http');
 import { MODELS_DATA } from './common-data';
 import * as jwt from 'jsonwebtoken';
 import { CONSTANTS } from '../../src/persist/constants';
+var mongoose = require('mongoose');
 
 chai.use(chaiHttp);
 var app = require('../../dist/app').app;
+
+export class GeneralHelper {
+    constructor() {}
+
+    cleanDB() {
+        const db = mongoose.connection;
+        db.dropDatabase();
+    }
+
+}
 
 export class TripHelper {
     trips: ITrip[] = [];
@@ -32,14 +43,15 @@ export class TripHelper {
 };
 
 export class UserHelper {
+    private request = chai.request(app).keepOpen();
+
     constructor(private userDAO: UserDAO) {
     }
 
     public async getUserAndToken(user?: IUser) {
         const newUser = user ? user : MODELS_DATA.User[0];
-        const request = chai.request(app).keepOpen();
-        const response = await request
-            .post('/users/register')
+        const response = await this.request
+            .post('/auth/register')
             .send(newUser)
         
         let token = response.header['authorization'];

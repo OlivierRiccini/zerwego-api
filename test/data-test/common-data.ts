@@ -1,4 +1,3 @@
-// import mongoose = require('mongoose');
 import { TripDAO } from '../../src/models/trip-model';
 import { UserDAO } from '../../src/models/user-model';
 import { ObjectID } from 'bson';

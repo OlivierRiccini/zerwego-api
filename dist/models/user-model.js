@@ -36,7 +36,7 @@ class UserDAO extends dao_1.DAOImpl {
                 type: String,
                 require: true,
                 minlength: 6
-            },
+            }
         });
         super('User', UserSchema);
     }

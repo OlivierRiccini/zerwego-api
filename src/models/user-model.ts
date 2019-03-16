@@ -16,10 +16,6 @@ export interface IUser {
     name?: string,
     email?: string,
     password?: string,
-    tokens?: [{
-        access: string,
-        token: string
-    }?]
 };
 
 export interface IUserCredentials {
@@ -52,17 +48,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                 type: String,
                 require: true,
                 minlength: 6
-            },
-            // tokens: [{
-            //     access: {
-            //         type: String,
-            //         required: true
-            //     },
-            //     token: {
-            //         type: String,
-            //         required: true
-            //     }
-            // }]
+            }
         });
        
         super('User', UserSchema);
