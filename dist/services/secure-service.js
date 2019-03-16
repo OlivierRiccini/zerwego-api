@@ -26,9 +26,7 @@ const routing_controllers_1 = require("routing-controllers");
 const secure_model_1 = require("../models/secure-model");
 ;
 let SecureService = class SecureService {
-    constructor(secureDAO) {
-        this.secureDAO = secureDAO;
-    }
+    constructor() { }
     ;
     generateAuthTokens(user, refreshing, secureId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -111,9 +109,10 @@ let SecureService = class SecureService {
             const payload = {
                 id: user.id,
                 name: user.name,
-                email: user.email,
+                email: user.email
             };
-            return yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();
+            const accessToken = yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();
+            return accessToken;
         });
     }
     generateRefreshToken(accessToken, user) {
@@ -173,9 +172,13 @@ __decorate([
     typedi_1.Inject(),
     __metadata("design:type", user_model_1.UserDAO)
 ], SecureService.prototype, "userDAO", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", secure_model_1.SecureDAO)
+], SecureService.prototype, "secureDAO", void 0);
 SecureService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [secure_model_1.SecureDAO])
+    __metadata("design:paramtypes", [])
 ], SecureService);
 exports.SecureService = SecureService;
 //# sourceMappingURL=secure-service.js.map

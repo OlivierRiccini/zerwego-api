@@ -10,8 +10,6 @@ routing_controllers_1.useContainer(typedi_1.Container);
 // creates express app, registers all controller routes and returns you express app instance
 const app = routing_controllers_1.createExpressServer({
     cors: true,
-    // defaultErrorHandler: false,
-    // controllers: [TripController, UserController] // we specify controllers we want to use
     controllers: [__dirname + "/controllers/**/*.js"],
     middlewares: [__dirname + "/middlewares/**/*.js"]
 });

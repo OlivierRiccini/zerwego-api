@@ -24,7 +24,6 @@ const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const auth_service_1 = require("../services/auth-service");
-const secure_model_1 = require("../models/secure-model");
 let AuthController = class AuthController {
     constructor() { }
     registerUser(user, response) {
@@ -57,10 +56,6 @@ __decorate([
     typedi_1.Inject(),
     __metadata("design:type", auth_service_1.AuthService)
 ], AuthController.prototype, "authService", void 0);
-__decorate([
-    typedi_1.Inject(),
-    __metadata("design:type", secure_model_1.SecureDAO)
-], AuthController.prototype, "secureDAO", void 0);
 __decorate([
     routing_controllers_1.Post('/register'),
     __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),

@@ -2,16 +2,12 @@ const debug = require('debug')('http');
 import {JsonController, Body, Post, Res, Delete, Param} from "routing-controllers";
 import { IUser, IUserCredentials } from "../models/user-model";
 import { Service, Inject } from "typedi";
-import { UserDAO } from '../models/user-model';
 import { AuthService } from "../services/auth-service";
-import { SecureService } from "../services/secure-service";
-import { SecureDAO } from "../models/secure-model";
 
 @JsonController('/auth')
 @Service()
 export class AuthController {
   @Inject() private authService: AuthService;
-  @Inject() private secureDAO: SecureDAO;
   
   constructor() { }
 

@@ -1,13 +1,14 @@
-import { Service } from "typedi";
+import { Service, Inject } from "typedi";
 import { UserDAO, IUserCredentials } from '../models/user-model';
 import { HttpError } from "routing-controllers";
 import { SecureService } from "./secure-service";
 
 @Service()
 export class AuthService {
-
-    constructor(private secureService: SecureService, private userDAO: UserDAO) {
-    };
+    @Inject() private secureService: SecureService;
+    @Inject() private userDAO: UserDAO;
+    
+    constructor() { };
 
     public async register(req: any): Promise<string> {         
         try {

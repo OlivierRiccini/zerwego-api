@@ -11,8 +11,9 @@ export interface ITokens { accessToken: string, refreshToken: string };
 @Service()
 export class SecureService {
     @Inject() private userDAO: UserDAO;
+    @Inject() private secureDAO: SecureDAO;
 
-    constructor(private secureDAO: SecureDAO) {};
+    constructor() {};
 
     public async generateAuthTokens(user: IUser, refreshing?: boolean, secureId?: string): Promise<ITokens> {
         try {
@@ -84,9 +85,10 @@ export class SecureService {
         const payload = {
             id: user.id,
             name: user.name,
-            email: user.email,
+            email: user.email
         };
-        return await jwt.sign({payload}, CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();
+        const accessToken = await jwt.sign({payload}, CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();
+        return accessToken;
     }
 
     private async generateRefreshToken(accessToken: string, user: IUser): Promise<string> {

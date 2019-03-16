@@ -20,17 +20,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
-const user_model_1 = require("../models/user-model");
 let TripService = class TripService {
-    // @Inject() tripDAO: TripDAO;
-    constructor(tripDAO, userDAO) {
-        this.tripDAO = tripDAO;
-        this.userDAO = userDAO;
-        debug('test');
-    }
+    constructor() { }
     findTrips(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const user: IUser = await this.userDAO.find({find: });
             return this.tripDAO.find({
                 find: {
                     userIds: userId
@@ -51,9 +44,13 @@ let TripService = class TripService {
         return this.tripDAO.delete(id);
     }
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", trip_model_1.TripDAO)
+], TripService.prototype, "tripDAO", void 0);
 TripService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [trip_model_1.TripDAO, user_model_1.UserDAO])
+    __metadata("design:paramtypes", [])
 ], TripService);
 exports.TripService = TripService;
 //# sourceMappingURL=trip-service.js.map

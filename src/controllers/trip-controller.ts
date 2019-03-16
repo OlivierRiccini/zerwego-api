@@ -2,16 +2,16 @@ const debug = require('debug')('http');
 import {JsonController, Param, Body, Get, Post, Put, Delete, Req, Res, UseBefore} from "routing-controllers";
 import { TripService } from "../services/trip-service";
 import { ITrip, TripDAO } from "../models/trip-model";
-import { Service } from "typedi";
+import { Service, Inject } from "typedi";
 import { Authenticate, AdminOnly } from "../middlewares/auth-middleware";
 import { UserDAO } from "../models/user-model";
 
 @JsonController('/trips')
 @Service()
 export class TripController {
-  constructor(private tripService: TripService) {    
-    this.tripService = new TripService(new TripDAO(), new UserDAO());
-  }
+  @Inject() private tripService: TripService;
+
+  constructor() { }
   
  
   @Get()

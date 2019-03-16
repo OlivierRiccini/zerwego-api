@@ -22,10 +22,7 @@ const user_model_1 = require("../models/user-model");
 const routing_controllers_1 = require("routing-controllers");
 const secure_service_1 = require("./secure-service");
 let AuthService = class AuthService {
-    constructor(secureService, userDAO) {
-        this.secureService = secureService;
-        this.userDAO = userDAO;
-    }
+    constructor() { }
     ;
     register(req) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -69,9 +66,17 @@ let AuthService = class AuthService {
     }
     ;
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", secure_service_1.SecureService)
+], AuthService.prototype, "secureService", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", user_model_1.UserDAO)
+], AuthService.prototype, "userDAO", void 0);
 AuthService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [secure_service_1.SecureService, user_model_1.UserDAO])
+    __metadata("design:paramtypes", [])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth-service.js.map

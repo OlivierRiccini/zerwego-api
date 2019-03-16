@@ -1,17 +1,14 @@
 const debug = require('debug')('service');
 import { Service, Inject } from "typedi";
-import { TripDAO, ITrip, TripDocument } from '../models/trip-model';
-import { IUser, UserDAO } from "../models/user-model";
+import { TripDAO, ITrip } from '../models/trip-model';
 
 @Service()
 export class TripService {
-    // @Inject() tripDAO: TripDAO;
-    constructor(private tripDAO: TripDAO, private userDAO: UserDAO) {
-        debug('test')
-    }
+    @Inject() private tripDAO: TripDAO;
+
+    constructor() { }
     
     public async findTrips(userId: string){
-        // const user: IUser = await this.userDAO.find({find: });
         return this.tripDAO.find({
             find: {
                 userIds: userId

@@ -23,15 +23,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const trip_service_1 = require("../services/trip-service");
-const trip_model_1 = require("../models/trip-model");
 const typedi_1 = require("typedi");
 const auth_middleware_1 = require("../middlewares/auth-middleware");
-const user_model_1 = require("../models/user-model");
 let TripController = class TripController {
-    constructor(tripService) {
-        this.tripService = tripService;
-        this.tripService = new trip_service_1.TripService(new trip_model_1.TripDAO(), new user_model_1.UserDAO());
-    }
+    constructor() { }
     getAllTrips(request) {
         return __awaiter(this, void 0, void 0, function* () {
             let trips = yield this.tripService.findTrips(request.user.id);
@@ -70,6 +65,10 @@ let TripController = class TripController {
         });
     }
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", trip_service_1.TripService)
+], TripController.prototype, "tripService", void 0);
 __decorate([
     routing_controllers_1.Get(),
     routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
@@ -113,7 +112,7 @@ __decorate([
 TripController = __decorate([
     routing_controllers_1.JsonController('/trips'),
     typedi_1.Service(),
-    __metadata("design:paramtypes", [trip_service_1.TripService])
+    __metadata("design:paramtypes", [])
 ], TripController);
 exports.TripController = TripController;
 //# sourceMappingURL=trip-controller.js.map
