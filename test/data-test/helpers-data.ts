@@ -33,7 +33,7 @@ export class TripHelper {
         for (const trip of this.trips) {
             trip.adminId = user.id;
             trip.userIds = [ user.id ];
-            await this.tripDAO.create(trip);
+            const t = await this.tripDAO.create(trip);
         }   
     }
 

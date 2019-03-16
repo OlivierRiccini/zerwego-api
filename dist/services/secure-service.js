@@ -58,6 +58,7 @@ let SecureService = class SecureService {
                     const decodedRefreshToken = jwt.decode(refreshToken);
                     const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
                     const users = yield this.userDAO.find({ find: { id: userId } });
+                    // console.log(users);
                     if (users.length <= 0) {
                         throw new routing_controllers_1.HttpError(404, 'User was not found while refreshing tokens');
                     }

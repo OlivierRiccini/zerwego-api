@@ -10,7 +10,6 @@ class SecureDAO extends dao_1.DAOImpl {
             id: String,
             refreshToken: String,
             _accessToken: String
-            // _userId: String
         });
         super('Secure', SecureSchema);
     }

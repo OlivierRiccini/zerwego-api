@@ -4,6 +4,7 @@ import { IUser } from 'src/models/user-model';
 const debug = require('debug')('DAO');
 import * as jwt from 'jsonwebtoken';
 import * as _ from 'lodash';
+import { ObjectId, ObjectID } from 'bson';
 
 export interface DAO<T> {
     create(model: T):Promise<T>;
@@ -51,12 +52,12 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             this.constructor['created'] = true;
         }
         this.model = this.constructor['_model'];
-    } 
+    }
 
     create(model: T):Promise<T> {
         return new Promise((resolve, reject) => {
             let document = new this.model(model);
-            document.id = document._id
+            document._id = document._id ? document._id : new ObjectID();
             document.save((err, res) => {
                 if (err) {
                     debug('create a document - FAILED => ' + err);
@@ -64,14 +65,14 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 }
                 let document = res.toObject();
                 debug('create a document - OK => ' + JSON.stringify(document));
-                resolve(document);
+                resolve(this.toClient(document));
             });
         })
     };
 
     get(id:number|string): Promise<T|any> {
         return new Promise((resolve, reject) => {
-            this.model.findOne({ id })
+            this.model.findOne({ _id: new ObjectID(id) })
             .lean()
             .exec((err: any, document: any) => {
                 if (err) {
@@ -79,7 +80,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     reject(new Error(`Document with id => ${id} not found`));
                 } else {
                     debug('get - OK => ' + JSON.stringify(document));
-                    resolve(document);
+                    resolve(this.toClient(document));
                 }
             })
         })
@@ -94,7 +95,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     debug('findById - FAILED => No documents found');
                     reject(new Error("No documents found"));
                 } else {
-                    resolve(res);
+                    resolve(this.toClient(res));
                 }
             })
         });
@@ -106,17 +107,18 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 if (!_.isObject(obj)) {
                     return reject(new TypeError('DAO.update value passed is not object.'));
                 }
-                if (!id && !obj._id) {
+                if (!id && !obj.id && !obj._id) {
                     return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
                 }
-                this.model.findById(id || obj._id).exec(
+                const _id = id ? new ObjectID(id) : new ObjectID( obj.id ? obj.id : obj._id);
+                this.model.findById(_id).exec(
                     (err, found) => {
                         if (err) { reject(err) };
                         if (!found) { resolve(found) };
                         let updated = _.merge(found, obj);
                         updated.save(
                             (err, updated) => {
-                                err ? reject(err) : resolve(updated.toObject())
+                                err ? reject(err) : resolve(this.toClient(updated).toObject())
                             }
                         )
                     }
@@ -127,7 +129,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
 
     delete(id:number|string): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.model.deleteOne({ id }, err => {
+            this.model.deleteOne({ _id: new ObjectID(id) }, err => {
                 if (err) {
                     debug('deleteTrip - FAILED => ' + JSON.stringify(err));
                     reject(err);
@@ -152,7 +154,10 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
     }
 
     find(findOptions: FindOptions): Promise<T[]> {
-        // TODO: fix the find
+        if (findOptions.find.hasOwnProperty('id')) {
+            findOptions.find._id = new ObjectID(findOptions.find.id);
+            delete findOptions.find.id;
+        }
         return new Promise((resolve, reject) => {
             this.model.find(findOptions.find)
             .lean()
@@ -161,7 +166,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     debug('find - FAILED => No documents found');
                     reject(new Error("No documents found"));
                 } else {
-                    resolve(res);
+                    resolve(this.toClient(res));
                 }
             })
         });
@@ -194,4 +199,17 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             })
         });
     };
+
+    private toClient(data: any) {
+        if (_.isArray(data)) {
+            return _.map(data, obj => {
+                obj.id = obj._id ? obj._id.toString() : obj.id;
+                delete obj._id;
+                return obj;
+            });
+        }
+        data.id = data._id.toString();
+        delete data._id;
+        return data;
+    }
 }

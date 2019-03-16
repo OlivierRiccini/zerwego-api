@@ -1,20 +1,18 @@
 'use strict';
 process.env.NODE_ENV = 'test';
 var app = require('../../dist/app').app;
-import mongoose = require('mongoose');
 
 import 'mocha';
 // import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { UserDAO, IUser } from '../../src/models/user-model';
+import { IUser } from '../../src/models/user-model';
 import { CONSTANTS } from '../../src/persist/constants';
 import * as jwt from 'jsonwebtoken';
 import { GeneralHelper } from '../data-test/helpers-data';
 
 const debug = require('debug')('test');
 
-const userDAO: UserDAO = new UserDAO();
 const generalHelper: GeneralHelper = new GeneralHelper();
 
 const expect = chai.expect;
@@ -37,7 +35,6 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     const response = await request
       .post('/auth/register')
       .send(validUser);
-
     let token = response.header['authorization'];
     if (token.startsWith('Bearer ')) {
       // Remove Bearer from string
@@ -53,7 +50,6 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   });
 
   after('Cleaning DB', async () => {
-    // await userDAO.deleteAll();
     generalHelper.cleanDB();
   });
 
@@ -103,7 +99,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     const response = await request
       .post('/auth/login')
       .send({email: validUser.email, password: validUser.password});
-
+    
     expect(response.header).to.have.property('authorization');
     
     let token = response.header['authorization'];

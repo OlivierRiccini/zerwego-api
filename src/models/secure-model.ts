@@ -10,7 +10,6 @@ export interface ISecure {
     _id?: ObjectID,
     refreshToken: string,
     _accessToken: string
-    // _userId: string,
 };
 
 // Document
@@ -25,7 +24,6 @@ export class SecureDAO extends DAOImpl<ISecure, SecureDocument> {
             id: String,
             refreshToken: String,
             _accessToken: String
-            // _userId: String
         });
        
         super('Secure', SecureSchema);

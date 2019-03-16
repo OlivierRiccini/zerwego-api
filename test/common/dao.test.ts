@@ -38,8 +38,8 @@ describe('COMMON - TESTING EACH MODEL DAO - ./common/dao.test', function() {
     .it('Should create a valid document', async MODEL => {
         const modelDAO = MODEL.DAO;
         return modelDAO.create(MODELS_DATA[MODEL.name][0]).then(response => {
-                expect(response).to.have.property('id').to.be.a('string');
-            });
+            expect(response).to.have.property('id').to.be.a('string');
+        });
     });
 
     forEach(MODELS)
@@ -47,8 +47,8 @@ describe('COMMON - TESTING EACH MODEL DAO - ./common/dao.test', function() {
         const modelDAO = MODEL.DAO;
         const newInstance = await modelDAO.create(MODELS_DATA[MODEL.name][0]);
         return modelDAO.get(newInstance.id).then(response => {
-                expect(response).to.have.property('id').to.be.a('string');
-            });
+            expect(response).to.have.property('id').to.be.a('string');
+        });
     });
 
     forEach(MODELS)

@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { ObjectID, ObjectId } from 'bson';
+import { ObjectID } from 'bson';
 import { DAOImpl } from '../persist/dao';
 
 delete mongoose.connection.models['Trip'];
@@ -22,7 +22,6 @@ export interface TripDocument extends ITrip, mongoose.Document {
     id: string,
     _id: ObjectID
 }
-
 
 export class TripDAO extends DAOImpl<ITrip, TripDocument> {
     constructor() {

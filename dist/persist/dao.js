@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose = require("mongoose");
 const debug = require('debug')('DAO');
 const _ = require("lodash");
+const bson_1 = require("bson");
 ;
 ;
 // mongoose.Document
@@ -26,7 +27,7 @@ class DAOImpl {
     create(model) {
         return new Promise((resolve, reject) => {
             let document = new this.model(model);
-            document.id = document._id;
+            document._id = document._id ? document._id : new bson_1.ObjectID();
             document.save((err, res) => {
                 if (err) {
                     debug('create a document - FAILED => ' + err);
@@ -34,14 +35,14 @@ class DAOImpl {
                 }
                 let document = res.toObject();
                 debug('create a document - OK => ' + JSON.stringify(document));
-                resolve(document);
+                resolve(this.toClient(document));
             });
         });
     }
     ;
     get(id) {
         return new Promise((resolve, reject) => {
-            this.model.findOne({ id })
+            this.model.findOne({ _id: new bson_1.ObjectID(id) })
                 .lean()
                 .exec((err, document) => {
                 if (err) {
@@ -50,7 +51,7 @@ class DAOImpl {
                 }
                 else {
                     debug('get - OK => ' + JSON.stringify(document));
-                    resolve(document);
+                    resolve(this.toClient(document));
                 }
             });
         });
@@ -66,7 +67,7 @@ class DAOImpl {
                     reject(new Error("No documents found"));
                 }
                 else {
-                    resolve(res);
+                    resolve(this.toClient(res));
                 }
             });
         });
@@ -77,10 +78,11 @@ class DAOImpl {
             if (!_.isObject(obj)) {
                 return reject(new TypeError('DAO.update value passed is not object.'));
             }
-            if (!id && !obj._id) {
+            if (!id && !obj.id && !obj._id) {
                 return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
             }
-            this.model.findById(id || obj._id).exec((err, found) => {
+            const _id = id ? new bson_1.ObjectID(id) : new bson_1.ObjectID(obj.id ? obj.id : obj._id);
+            this.model.findById(_id).exec((err, found) => {
                 if (err) {
                     reject(err);
                 }
@@ -91,7 +93,7 @@ class DAOImpl {
                 ;
                 let updated = _.merge(found, obj);
                 updated.save((err, updated) => {
-                    err ? reject(err) : resolve(updated.toObject());
+                    err ? reject(err) : resolve(this.toClient(updated).toObject());
                 });
             });
         });
@@ -99,7 +101,7 @@ class DAOImpl {
     ;
     delete(id) {
         return new Promise((resolve, reject) => {
-            this.model.deleteOne({ id }, err => {
+            this.model.deleteOne({ _id: new bson_1.ObjectID(id) }, err => {
                 if (err) {
                     debug('deleteTrip - FAILED => ' + JSON.stringify(err));
                     reject(err);
@@ -123,7 +125,10 @@ class DAOImpl {
         });
     }
     find(findOptions) {
-        // TODO: fix the find
+        if (findOptions.find.hasOwnProperty('id')) {
+            findOptions.find._id = new bson_1.ObjectID(findOptions.find.id);
+            delete findOptions.find.id;
+        }
         return new Promise((resolve, reject) => {
             this.model.find(findOptions.find)
                 .lean()
@@ -133,7 +138,7 @@ class DAOImpl {
                     reject(new Error("No documents found"));
                 }
                 else {
-                    resolve(res);
+                    resolve(this.toClient(res));
                 }
             });
         });
@@ -167,6 +172,18 @@ class DAOImpl {
         });
     }
     ;
+    toClient(data) {
+        if (_.isArray(data)) {
+            return _.map(data, obj => {
+                obj.id = obj._id ? obj._id.toString() : obj.id;
+                delete obj._id;
+                return obj;
+            });
+        }
+        data.id = data._id.toString();
+        delete data._id;
+        return data;
+    }
 }
 DAOImpl.created = false;
 exports.DAOImpl = DAOImpl;
