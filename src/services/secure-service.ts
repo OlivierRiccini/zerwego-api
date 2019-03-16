@@ -33,27 +33,17 @@ export class SecureService {
         try {
             const secure = await this.findISecureByAccessToken(token);
             const refreshToken = secure.refreshToken;
-            // console.log('refreshToken');
-            // console.log(refreshToken);
-                
+            
             if (await this.refreshTokenIsExpired(refreshToken)) {
                 throw new HttpError(403, 'Refresh token is expired, user has to login');
             } else {
                 const decodedRefreshToken = jwt.decode(refreshToken);
-                // console.log('decodedRefreshToken');
-                // console.log(decodedRefreshToken);
                 const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
-                // console.log('userId');
-                // console.log(userId);
                 const users = await this.userDAO.find({find: { id: userId}});
                 if (users.length <= 0) {
                     throw new HttpError(404, 'User was not found while refreshing tokens');
                 }
                 const tokens: ITokens= await this.generateAuthTokens(users[0], true, secure.id);
-                // await this.secureDAO.update(
-                //     {refreshToken: tokens.refreshToken, _accessToken: tokens.accessToken},
-                //     secure.id
-                // );
                 return tokens.accessToken;
             }
         } catch (err) {
@@ -72,31 +62,21 @@ export class SecureService {
 
     public async refreshTokenIsExpired(refreshToken: string): Promise<boolean> {
         try {
-            // console.log('IN EXIPRED REFRESH TOKEN');
             const decodedRefreshToken = jwt.decode(refreshToken);
-            // console.log(decodedRefreshToken);
             const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
             if (users.length <= 0) {
                 throw new HttpError(404, 'User was not found while refreshing tokens');
             }
             const secret = CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
-            // console.log('IN EXIPRED REFRESH TOKEN - PASSWORD');
-            // console.log(users[0].password);
             jwt.verify(refreshToken, secret, null);
         } catch (err) {
-            // console.log('IN EXIPRED REFRESH TOKEN - ERROR');
-            // console.log(err);
             return err.name && err.name === 'TokenExpiredError'
         }
         return false;
     }
 
     private async findISecureByAccessToken(accessToken: string): Promise<ISecure> {
-        console.log('accessToken');
-        console.log(accessToken);
         const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
-        console.log('RESULTS');
-        console.log(results);
         return results.length > 0 ? results[0] : null;
     }
 
@@ -114,6 +94,15 @@ export class SecureService {
         const refreshSecret = CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
         const refreshToken = await jwt.sign({payload}, refreshSecret, { expiresIn: '30s' }).toString();
         return refreshToken;
+    }
+
+    public async removeSecure(token: string): Promise<void> {
+        const secure: ISecure = await this.findISecureByAccessToken(token);
+        if (secure) {
+            await this.secureDAO.delete(secure.id);
+        } else {
+            throw new HttpError(400, 'Something went wrong while removing token');
+        }
     }
 
     public async hashPassword(user: IUser): Promise<string> {

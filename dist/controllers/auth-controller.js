@@ -53,6 +53,13 @@ let AuthController = class AuthController {
             return 'Successfully logged in!';
         });
     }
+    logout(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.authService.logout(token);
+            debug('POST /user/login => ' + token);
+            return 'Successfully logged in!';
+        });
+    }
 };
 __decorate([
     routing_controllers_1.Post('/register'),
@@ -68,6 +75,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    routing_controllers_1.Delete('/logout/:token'),
+    __param(0, routing_controllers_1.Param('token')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "logout", null);
 AuthController = __decorate([
     routing_controllers_1.JsonController('/users'),
     typedi_1.Service(),

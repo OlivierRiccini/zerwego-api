@@ -15,7 +15,6 @@ export class AuthService {
             user.password = await this.secureService.hashPassword(user);
             user = await this.userDAO.create(req);
             const tokens = await this.secureService.generateAuthTokens(user);
-            // const token = await this.secureService.generateAuthToken(user)
             return tokens.accessToken;
         } catch (err) {
             throw new HttpError(400, 'Smothing went wrong while creating new user');
@@ -28,8 +27,15 @@ export class AuthService {
             let user = users[0];
             await this.secureService.comparePassword(credentials.password, user.password);
             const tokens = await this.secureService.generateAuthTokens(user);
-            // const token = await this.secureService.generateAuthToken(user);
             return tokens.accessToken;
+        } catch (err) {
+            throw new HttpError(400, err);
+        }
+    };
+
+    public async logout(token: string): Promise<void> {
+        try {
+            await this.secureService.removeSecure(token);
         } catch (err) {
             throw new HttpError(400, err);
         }

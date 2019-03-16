@@ -34,6 +34,8 @@ export class Authenticate implements ExpressMiddlewareInterface {
             if (accessToken && await this.secureService.accessTokenIsExpired(accessToken)) {
                 accessToken = await this.secureService.refreshTokens(accessToken);
                 // refreshToken = tokens.refreshToken;
+                response.set('Access-Control-Expose-Headers', '*');
+                response.set('Authorization', accessToken);
             }
 
             const decoded = jwt.verify(accessToken, CONSTANTS.ACCESS_TOKEN_SECRET, null);
@@ -57,8 +59,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
             }
             request.user = user;
             request.token = accessToken;
-            response.set('Authorization', accessToken);
-            // response.set('Refresh_token', refreshToken);
             next(); 
         } catch(err) {
             console.log(err);

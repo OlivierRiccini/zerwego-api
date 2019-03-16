@@ -1,5 +1,5 @@
 const debug = require('debug')('http');
-import {JsonController, Body, Post, Res} from "routing-controllers";
+import {JsonController, Body, Post, Res, Delete, Param} from "routing-controllers";
 import { IUser, IUserCredentials } from "../models/user-model";
 import { Service } from "typedi";
 import { UserDAO } from '../models/user-model';
@@ -31,6 +31,13 @@ export class AuthController {
     const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*'};
     response.header(headers);
     // response.header({'Refresh_token': tokens.refreshToken});
+    debug('POST /user/login => ' + token);
+    return 'Successfully logged in!';
+  }
+
+  @Delete('/logout/:token')
+  async logout(@Param('token') token: string) {
+    await this.authService.logout(token);
     debug('POST /user/login => ' + token);
     return 'Successfully logged in!';
   }

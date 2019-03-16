@@ -34,7 +34,6 @@ let AuthService = class AuthService {
                 user.password = yield this.secureService.hashPassword(user);
                 user = yield this.userDAO.create(req);
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                // const token = await this.secureService.generateAuthToken(user)
                 return tokens.accessToken;
             }
             catch (err) {
@@ -50,8 +49,18 @@ let AuthService = class AuthService {
                 let user = users[0];
                 yield this.secureService.comparePassword(credentials.password, user.password);
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                // const token = await this.secureService.generateAuthToken(user);
                 return tokens.accessToken;
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(400, err);
+            }
+        });
+    }
+    ;
+    logout(token) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.secureService.removeSecure(token);
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, err);

@@ -42,6 +42,8 @@ let Authenticate = class Authenticate {
                 if (accessToken && (yield this.secureService.accessTokenIsExpired(accessToken))) {
                     accessToken = yield this.secureService.refreshTokens(accessToken);
                     // refreshToken = tokens.refreshToken;
+                    response.set('Access-Control-Expose-Headers', '*');
+                    response.set('Authorization', accessToken);
                 }
                 const decoded = jwt.verify(accessToken, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
                 if (typeof decoded === 'undefined') {
@@ -63,8 +65,6 @@ let Authenticate = class Authenticate {
                 }
                 request.user = user;
                 request.token = accessToken;
-                response.set('Authorization', accessToken);
-                // response.set('Refresh_token', refreshToken);
                 next();
             }
             catch (err) {
