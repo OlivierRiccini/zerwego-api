@@ -6,6 +6,7 @@ delete mongoose.connection.models['Trip'];
 ;
 class TripDAO extends dao_1.DAOImpl {
     constructor() {
+        const waitingUsersSchema = new mongoose.Schema({ name: String, email: String }, { _id: false });
         const TripSchema = new mongoose.Schema({
             id: String,
             tripName: String,
@@ -16,7 +17,8 @@ class TripDAO extends dao_1.DAOImpl {
             adminId: String,
             userIds: [{
                     type: String
-                }]
+                }],
+            waitingUsers: [waitingUsersSchema]
         });
         super('Trip', TripSchema);
     }

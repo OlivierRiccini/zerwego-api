@@ -36,7 +36,12 @@ export const MODELS_DATA = {
             startDate: new Date('2019-03-12'),
             endDate: new Date('2019-03-25'),
             adminId: new ObjectID('111111111111111111111111'),
-            userIds: [new ObjectID('111111111111111111111111'), new ObjectID('222222222222222222222222')]
+            // userIds: [new ObjectID('111111111111111111111111'), new ObjectID('222222222222222222222222')]
+            userIds: [],
+            waitingUsers: [
+                {name: "Lebron James", email: "lebron.james@lakers.com"},
+                {name: "Stephen Curry", email: "stephen.curry@warriors.com"}
+            ]
         },
         {
             tripName: "NYC",
@@ -45,7 +50,12 @@ export const MODELS_DATA = {
             startDate: new Date('2019-03-12'),
             endDate: new Date('2019-03-25'),
             adminId: new ObjectID('222222222222222222222222'),
-            userIds: [new ObjectID('111111111111111111111111'), new ObjectID('222222222222222222222222')]
+            // userIds: [new ObjectID('111111111111111111111111'), new ObjectID('222222222222222222222222')]
+            userIds: [],
+            waitingUsers: [
+                {name: "Lebron James", email: "lebron.james@lakers.com"},
+                {name: "Stephen Curry", email: "stephen.curry@warriors.com"}
+            ]
         }
     ]
 };

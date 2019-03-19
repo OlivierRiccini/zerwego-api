@@ -13,8 +13,9 @@ export interface ITrip {
     imageUrl: string,
     startDate: Date;
     endDate: Date;
-    adminId: String, 
-    userIds?: String[];
+    adminId: string, 
+    userIds?: string[];
+    waitingUsers?: IWaitingUser[]
 };
 
 // Document
@@ -23,8 +24,16 @@ export interface TripDocument extends ITrip, mongoose.Document {
     _id: ObjectID
 }
 
+export interface IWaitingUser {
+    name: string,
+    email: string
+}
+
 export class TripDAO extends DAOImpl<ITrip, TripDocument> {
     constructor() {
+
+        const waitingUsersSchema = new mongoose.Schema({ name: String, email: String }, { _id: false });
+
         const TripSchema = new mongoose.Schema({
             id: String,
             tripName: String,
@@ -35,7 +44,8 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
             adminId: String, 
             userIds: [{
                 type: String
-            }]
+            }],
+            waitingUsers: [waitingUsersSchema]
         });
         super('Trip', TripSchema);
     }

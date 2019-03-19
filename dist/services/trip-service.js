@@ -20,6 +20,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
+const user_model_1 = require("../models/user-model");
 let TripService = class TripService {
     constructor() { }
     findTrips(userId) {
@@ -35,7 +36,16 @@ let TripService = class TripService {
         return this.tripDAO.get(id);
     }
     createTrip(trip) {
-        return this.tripDAO.create(trip);
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Check if user exists, if not send email or facebook notif or whatsapp notif or text notif
+                yield this.handleUsers(trip);
+                return yield this.tripDAO.create(trip);
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
     }
     updateTrip(trip, id) {
         return this.tripDAO.update(trip, id);
@@ -43,11 +53,30 @@ let TripService = class TripService {
     deleteTrip(id) {
         return this.tripDAO.delete(id);
     }
+    handleUsers(trip) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const emails = trip.waitingUsers.map(obj => { return obj.email; });
+            const exitingUsers = yield this.userDAO.find({ find: { 'email': { $in: emails } } });
+            if (exitingUsers.length > 0) {
+                trip.userIds = exitingUsers.map(user => { return user.id; });
+                for (const user of exitingUsers) {
+                    const i = trip.waitingUsers.findIndex(watinUser => watinUser.email === user.email);
+                    if (i >= 0) {
+                        trip.waitingUsers.splice(i, 1);
+                    }
+                }
+            }
+        });
+    }
 };
 __decorate([
     typedi_1.Inject(),
     __metadata("design:type", trip_model_1.TripDAO)
 ], TripService.prototype, "tripDAO", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", user_model_1.UserDAO)
+], TripService.prototype, "userDAO", void 0);
 TripService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])

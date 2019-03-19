@@ -92,7 +92,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         adminId: USER.id,
-        userIds: [USER.id, USER_2.id]
+        // userIds: [USER.id, USER_2.id]
+        userIds: [],
+        waitingUsers: [
+            {name: USER.name, email: USER.email},
+            {name: USER_2.name, email: USER_2.email}
+        ]
     };
     
     const response = await request
@@ -139,7 +144,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         adminId: USER.id,
-        userIds: [USER.id, USER_2.id]
+        // userIds: [USER.id, USER_2.id]
+        userIds: [],
+        waitingUsers: [
+          {name: USER.name, email: USER.email},
+          {name: USER_2.name, email: USER_2.email}
+        ]
     };
     const response = await request
       .post('/trips')
@@ -157,7 +167,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     }
   );
 
-  it('POSITIVE - Should create a valid trip if user authenticated', async () => {
+  it.only('POSITIVE - Should create a valid trip if user authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
@@ -167,7 +177,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         adminId: USER.id,
-        userIds: [USER.id, USER_2.id]
+        // userIds: [USER.id, USER_2.id]
+        userIds: [],
+        waitingUsers: [
+          {name: USER.name, email: USER.email},
+          {name: USER_2.name, email: USER_2.email},
+          {name: 'olivier', email: 'info@olivierriccini.com'},
+          {name: 'post malone', email: 'info@postmalone.com'}
+        ]
     }
 
     return request
@@ -176,6 +193,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .send(validTrip)
       .then(
         response => {
+          console.log(response.body);
           expect(response.status).to.equal(200);
           expect(response.body).to.have.property('id').to.be.a('string').to.equal('111111111111111111111111');
           expect(response.body).to.have.property('tripName');
@@ -203,7 +221,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: 'testurlimage',
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: 'testadminid'
+        adminId: 'testadminid',
+        userIds: [],
+        waitingUsers: [
+          {name: USER.name, email: USER.email},
+          {name: USER_2.name, email: USER_2.email}
+        ]
     }
 
     return request
@@ -213,8 +236,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .then(response => {
         expect(response.status).to.equal(401);
         expect(response.body.message).to.equal('No authorization token provided');
-      }
-      )
+      })
   });
 
   it('POSITIVE - Should delete a trip if user is Admin only', async () => {
@@ -228,7 +250,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         adminId: USER.id,
-        userIds: [USER.id, USER_2.id]
+        // userIds: [USER.id, USER_2.id]
+        userIds: [],
+        waitingUsers: [
+          {name: USER.name, email: USER.email},
+          {name: USER_2.name, email: USER_2.email}
+        ]
     };
     
     const response = await request
@@ -264,7 +291,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         adminId: USER.id,
-        userIds: [USER.id, USER_2.id]
+        // userIds: [USER.id, USER_2.id]
+        userIds: [],
+        waitingUsers: [
+          {name: USER.name, email: USER.email},
+          {name: USER_2.name, email: USER_2.email}
+        ]
     };
     
     const response = await request
@@ -298,7 +330,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       adminId: USER.id,
-      userIds: [USER.id, USER_2.id]
+      // userIds: [USER.id, USER_2.id]
+      userIds: [],
+      waitingUsers: [
+        {name: USER.name, email: USER.email},
+        {name: USER_2.name, email: USER_2.email}
+      ]
     };
     
     await request
@@ -313,7 +350,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       adminId: USER_2.id,
-      userIds: [USER.id, USER_2.id]
+      // userIds: [USER.id, USER_2.id]
+      userIds: [],
+      waitingUsers: [
+        {name: USER.name, email: USER.email},
+        {name: USER_2.name, email: USER_2.email}
+      ]
     }
 
     const id = trip._id;
@@ -344,7 +386,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       adminId: USER.id,
-      userIds: [USER.id, USER_2.id]
+      // userIds: [USER.id, USER_2.id]
+      userIds: [],
+      waitingUsers: [
+        {name: USER.name, email: USER.email},
+        {name: USER_2.name, email: USER_2.email}
+      ]
     };
     
     await request
@@ -358,7 +405,12 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       imageUrl: 'new image url',
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: 'testadminid'
+      adminId: 'testadminid',
+      userIds: [],
+      waitingUsers: [
+        {name: USER.name, email: USER.email},
+        {name: USER_2.name, email: USER_2.email}
+      ]
     }
 
     const id = trip._id;
