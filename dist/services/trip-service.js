@@ -21,6 +21,8 @@ const debug = require('debug')('service');
 const typedi_1 = require("typedi");
 const trip_model_1 = require("../models/trip-model");
 const user_model_1 = require("../models/user-model");
+const _ = require("lodash");
+const routing_controllers_1 = require("routing-controllers");
 let TripService = class TripService {
     constructor() { }
     findTrips(userId) {
@@ -53,19 +55,36 @@ let TripService = class TripService {
     deleteTrip(id) {
         return this.tripDAO.delete(id);
     }
+    handleTripRequest(requestResponse) {
+        return;
+    }
     handleUsers(trip) {
         return __awaiter(this, void 0, void 0, function* () {
-            const emails = trip.waitingUsers.map(obj => { return obj.email; });
-            const exitingUsers = yield this.userDAO.find({ find: { 'email': { $in: emails } } });
-            if (exitingUsers.length > 0) {
-                trip.userIds = exitingUsers.map(user => { return user.id; });
-                for (const user of exitingUsers) {
-                    const i = trip.waitingUsers.findIndex(watinUser => watinUser.email === user.email);
-                    if (i >= 0) {
-                        trip.waitingUsers.splice(i, 1);
-                    }
+            const emails = trip.participants.map(obj => { return obj.info.email; });
+            const registeredUsers = yield this.userDAO.find({ find: { 'email': { $in: emails } } });
+            const unRegisteredUsers = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
+            for (const participant of trip.participants) {
+                if (registeredUsers.indexOf(participant) >= 0) {
+                    participant.status = 'pending';
+                    yield this.sendTripRequest('pending');
+                    // send request to accept
+                }
+                else if (unRegisteredUsers.indexOf(participant) >= 0) {
+                    participant.status = 'not_registred';
+                    yield this.sendTripRequest('not_registred');
+                    // send request to signup and accept 
+                }
+                else {
+                    throw new routing_controllers_1.HttpError(400, 'Something went wring while handling partipants');
                 }
             }
+        });
+    }
+    sendTripRequest(participantStatus) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // /request/:tripId/:participantStatus => front 
+            // endpoint => answerRequest /trips/request body: accepted or rejected
+            return;
         });
     }
 };

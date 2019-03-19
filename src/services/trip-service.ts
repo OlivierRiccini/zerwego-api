@@ -1,8 +1,9 @@
 const debug = require('debug')('service');
 import { Service, Inject } from "typedi";
-import { TripDAO, ITrip, IWaitingUser } from '../models/trip-model';
+import { TripDAO, ITrip, IWaitingUser, ParticipationStatus, IParticipant } from '../models/trip-model';
 import { IUser, UserDAO } from "../models/user-model";
 import _ = require("lodash");
+import { HttpError } from "routing-controllers";
 
 @Service()
 export class TripService {
@@ -41,18 +42,38 @@ export class TripService {
         return this.tripDAO.delete(id);
     }
 
-    private async handleUsers(trip: ITrip): Promise<void> {
-        const emails: string[] = trip.waitingUsers.map(obj => { return obj.email });
-        
-        const exitingUsers: any[] = await this.userDAO.find({find: {'email': { $in: emails }}});
+    public handleTripRequest(requestResponse: ParticipationStatus, participant: IParticipant) {
+        // if (requestResponse === 'accepted') {
 
-        if (exitingUsers.length > 0) {
-            trip.userIds = exitingUsers.map(user => { return user.id });
-            for (const user of exitingUsers) {
-                const i: number = trip.waitingUsers.findIndex(watinUser => watinUser.email === user.email);
-                if (i >= 0) { trip.waitingUsers.splice(i, 1) }
+        // }
+        return;
+    }
+
+    private async handleUsers(trip: ITrip): Promise<void> {
+        const emails: string[] = trip.participants.map(obj => { return obj.info.email });
+        
+        const registeredUsers: any[] = await this.userDAO.find({find: {'email': { $in: emails }}});
+        const unRegisteredUsers: any [] = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
+
+        for (const participant of trip.participants) {
+            if (registeredUsers.indexOf(participant) >= 0) {
+                participant.status = 'pending';
+                await this.sendTripRequest('pending');
+                // send request to accept
+            } else if (unRegisteredUsers.indexOf(participant) >= 0) {
+                participant.status = 'not_registred';
+                await this.sendTripRequest('not_registred');
+                // send request to signup and accept 
+            } else {
+                throw new HttpError(400, 'Something went wring while handling partipants');
             }
         }
+    }
+
+    private async sendTripRequest(participantStatus: ParticipationStatus) {
+        // /request/:tripId/:participantStatus => front 
+        // endpoint => answerRequest /trips/request body: accepted or rejected
+        return;
     }
 
 }

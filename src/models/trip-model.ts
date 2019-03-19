@@ -14,9 +14,23 @@ export interface ITrip {
     startDate: Date;
     endDate: Date;
     adminId: string, 
-    userIds?: string[];
-    waitingUsers?: IWaitingUser[]
+    participants?: IParticipant[];
 };
+
+export type ParticipationStatus = 
+| 'pending'
+| 'request_accepted'
+| 'request_rejected'
+| 'not_registred'
+
+export interface IParticipant {
+    userId?: string,
+    info: {
+        email: string,
+        name: string
+    },
+    status: ParticipationStatus
+}
 
 // Document
 export interface TripDocument extends ITrip, mongoose.Document {
@@ -32,7 +46,14 @@ export interface IWaitingUser {
 export class TripDAO extends DAOImpl<ITrip, TripDocument> {
     constructor() {
 
-        const waitingUsersSchema = new mongoose.Schema({ name: String, email: String }, { _id: false });
+        const ParticipantSchema = new mongoose.Schema({
+            userId: String,
+            info: {
+                email: String,
+                name: String
+            },
+            status: String 
+        }, { _id: false });
 
         const TripSchema = new mongoose.Schema({
             id: String,
@@ -45,7 +66,7 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
             userIds: [{
                 type: String
             }],
-            waitingUsers: [waitingUsersSchema]
+            participants: [ParticipantSchema]
         });
         super('Trip', TripSchema);
     }
