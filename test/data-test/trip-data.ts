@@ -11,7 +11,7 @@ const TRIPS: ITrip[] =  [
       imageUrl: null,
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: null
+      participants: []
     },
     {
       _id: new ObjectId(),
@@ -20,7 +20,7 @@ const TRIPS: ITrip[] =  [
       imageUrl: null,
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: null
+      participants: []
     },
     {
       _id: new ObjectId('oooooooooooo'),
@@ -29,7 +29,7 @@ const TRIPS: ITrip[] =  [
       imageUrl: null,
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: null
+      participants: []
     }
 ];
 

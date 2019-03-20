@@ -31,9 +31,8 @@ export class TripHelper {
 
     public async addTrips(user) {
         for (const trip of this.trips) {
-            trip.adminId = user.id;
-            trip.userIds = [ user.id ];
-            const t = await this.tripDAO.create(trip);
+            trip.participants.push({ userId: user.id, info: {email: user.email, name: user.name}, status: 'admin' });
+            await this.tripDAO.create(trip);
         }   
     }
 

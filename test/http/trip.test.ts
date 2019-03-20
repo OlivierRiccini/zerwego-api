@@ -60,9 +60,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         response => {
           expect(response.status).to.equal(200);
           expect(response.body).to.have.lengthOf(3);
-          expect(response.body[0].userIds).to.include(USER.id);
-          expect(response.body[1].userIds).to.include(USER.id);
-          expect(response.body[2].userIds).to.include(USER.id);
         })
   });
 
@@ -91,12 +88,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: null,
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: USER.id,
-        // userIds: [USER.id, USER_2.id]
-        userIds: [],
-        waitingUsers: [
-            {name: USER.name, email: USER.email},
-            {name: USER_2.name, email: USER_2.email}
+        participants: [
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
         ]
     };
     
@@ -119,9 +115,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
             expect(response.body).to.have.property('imageUrl');
             expect(response.body).to.have.property('startDate');
             expect(response.body).to.have.property('endDate');
-            expect(response.body).to.have.property('adminId').to.equal(USER.id);
-            expect(response.body).to.have.property('userIds').to.include(USER.id);
-            expect(response.body).to.have.property('userIds').to.include(USER_2.id);
+            expect(response.body).to.have.property('participants').to.have.length(4);
+            expect(response.body.participants[0]).to.have.property('status').to.equal('admin');
+            expect(response.body.participants[1]).to.have.property('status').to.equal('pending');
+            expect(response.body.participants[2]).to.have.property('status').to.equal('not_registred');
           },
           err => {
             debug(err);
@@ -143,12 +140,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: null,
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: USER.id,
-        // userIds: [USER.id, USER_2.id]
-        userIds: [],
-        waitingUsers: [
-          {name: USER.name, email: USER.email},
-          {name: USER_2.name, email: USER_2.email}
+        participants: [
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
         ]
     };
     const response = await request
@@ -167,7 +163,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     }
   );
 
-  it.only('POSITIVE - Should create a valid trip if user authenticated', async () => {
+  it('POSITIVE - Should create a valid trip if user authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
@@ -176,14 +172,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: 'testurlimage',
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: USER.id,
-        // userIds: [USER.id, USER_2.id]
-        userIds: [],
-        waitingUsers: [
-          {name: USER.name, email: USER.email},
-          {name: USER_2.name, email: USER_2.email},
-          {name: 'olivier', email: 'info@olivierriccini.com'},
-          {name: 'post malone', email: 'info@postmalone.com'}
+        participants: [
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
         ]
     }
 
@@ -201,9 +194,8 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.body).to.have.property('imageUrl');
           expect(response.body).to.have.property('startDate');
           expect(response.body).to.have.property('endDate');
-          expect(response.body).to.have.property('adminId').to.equal(USER.id);
-          expect(response.body).to.have.property('userIds').to.include(USER.id);
-          expect(response.body).to.have.property('userIds').to.include(USER_2.id);
+          expect(response.body).to.have.property('participants');
+          expect(response.body.participants[0]).to.have.property('status').to.equal('admin');
         },
         err => {
           debug(err)
@@ -221,11 +213,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: 'testurlimage',
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: 'testadminid',
-        userIds: [],
-        waitingUsers: [
-          {name: USER.name, email: USER.email},
-          {name: USER_2.name, email: USER_2.email}
+        participants: [
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
         ]
     }
 
@@ -249,12 +241,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: null,
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: USER.id,
-        // userIds: [USER.id, USER_2.id]
-        userIds: [],
-        waitingUsers: [
-          {name: USER.name, email: USER.email},
-          {name: USER_2.name, email: USER_2.email}
+        participants: [
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
         ]
     };
     
@@ -290,12 +281,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         imageUrl: null,
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
-        adminId: USER.id,
-        // userIds: [USER.id, USER_2.id]
-        userIds: [],
-        waitingUsers: [
-          {name: USER.name, email: USER.email},
-          {name: USER_2.name, email: USER_2.email}
+        participants: [
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
         ]
     };
     
@@ -329,12 +319,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       imageUrl: null,
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: USER.id,
-      // userIds: [USER.id, USER_2.id]
-      userIds: [],
-      waitingUsers: [
-        {name: USER.name, email: USER.email},
-        {name: USER_2.name, email: USER_2.email}
+      participants: [
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
       ]
     };
     
@@ -349,12 +338,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       imageUrl: 'new image url',
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: USER_2.id,
-      // userIds: [USER.id, USER_2.id]
-      userIds: [],
-      waitingUsers: [
-        {name: USER.name, email: USER.email},
-        {name: USER_2.name, email: USER_2.email}
+      participants: [
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'pending' },
+        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'admin' },
+        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
       ]
     }
 
@@ -368,9 +356,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         expect(response.status).to.equal(200);
         expect(response.body.tripName).to.equal('TEST TRIP UPDATED');
         expect(response.body.imageUrl).to.equal('new image url');
-        expect(response.body).to.have.property('adminId').to.equal(USER_2.id);
-        expect(response.body).to.have.property('userIds').to.include(USER.id);
-        expect(response.body).to.have.property('userIds').to.include(USER_2.id);
+        expect(response.body).to.have.property('participants').to.have.length(4);
       });
     
   });
@@ -385,12 +371,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       imageUrl: null,
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: USER.id,
-      // userIds: [USER.id, USER_2.id]
-      userIds: [],
-      waitingUsers: [
-        {name: USER.name, email: USER.email},
-        {name: USER_2.name, email: USER_2.email}
+      participants: [
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
       ]
     };
     
@@ -405,11 +390,11 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       imageUrl: 'new image url',
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
-      adminId: 'testadminid',
-      userIds: [],
-      waitingUsers: [
-        {name: USER.name, email: USER.email},
-        {name: USER_2.name, email: USER_2.email}
+      participants: [
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
+        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
       ]
     }
 

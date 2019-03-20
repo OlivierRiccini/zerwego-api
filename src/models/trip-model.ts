@@ -13,11 +13,11 @@ export interface ITrip {
     imageUrl: string,
     startDate: Date;
     endDate: Date;
-    adminId: string, 
     participants?: IParticipant[];
 };
 
 export type ParticipationStatus = 
+| 'admin'
 | 'pending'
 | 'request_accepted'
 | 'request_rejected'
@@ -62,10 +62,6 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
             imageUrl: String,
             startDate: { type: Date },
             endDate: { type: Date },
-            adminId: String, 
-            userIds: [{
-                type: String
-            }],
             participants: [ParticipantSchema]
         });
         super('Trip', TripSchema);

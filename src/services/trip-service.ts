@@ -15,7 +15,7 @@ export class TripService {
     public async findTrips(userId: string){
         return this.tripDAO.find({
             find: {
-                userIds: userId
+                'participants.userId': userId
             }
         });
     }

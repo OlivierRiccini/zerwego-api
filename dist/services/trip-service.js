@@ -29,7 +29,7 @@ let TripService = class TripService {
         return __awaiter(this, void 0, void 0, function* () {
             return this.tripDAO.find({
                 find: {
-                    userIds: userId
+                    'participants.userId': userId
                 }
             });
         });
@@ -55,7 +55,9 @@ let TripService = class TripService {
     deleteTrip(id) {
         return this.tripDAO.delete(id);
     }
-    handleTripRequest(requestResponse) {
+    handleTripRequest(requestResponse, participant) {
+        // if (requestResponse === 'accepted') {
+        // }
         return;
     }
     handleUsers(trip) {

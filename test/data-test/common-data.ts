@@ -35,12 +35,9 @@ export const MODELS_DATA = {
             imageUrl: null,
             startDate: new Date('2019-03-12'),
             endDate: new Date('2019-03-25'),
-            adminId: new ObjectID('111111111111111111111111'),
-            // userIds: [new ObjectID('111111111111111111111111'), new ObjectID('222222222222222222222222')]
-            userIds: [],
-            waitingUsers: [
-                {name: "Lebron James", email: "lebron.james@lakers.com"},
-                {name: "Stephen Curry", email: "stephen.curry@warriors.com"}
+            participants: [
+                { userId: null, info: { email: 'lebron.james@lakers.com', name: 'Lebron James' }, status: 'admin' },
+                { userId: null, info: { email: 'stephen.curry@warriors.com', name: 'Stephen Curry' }, status: 'pending' },
             ]
         },
         {
@@ -49,12 +46,9 @@ export const MODELS_DATA = {
             imageUrl: null,
             startDate: new Date('2019-03-12'),
             endDate: new Date('2019-03-25'),
-            adminId: new ObjectID('222222222222222222222222'),
-            // userIds: [new ObjectID('111111111111111111111111'), new ObjectID('222222222222222222222222')]
-            userIds: [],
-            waitingUsers: [
-                {name: "Lebron James", email: "lebron.james@lakers.com"},
-                {name: "Stephen Curry", email: "stephen.curry@warriors.com"}
+            participants: [
+                { userId: null, info: { email: 'lebron.james@lakers.com', name: 'Lebron James' }, status: 'pending' },
+                { userId: null, info: { email: 'stephen.curry@warriors.com', name: 'Stephen Curry' }, status: 'admin' },
             ]
         }
     ]

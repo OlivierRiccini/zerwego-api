@@ -1,6 +1,6 @@
 import { ExpressMiddlewareInterface, HttpError, NotFoundError } from "routing-controllers";
 import { UserDAO } from "../models/user-model";
-import { TripDAO } from "../models/trip-model";
+import { TripDAO, ITrip } from "../models/trip-model";
 import * as jwt from 'jsonwebtoken';
 import { Service, Inject } from "typedi";
 import { CONSTANTS } from '../persist/constants'
@@ -67,11 +67,27 @@ export class Authenticate implements ExpressMiddlewareInterface {
     }
 
     private async isUserTripAdmin(userId: string, tripId: string): Promise<boolean> {
-        const result = await this.tripDAO.find({find: {
-            id: tripId,
-            adminId: userId
-        }});
-        return result.length > 0;
+        // const result = await this.tripDAO.find({find: {
+        //     id: tripId,
+        //     adminId: userId
+        // }});
+        // return result.length > 0;
+        // let isAdmin: boolean = false;
+        try {
+            const trip: ITrip = await this.tripDAO.get(tripId);
+            if (!trip) {
+                return false;
+            }
+            const admin = trip.participants.find(user => user.userId === userId);
+            if (!admin) {
+                return false;
+            }
+            if (admin && admin.status === 'admin') {
+                return true;
+            }
+        } catch (err) {
+            throw new HttpError(401, 'User not found during trip admin checking'); 
+        }
     }
 
 }

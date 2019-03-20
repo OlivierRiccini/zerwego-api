@@ -21,10 +21,6 @@ class TripDAO extends dao_1.DAOImpl {
             imageUrl: String,
             startDate: { type: Date },
             endDate: { type: Date },
-            adminId: String,
-            userIds: [{
-                    type: String
-                }],
             participants: [ParticipantSchema]
         });
         super('Trip', TripSchema);
