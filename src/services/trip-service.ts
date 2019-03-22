@@ -56,14 +56,14 @@ export class TripService {
         const unRegisteredUsers: any [] = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
 
         for (const participant of trip.participants) {
-            if (registeredUsers.indexOf(participant) >= 0) {
+            if (participant.status === 'admin') {
+                await this.sendConfirmation();
+            } else if (registeredUsers.indexOf(participant) >= 0) {
                 participant.status = 'pending';
                 await this.sendTripRequest('pending');
-                // send request to accept
             } else if (unRegisteredUsers.indexOf(participant) >= 0) {
                 participant.status = 'not_registred';
                 await this.sendTripRequest('not_registred');
-                // send request to signup and accept 
             } else {
                 throw new HttpError(400, 'Something went wring while handling partipants');
             }
@@ -73,6 +73,10 @@ export class TripService {
     private async sendTripRequest(participantStatus: ParticipationStatus) {
         // /request/:tripId/:participantStatus => front 
         // endpoint => answerRequest /trips/request body: accepted or rejected
+        return;
+    }
+
+    private async sendConfirmation() {
         return;
     }
 

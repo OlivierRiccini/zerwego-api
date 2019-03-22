@@ -74,12 +74,6 @@ let Authenticate = class Authenticate {
     }
     isUserTripAdmin(userId, tripId) {
         return __awaiter(this, void 0, void 0, function* () {
-            // const result = await this.tripDAO.find({find: {
-            //     id: tripId,
-            //     adminId: userId
-            // }});
-            // return result.length > 0;
-            // let isAdmin: boolean = false;
             try {
                 const trip = yield this.tripDAO.get(tripId);
                 if (!trip) {
@@ -92,6 +86,7 @@ let Authenticate = class Authenticate {
                 if (admin && admin.status === 'admin') {
                     return true;
                 }
+                return false;
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(401, 'User not found during trip admin checking');

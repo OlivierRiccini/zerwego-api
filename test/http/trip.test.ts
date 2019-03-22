@@ -163,7 +163,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     }
   );
 
-  it('POSITIVE - Should create a valid trip if user authenticated', async () => {
+  it.only('POSITIVE - Should create a valid trip if user authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
@@ -186,7 +186,6 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       .send(validTrip)
       .then(
         response => {
-          console.log(response.body);
           expect(response.status).to.equal(200);
           expect(response.body).to.have.property('id').to.be.a('string').to.equal('111111111111111111111111');
           expect(response.body).to.have.property('tripName');
@@ -231,7 +230,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       })
   });
 
-  it('POSITIVE - Should delete a trip if user is Admin only', async () => {
+  it.only('POSITIVE - Should delete a trip if user is Admin only', async () => {
     
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {

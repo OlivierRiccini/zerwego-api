@@ -66,7 +66,10 @@ let TripService = class TripService {
             const registeredUsers = yield this.userDAO.find({ find: { 'email': { $in: emails } } });
             const unRegisteredUsers = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
             for (const participant of trip.participants) {
-                if (registeredUsers.indexOf(participant) >= 0) {
+                if (participant.status === 'admin') {
+                    yield this.sendConfirmation();
+                }
+                else if (registeredUsers.indexOf(participant) >= 0) {
                     participant.status = 'pending';
                     yield this.sendTripRequest('pending');
                     // send request to accept
@@ -86,6 +89,11 @@ let TripService = class TripService {
         return __awaiter(this, void 0, void 0, function* () {
             // /request/:tripId/:participantStatus => front 
             // endpoint => answerRequest /trips/request body: accepted or rejected
+            return;
+        });
+    }
+    sendConfirmation() {
+        return __awaiter(this, void 0, void 0, function* () {
             return;
         });
     }

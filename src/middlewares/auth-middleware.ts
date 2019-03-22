@@ -67,12 +67,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
     }
 
     private async isUserTripAdmin(userId: string, tripId: string): Promise<boolean> {
-        // const result = await this.tripDAO.find({find: {
-        //     id: tripId,
-        //     adminId: userId
-        // }});
-        // return result.length > 0;
-        // let isAdmin: boolean = false;
         try {
             const trip: ITrip = await this.tripDAO.get(tripId);
             if (!trip) {
@@ -85,6 +79,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
             if (admin && admin.status === 'admin') {
                 return true;
             }
+            return false;
         } catch (err) {
             throw new HttpError(401, 'User not found during trip admin checking'); 
         }
