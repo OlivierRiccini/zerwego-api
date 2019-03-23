@@ -72,12 +72,10 @@ let TripService = class TripService {
                 else if (registeredUsers.indexOf(participant) >= 0) {
                     participant.status = 'pending';
                     yield this.sendTripRequest('pending');
-                    // send request to accept
                 }
                 else if (unRegisteredUsers.indexOf(participant) >= 0) {
                     participant.status = 'not_registred';
                     yield this.sendTripRequest('not_registred');
-                    // send request to signup and accept 
                 }
                 else {
                     throw new routing_controllers_1.HttpError(400, 'Something went wring while handling partipants');
