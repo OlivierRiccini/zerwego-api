@@ -10,10 +10,10 @@ amqp.connect('amqp://localhost', function (err, conn) {
     setTimeout(function () { conn.close(); process.exit(0); }, 500);
 });
 // 'use strict';
-// import * as amqplib from 'amqplib/callback_api';
+// var amqplib = require('amqplib/callback_api');
 // const config = process.env;
 // // Create connection to AMQP server
-// amqplib.connect(config.amqp, (err, connection) => {
+// amqplib.connect('amqp://localhost', (err, connection) => {
 //     if (err) {
 //         console.error(err.stack);
 //         return process.exit(1);
@@ -25,7 +25,7 @@ amqp.connect('amqp://localhost', function (err, conn) {
 //             return process.exit(1);
 //         }
 //         // Ensure queue for messages
-//         channel.assertQueue(config.queue, {
+//         channel.assertQueue('nodemailer-amqp', {
 //             // Ensure that the queue is not deleted when server restarts
 //             durable: true
 //         }, err => {
@@ -36,7 +36,7 @@ amqp.connect('amqp://localhost', function (err, conn) {
 //             // Create a function to send objects to the queue
 //             // Javascript opbject is converted to JSON and the into a Buffer
 //             let sender = (content, next) => {
-//                 let sent = channel.sendToQueue(config.queue, Buffer.from(JSON.stringify(content)), {
+//                 let sent = channel.sendToQueue('nodemailer-amqp', Buffer.from(JSON.stringify(content)), {
 //                     // Store queued elements on disk
 //                     persistent: true,
 //                     contentType: 'application/json'
@@ -50,7 +50,7 @@ amqp.connect('amqp://localhost', function (err, conn) {
 //             // push 100 messages to queue
 //             let sent = 0;
 //             let sendNext = () => {
-//                 if (sent >= 100) {
+//                 if (sent >= 1) {
 //                     console.log('All messages sent!');
 //                     // Close connection to AMQP server
 //                     // We need to call channel.close first, otherwise pending
@@ -59,7 +59,7 @@ amqp.connect('amqp://localhost', function (err, conn) {
 //                 }
 //                 sent++;
 //                 sender({
-//                     to: 'recipient@example.com',
+//                     to: 'info@olivierriccini.com',
 //                     subject: 'Test message #' + sent,
 //                     text: 'hello world!'
 //                 }, sendNext);
