@@ -1,16 +1,28 @@
+import { Service } from 'typedi';
+
 var amqp = require('amqplib/callback_api');
+// Load the AWS SDK for Node.js
+// var AWS = require('aws-sdk');
 
-amqp.connect('amqp://localhost', function(err, conn) {
-  conn.createChannel(function(err, ch) {
-    var q = 'hello';
-    var msg = 'Hello World!';
+@Service()
+export class AmqSender { 
+  constructor() {}
 
-    ch.assertQueue(q, {durable: false});
-    ch.sendToQueue(q, Buffer.from(msg));
-    console.log(" [x] Sent %s", msg);
-  });
-  setTimeout(function() { conn.close(); process.exit(0) }, 500);
-});
+  public sendToMessageToQueue(message) {
+    amqp.connect('amqp://localhost', function(err, conn) {
+      conn.createChannel(function(err, ch) {
+        var q = 'hello';
+        var msg = message;
+    
+        ch.assertQueue(q, {durable: false});
+        ch.sendToQueue(q, Buffer.from(msg));
+        console.log(" [x] Sent %s", msg);
+      });
+      setTimeout(function() { conn.close(); process.exit(0) }, 500);
+    });
+  }
+
+}
 // 'use strict';
 
 // var amqplib = require('amqplib/callback_api');

@@ -6,6 +6,7 @@ import "reflect-metadata"; // this shim is required
 import {createExpressServer, useContainer} from "routing-controllers";
 import { MongooseConnection } from './db/mongoose-connection';
 import {Container} from "typedi";
+import { AmqReceiver } from "./messaging/receive";
 
 useContainer(Container);
  
@@ -18,6 +19,9 @@ const app = createExpressServer({
 
 const mongooseConnection = new MongooseConnection();
 mongooseConnection.init();
+
+const ampqReceiver = new AmqReceiver();
+ampqReceiver.init();
 
 app.set("port", process.env.PORT);
 

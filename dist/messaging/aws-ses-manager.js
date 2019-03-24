@@ -1,4 +1,13 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -8,28 +17,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const typedi_1 = require("typedi");
 var AWS = require('aws-sdk');
-class AwsSESManager {
-    // Load the AWS SDK for Node.js
-    // Set the region 
+let AwsSESManager = class AwsSESManager {
     constructor() {
-        this.init();
+        const apiVersion = '2010-12-01';
+        const region = 'us-east-1';
+        this.init(apiVersion, region);
     }
     formatAndSenEmail(message) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = yield this.createSendEmailParams(message);
-            this.SESService.sendEmail(params)
-                .then(data => {
+            this.sendPromise.sendEmail(params).promise()
+                .then(function (data) {
                 console.log(data.MessageId);
-            })
-                .catch(err => {
+            }).catch(function (err) {
                 console.error(err, err.stack);
             });
         });
     }
-    init() {
-        AWS.config.update({ region: this.region });
-        this.SESService = new AWS.SES({ apiVersion: this.apiVersion });
+    init(apiVersion, region) {
+        AWS.config.update({ region });
+        this.sendPromise = new AWS.SES({ apiVersion });
     }
     createSendEmailParams(msg) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -64,6 +73,10 @@ class AwsSESManager {
             };
         });
     }
-}
+};
+AwsSESManager = __decorate([
+    typedi_1.Service(),
+    __metadata("design:paramtypes", [])
+], AwsSESManager);
 exports.AwsSESManager = AwsSESManager;
-//# sourceMappingURL=playground.js.map
+//# sourceMappingURL=aws-ses-manager.js.map

@@ -1,69 +1,36 @@
+import { Inject, Service } from 'typedi';
+import { AwsSESManager } from './aws-ses-manager';
 
 var amqp = require('amqplib/callback_api');
 // Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
+// var AWS = require('aws-sdk');
 
-amqp.connect('amqp://localhost', function(err, conn) {
-  conn.createChannel(function(err, ch) {
-    var q = 'hello';
+@Service()
+export class AmqReceiver {
+  awsSesManager;
+  // @Inject() private awsSesManager: AwsSESManager;
 
-    ch.assertQueue(q, {durable: false});
-    console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
-    ch.consume(q, function(msg) {
-      console.log(" [x] Received %s", msg.content.toString());
-          
-    // Set the region 
-    AWS.config.update({region: 'us-east-1'});
+  constructor() {
+    this.awsSesManager = new AwsSESManager();
+    // console.log(this.awsSesManager);
+   }
 
-    // Create sendEmail params 
-    var params = {
-      Destination: { /* required */
-        // CcAddresses: [
-        //   'us-west-2',
-        //   /* more items */
-        // ],
-        ToAddresses: [
-          'info@olivierriccini.com',
-          /* more items */
-        ]
-      },
-      Message: { /* required */
-        Body: { /* required */
-          Html: {
-          Charset: "UTF-8",
-          Data: `<h1>${msg}</h1>`
-          },
-          Text: {
-          Charset: "UTF-8",
-          Data: msg
-          }
-        },
-        Subject: {
-          Charset: 'UTF-8',
-          Data: 'Test email'
-        }
-        },
-      Source: 'info@olivierriccini.com', /* required */
-    //   ReplyToAddresses: [
-    //      'EMAIL_ADDRESS',
-    //     /* more items */
-    //   ],
-    };
-
-    // Create the promise and SES service object
-    var sendPromise = new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(params).promise();
-
-// Handle promise's fulfilled/rejected states
-    sendPromise.then(
-      function(data) {
-        console.log(data.MessageId);
-      }).catch(
-        function(err) {
-        console.error(err, err.stack);
+  public init() {
+    amqp.connect('amqp://localhost', (err, conn) => {
+      conn.createChannel((err, ch) => {
+        var q = 'hello';
+  
+        ch.assertQueue(q, {durable: false});
+        console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
+        ch.consume(q, async msg => {
+          console.log(" [x] Received %s", msg.content.toString());
+          await this.awsSesManager.formatAndSenEmail(msg);
+          }, {noAck: true});
+        });
     });
-        }, {noAck: true});
-      });
-});
+  }
+  
+}
 // 'use strict';
 
 // import * as amqplib from 'amqplib/callback_api';

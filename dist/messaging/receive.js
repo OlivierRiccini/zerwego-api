@@ -1,55 +1,52 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const typedi_1 = require("typedi");
+const aws_ses_manager_1 = require("./aws-ses-manager");
 var amqp = require('amqplib/callback_api');
 // Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
-amqp.connect('amqp://localhost', function (err, conn) {
-    conn.createChannel(function (err, ch) {
-        var q = 'hello';
-        ch.assertQueue(q, { durable: false });
-        console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
-        ch.consume(q, function (msg) {
-            console.log(" [x] Received %s", msg.content.toString());
-            // Set the region 
-            AWS.config.update({ region: 'us-east-1' });
-            // Create sendEmail params 
-            var params = {
-                Destination: {
-                    // CcAddresses: [
-                    //   'us-west-2',
-                    //   /* more items */
-                    // ],
-                    ToAddresses: [
-                        'info@olivierriccini.com',
-                    ]
-                },
-                Message: {
-                    Body: {
-                        Html: {
-                            Charset: "UTF-8",
-                            Data: `<h1>${msg}</h1>`
-                        },
-                        Text: {
-                            Charset: "UTF-8",
-                            Data: msg
-                        }
-                    },
-                    Subject: {
-                        Charset: 'UTF-8',
-                        Data: 'Test email'
-                    }
-                },
-                Source: 'info@olivierriccini.com',
-            };
-            // Create the promise and SES service object
-            var sendPromise = new AWS.SES({ apiVersion: '2010-12-01' }).sendEmail(params).promise();
-            // Handle promise's fulfilled/rejected states
-            sendPromise.then(function (data) {
-                console.log(data.MessageId);
-            }).catch(function (err) {
-                console.error(err, err.stack);
+// var AWS = require('aws-sdk');
+let AmqReceiver = class AmqReceiver {
+    // @Inject() private awsSesManager: AwsSESManager;
+    constructor() {
+        this.awsSesManager = new aws_ses_manager_1.AwsSESManager();
+        // console.log(this.awsSesManager);
+    }
+    init() {
+        amqp.connect('amqp://localhost', (err, conn) => {
+            conn.createChannel((err, ch) => {
+                var q = 'hello';
+                ch.assertQueue(q, { durable: false });
+                console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
+                ch.consume(q, (msg) => __awaiter(this, void 0, void 0, function* () {
+                    console.log(" [x] Received %s", msg.content.toString());
+                    yield this.awsSesManager.formatAndSenEmail(msg);
+                }), { noAck: true });
             });
-        }, { noAck: true });
-    });
-});
+        });
+    }
+};
+AmqReceiver = __decorate([
+    typedi_1.Service(),
+    __metadata("design:paramtypes", [])
+], AmqReceiver);
+exports.AmqReceiver = AmqReceiver;
 // 'use strict';
 // import * as amqplib from 'amqplib/callback_api';
 // import * as nodemailer from 'nodemailer';

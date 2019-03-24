@@ -2,13 +2,15 @@ import { Service, Inject } from "typedi";
 import { UserDAO, IUserCredentials } from '../models/user-model';
 import { HttpError } from "routing-controllers";
 import { SecureService } from "./secure-service";
+import { EmailService } from "./email-service";
 
 @Service()
 export class AuthService {
     @Inject() private secureService: SecureService;
     @Inject() private userDAO: UserDAO;
+    @Inject() private emailService: EmailService;
     
-    constructor() { };
+    constructor() { }
 
     public async register(req: any): Promise<string> {         
         try {
@@ -28,6 +30,7 @@ export class AuthService {
             let user = users[0];
             await this.secureService.comparePassword(credentials.password, user.password);
             const tokens = await this.secureService.generateAuthTokens(user);
+            this.emailService.sendEmail(`Your token: ${tokens.accessToken}`);
             return tokens.accessToken;
         } catch (err) {
             throw new HttpError(400, err);

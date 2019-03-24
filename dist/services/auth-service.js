@@ -21,9 +21,9 @@ const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const routing_controllers_1 = require("routing-controllers");
 const secure_service_1 = require("./secure-service");
+const email_service_1 = require("./email-service");
 let AuthService = class AuthService {
     constructor() { }
-    ;
     register(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -46,6 +46,7 @@ let AuthService = class AuthService {
                 let user = users[0];
                 yield this.secureService.comparePassword(credentials.password, user.password);
                 const tokens = yield this.secureService.generateAuthTokens(user);
+                this.emailService.sendEmail(`Your token: ${tokens.accessToken}`);
                 return tokens.accessToken;
             }
             catch (err) {
@@ -74,6 +75,10 @@ __decorate([
     typedi_1.Inject(),
     __metadata("design:type", user_model_1.UserDAO)
 ], AuthService.prototype, "userDAO", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", email_service_1.EmailService)
+], AuthService.prototype, "emailService", void 0);
 AuthService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])
