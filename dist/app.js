@@ -6,7 +6,7 @@ require("reflect-metadata"); // this shim is required
 const routing_controllers_1 = require("routing-controllers");
 const mongoose_connection_1 = require("./db/mongoose-connection");
 const typedi_1 = require("typedi");
-const receive_1 = require("./messaging/receive");
+const sqs_listenner_1 = require("./messaging/sqs-listenner");
 routing_controllers_1.useContainer(typedi_1.Container);
 // creates express app, registers all controller routes and returns you express app instance
 const app = routing_controllers_1.createExpressServer({
@@ -16,8 +16,8 @@ const app = routing_controllers_1.createExpressServer({
 });
 const mongooseConnection = new mongoose_connection_1.MongooseConnection();
 mongooseConnection.init();
-const ampqReceiver = new receive_1.AmqReceiver();
-ampqReceiver.init();
+const awsSqsListenner = new sqs_listenner_1.AWSSqsListenner();
+awsSqsListenner.init();
 app.set("port", process.env.PORT);
 app.listen(app.get("port"), () => {
     debug(`Server running on port ${app.get("port")}`);

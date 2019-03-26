@@ -8,7 +8,7 @@ var amqp = require('amqplib/callback_api');
 export class AmqSender { 
   constructor() {}
 
-  public sendToMessageToQueue(message) {
+  public sendMessageToQueue(message) {
     amqp.connect('amqp://localhost', function(err, conn) {
       conn.createChannel(function(err, ch) {
         var q = 'hello';

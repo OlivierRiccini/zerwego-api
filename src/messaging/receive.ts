@@ -24,7 +24,7 @@ export class AmqReceiver {
         console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
         ch.consume(q, async msg => {
           console.log(" [x] Received %s", msg.content.toString());
-          await this.awsSesManager.formatAndSenEmail(msg);
+          await this.awsSesManager.formatAndSendEmail(msg);
           }, {noAck: true});
         });
     });

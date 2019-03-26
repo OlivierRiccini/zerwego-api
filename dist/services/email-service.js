@@ -14,7 +14,7 @@ const send_1 = require("../messaging/send");
 let EmailService = class EmailService {
     constructor() { }
     sendEmail(message) {
-        this.amqSender.sendToMessageToQueue(message);
+        this.amqSender.sendMessageToQueue(message);
     }
 };
 __decorate([

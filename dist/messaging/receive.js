@@ -36,7 +36,7 @@ let AmqReceiver = class AmqReceiver {
                 console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", q);
                 ch.consume(q, (msg) => __awaiter(this, void 0, void 0, function* () {
                     console.log(" [x] Received %s", msg.content.toString());
-                    yield this.awsSesManager.formatAndSenEmail(msg);
+                    yield this.awsSesManager.formatAndSendEmail(msg);
                 }), { noAck: true });
             });
         });

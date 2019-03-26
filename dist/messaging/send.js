@@ -15,7 +15,7 @@ var amqp = require('amqplib/callback_api');
 // var AWS = require('aws-sdk');
 let AmqSender = class AmqSender {
     constructor() { }
-    sendToMessageToQueue(message) {
+    sendMessageToQueue(message) {
         amqp.connect('amqp://localhost', function (err, conn) {
             conn.createChannel(function (err, ch) {
                 var q = 'hello';

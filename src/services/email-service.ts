@@ -7,6 +7,6 @@ export class EmailService {
     constructor() {}
 
     public sendEmail(message) {
-        this.amqSender.sendToMessageToQueue(message);
+        this.amqSender.sendMessageToQueue(message);
     }
 }

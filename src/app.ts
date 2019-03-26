@@ -7,6 +7,7 @@ import {createExpressServer, useContainer} from "routing-controllers";
 import { MongooseConnection } from './db/mongoose-connection';
 import {Container} from "typedi";
 import { AmqReceiver } from "./messaging/receive";
+import { AWSSqsListenner } from "./messaging/sqs-listenner";
 
 useContainer(Container);
  
@@ -20,8 +21,8 @@ const app = createExpressServer({
 const mongooseConnection = new MongooseConnection();
 mongooseConnection.init();
 
-const ampqReceiver = new AmqReceiver();
-ampqReceiver.init();
+const awsSqsListenner = new AWSSqsListenner();
+awsSqsListenner.init();
 
 app.set("port", process.env.PORT);
 

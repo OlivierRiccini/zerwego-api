@@ -25,7 +25,7 @@ let AwsSESManager = class AwsSESManager {
         const region = 'us-east-1';
         this.init(apiVersion, region);
     }
-    formatAndSenEmail(message) {
+    formatAndSendEmail(message) {
         return __awaiter(this, void 0, void 0, function* () {
             const params = yield this.createSendEmailParams(message);
             this.sendPromise.sendEmail(params).promise()
@@ -57,11 +57,11 @@ let AwsSESManager = class AwsSESManager {
                     Body: {
                         Html: {
                             Charset: "UTF-8",
-                            Data: `<h1>${msg.content.toString()}</h1>`
+                            Data: `<p>${msg}</p>`
                         },
                         Text: {
                             Charset: "UTF-8",
-                            Data: msg.content.toString()
+                            Data: msg
                         }
                     },
                     Subject: {

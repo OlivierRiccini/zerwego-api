@@ -6,14 +6,14 @@ var AWS = require('aws-sdk');
 @Service()
 export class AwsSESManager {
   sendPromise;
-  
+
   constructor() {
     const apiVersion: string = '2010-12-01';
     const region: string = 'us-east-1';
     this.init(apiVersion, region);
   }
 
-  public async formatAndSenEmail(message) {
+  public async formatAndSendEmail(message) {
     const params = await this.createSendEmailParams(message);
     this.sendPromise.sendEmail(params).promise()
       .then(
@@ -47,11 +47,11 @@ export class AwsSESManager {
         Body: { /* required */
           Html: {
           Charset: "UTF-8",
-          Data: `<h1>${msg.content.toString()}</h1>`
+          Data: `<p>${msg}</p>`
           },
           Text: {
           Charset: "UTF-8",
-          Data: msg.content.toString()
+          Data: msg
           }
         },
         Subject: {
