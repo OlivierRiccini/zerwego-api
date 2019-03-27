@@ -46,7 +46,7 @@ let AuthService = class AuthService {
                 let user = users[0];
                 yield this.secureService.comparePassword(credentials.password, user.password);
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                this.emailService.sendEmail(`Your token: ${tokens.accessToken}`);
+                this.emailService.sendEmail(`Welcome: ${user.name.toUpperCase()}!`);
                 return tokens.accessToken;
             }
             catch (err) {

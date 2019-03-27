@@ -30,7 +30,7 @@ export class AuthService {
             let user = users[0];
             await this.secureService.comparePassword(credentials.password, user.password);
             const tokens = await this.secureService.generateAuthTokens(user);
-            this.emailService.sendEmail(`Your token: ${tokens.accessToken}`);
+            this.emailService.sendEmail(`Welcome: ${user.name.toUpperCase()}!`);
             return tokens.accessToken;
         } catch (err) {
             throw new HttpError(400, err);

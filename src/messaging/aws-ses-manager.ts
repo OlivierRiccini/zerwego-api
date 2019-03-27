@@ -47,7 +47,7 @@ export class AwsSESManager {
         Body: { /* required */
           Html: {
           Charset: "UTF-8",
-          Data: `<p>${msg}</p>`
+          Data: `<p>${msg}</p><br><a style="display: block; padding: 10px, 15px; background-color: blue" href="http://localhost:4200/trips/new/overview">Create a trip</a>`
           },
           Text: {
           Charset: "UTF-8",

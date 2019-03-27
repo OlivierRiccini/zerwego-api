@@ -1,12 +1,13 @@
 import { Service, Inject } from "typedi";
-import { AmqSender } from "../messaging/send";
+// import { AmqSender } from "../messaging/send";
+import { AWSSqsSender } from "../messaging/aws-sqs-sender";
 
 @Service()
 export class EmailService {
-    @Inject() private amqSender: AmqSender;
+    @Inject() private awsSqsSender: AWSSqsSender;
     constructor() {}
 
     public sendEmail(message) {
-        this.amqSender.sendMessageToQueue(message);
+        this.awsSqsSender.sendMessageToQueue(message);
     }
 }

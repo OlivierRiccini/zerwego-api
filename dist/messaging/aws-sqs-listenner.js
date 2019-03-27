@@ -21,13 +21,16 @@ const aws_ses_manager_1 = require("./aws-ses-manager");
 const typedi_1 = require("typedi");
 const { Consumer } = require('sqs-consumer');
 let AWSSqsListenner = class AWSSqsListenner {
-    constructor() { }
+    constructor() {
+        this.awsSesManager = new aws_ses_manager_1.AwsSESManager();
+    }
     init() {
-        const awsSesManager = new aws_ses_manager_1.AwsSESManager();
+        // const awsSesManager = new AwsSESManager();
         const app = Consumer.create({
             queueUrl: "https://sqs.us-east-1.amazonaws.com/039444674434/NiceQueue",
             handleMessage: (message) => __awaiter(this, void 0, void 0, function* () {
                 console.log(message.Body);
+                yield this.awsSesManager.formatAndSendEmail(message.Body);
                 // do some work with `message`
             })
         });

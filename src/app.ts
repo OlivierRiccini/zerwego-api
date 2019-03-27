@@ -6,8 +6,8 @@ import "reflect-metadata"; // this shim is required
 import {createExpressServer, useContainer} from "routing-controllers";
 import { MongooseConnection } from './db/mongoose-connection';
 import {Container} from "typedi";
-import { AmqReceiver } from "./messaging/receive";
-import { AWSSqsListenner } from "./messaging/sqs-listenner";
+// import { AmqReceiver } from "./messaging/receive";
+import { AWSSqsListenner } from "./messaging/aws-sqs-listenner";
 
 useContainer(Container);
  

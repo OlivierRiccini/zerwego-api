@@ -10,17 +10,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const typedi_1 = require("typedi");
-const send_1 = require("../messaging/send");
+// import { AmqSender } from "../messaging/send";
+const aws_sqs_sender_1 = require("../messaging/aws-sqs-sender");
 let EmailService = class EmailService {
     constructor() { }
     sendEmail(message) {
-        this.amqSender.sendMessageToQueue(message);
+        this.awsSqsSender.sendMessageToQueue(message);
     }
 };
 __decorate([
     typedi_1.Inject(),
-    __metadata("design:type", send_1.AmqSender)
-], EmailService.prototype, "amqSender", void 0);
+    __metadata("design:type", aws_sqs_sender_1.AWSSqsSender)
+], EmailService.prototype, "awsSqsSender", void 0);
 EmailService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])
