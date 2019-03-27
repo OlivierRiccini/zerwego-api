@@ -17,38 +17,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const aws_ses_manager_1 = require("./aws-ses-manager");
 const typedi_1 = require("typedi");
-const aws_sns_manager_1 = require("./aws-sns-manager");
-const { Consumer } = require('sqs-consumer');
-let AWSSqsListenner = class AWSSqsListenner {
+var AWS = require('aws-sdk');
+let AwsSNSManager = class AwsSNSManager {
     constructor() {
-        this.awsSesManager = new aws_ses_manager_1.AwsSESManager();
-        this.awsSnsManager = new aws_sns_manager_1.AwsSNSManager();
+        AWS.config.region = 'us-east-1';
+        this.sns = new AWS.SNS();
     }
-    init() {
-        // const awsSesManager = new AwsSESManager();
-        const app = Consumer.create({
-            queueUrl: "https://sqs.us-east-1.amazonaws.com/039444674434/NiceQueue",
-            handleMessage: (message) => __awaiter(this, void 0, void 0, function* () {
-                console.log(message.Body);
-                yield this.awsSesManager.formatAndSendEmail(message.Body);
-                yield this.awsSnsManager.formatAndSendSMS();
-                // do some work with `message`
-            })
+    formatAndSendSMS() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const params = this.buildParams();
+            this.sns.publish(params, function (err, data) {
+                if (err)
+                    console.log(err, err.stack); // an error occurred
+                else
+                    console.log(data); // successful response
+            });
         });
-        app.on('error', (err) => {
-            console.error(err.message);
-        });
-        app.on('processing_error', (err) => {
-            console.error(err.message);
-        });
-        app.start();
+    }
+    buildParams() {
+        return {
+            Message: 'this is a test message',
+            MessageStructure: 'string',
+            PhoneNumber: '+14383991332'
+        };
     }
 };
-AWSSqsListenner = __decorate([
+AwsSNSManager = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])
-], AWSSqsListenner);
-exports.AWSSqsListenner = AWSSqsListenner;
-//# sourceMappingURL=aws-sqs-listenner.js.map
+], AwsSNSManager);
+exports.AwsSNSManager = AwsSNSManager;
+//# sourceMappingURL=aws-sns-manager.js.map

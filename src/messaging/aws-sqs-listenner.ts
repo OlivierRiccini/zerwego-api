@@ -1,13 +1,16 @@
 import { AwsSESManager } from "./aws-ses-manager";
 import { Service } from "typedi";
+import { AwsSNSManager } from "./aws-sns-manager";
 const { Consumer } = require('sqs-consumer');
 
 @Service()
 export class AWSSqsListenner {
   awsSesManager: AwsSESManager;
+  awsSnsManager: AwsSNSManager;
   
   constructor() {
     this.awsSesManager = new AwsSESManager();
+    this.awsSnsManager = new AwsSNSManager();
    }
   
   public init() {
@@ -17,6 +20,7 @@ export class AWSSqsListenner {
       handleMessage: async (message) => {
         console.log(message.Body);
         await this.awsSesManager.formatAndSendEmail(message.Body);
+        await this.awsSnsManager.formatAndSendSMS();
         // do some work with `message`
       }
     });
