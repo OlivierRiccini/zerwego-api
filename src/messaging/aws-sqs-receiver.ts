@@ -1,61 +1,68 @@
-import { Service } from "typedi";
+// import { Service } from "typedi";
+// import { CONSTANTS } from "../persist/constants";
 
-// Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
-// Set the region
+// // Load the AWS SDK for Node.js
+// var AWS = require('aws-sdk');
+// // Set the region
 
-var queueURL = "https://sqs.us-east-1.amazonaws.com/039444674434/NiceQueue";
+// @Service()
+// export class AWSSqsReceiver {
+//   sqs: any;
 
-@Service()
-export class AWSSqsReceiver {
-  sqs: any;
+//   constructor() {
+//     this.init();
+//   }
+//   private init() {
 
-  constructor() {
-    this.init();
-  }
-  private init() {
-    AWS.config.update({region: 'us-east-1'});
-    this.sqs = new AWS.SQS({apiVersion: '2012-11-05'});
+//     AWS.config.update({region: 'us-east-1'});
+//     this.sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
-    const params = this.buildParams();
-    this.initReceiver(params);
-  }
+//     for (const QueueUrl in CONSTANTS.QUEUES) {
+//       if (CONSTANTS.QUEUES.hasOwnProperty(QueueUrl)) {
+//         this.initReceiver(CONSTANTS.QUEUES[QueueUrl]);
+//       }
+//     }
+//   }
 
-  private initReceiver(parameters) {
-    this.sqs.receiveMessage(parameters, function(err, data) {
-      if (err) {
-        console.log("Receive Error", err);
-      } else if (data.Messages) {
-          console.log('----------- RECEIVED ----------');
-          console.log(data.Messages[0]);
-        var deleteParams = {
-          QueueUrl: queueURL,
-          ReceiptHandle: data.Messages[0].ReceiptHandle
-        };
-        this.sqs.deleteMessage(deleteParams, function(err, data) {
-          if (err) {
-            console.log("Delete Error", err);
-          } else {
-            console.log("Message Deleted", data);
-          }
-        });
-      }
-    });
-  }
+//   private initReceiver(QueueUrl) {
+//     const params = this.buildParams(QueueUrl);
+//     this.sqs.receiveMessage(params, function(err, data) {
+//       console.log('----------- RECEIVED 1 ----------');
+//       if (err) {
+//         console.log("Receive Error", err);
+//       } else if (data.Messages) {
+//           console.log('QUEUE');
+//           console.log(data);
+//           console.log('----------- RECEIVED ----------');
+//           console.log(data.Messages[0]);
+//         var deleteParams = {
+//           QueueUrl: params.QueueUrl,
+//           ReceiptHandle: data.Messages[0].ReceiptHandle
+//         };
+//         this.sqs.deleteMessage(deleteParams, function(err, data) {
+//           if (err) {
+//             console.log("Delete Error", err);
+//           } else {
+//             console.log("Message Deleted", data);
+//           }
+//         });
+//       }
+//     });
+//   }
 
-  private buildParams() {
-    return {
-      AttributeNames: [
-          "SentTimestamp"
-      ],
-      MaxNumberOfMessages: 1,
-      MessageAttributeNames: [
-          "All"
-      ],
-      QueueUrl: queueURL,
-      VisibilityTimeout: 20,
-      WaitTimeSeconds: 0
-    }
-  }
+//   private buildParams(QueueUrl) {
+//     return {
+//       AttributeNames: [
+//           "SentTimestamp"
+//       ],
+//       MaxNumberOfMessages: 1,
+//       MessageAttributeNames: [
+//           "All"
+//       ],
+//       QueueUrl,
+//       VisibilityTimeout: 20,
+//       WaitTimeSeconds: 0
+//     }
+//   }
 
-}
+// }

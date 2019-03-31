@@ -18,49 +18,51 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const typedi_1 = require("typedi");
-var AWS = require('aws-sdk');
-let AwsSNSManager = class AwsSNSManager {
-    constructor() {
-        AWS.config.region = 'us-east-1';
-        this.sns = new AWS.SNS();
-    }
-    formatAndSendSMS(message) {
+// import { AmqSender } from "../messaging/send";
+const aws_sqs_sender_1 = require("../messaging/aws-sqs-sender");
+const routing_controllers_1 = require("routing-controllers");
+let MessagesService = class MessagesService {
+    constructor() { }
+    sendEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.setAttributes();
-            const params = this.buildParams(message);
-            console.log('Sending SMS....');
-            this.sns.publish(params, function (err, data) {
-                if (err) {
-                    console.log(err, err.stack);
-                }
-                else {
-                    console.log('Done! email sent => ' + data.MessageId);
-                }
-            });
+            try {
+                const messageForQueue = { type: 'email', email };
+                this.awsSqsSender.sendMessageToQueue(messageForQueue);
+            }
+            catch (_a) {
+                throw new routing_controllers_1.BadRequestError('OOpss something went wrong while sending email');
+            }
         });
     }
-    buildParams(message) {
-        return {
-            Message: message.Body,
-            MessageStructure: 'string',
-            PhoneNumber: message.MessageAttributes.Phone.StringValue,
-        };
-    }
-    setAttributes() {
+    sendSMS(sms) {
         return __awaiter(this, void 0, void 0, function* () {
-            var params = {
-                attributes: {
-                    DefaultSenderID: 'Zerwego',
-                    DefaultSMSType: 'Transactional'
-                }
-            };
-            yield this.sns.setSMSAttributes(params).promise();
+            try {
+                const messageForQueue = { type: 'sms', sms };
+                this.awsSqsSender.sendMessageToQueue(messageForQueue);
+            }
+            catch (_a) {
+                throw new routing_controllers_1.BadRequestError('OOpss something went wrong while sending sms');
+            }
+        });
+    }
+    sendFacebookMessengerMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            //
+        });
+    }
+    sendWhatsAppMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            //
         });
     }
 };
-AwsSNSManager = __decorate([
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", aws_sqs_sender_1.AWSSqsSender)
+], MessagesService.prototype, "awsSqsSender", void 0);
+MessagesService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])
-], AwsSNSManager);
-exports.AwsSNSManager = AwsSNSManager;
-//# sourceMappingURL=aws-sns-manager.js.map
+], MessagesService);
+exports.MessagesService = MessagesService;
+//# sourceMappingURL=messages-service.js.map

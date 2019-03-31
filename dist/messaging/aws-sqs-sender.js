@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const typedi_1 = require("typedi");
-// Load the SDK for JavaScript
+const constants_1 = require("../persist/constants");
 var AWS = require('aws-sdk');
 let AWSSqsSender = class AWSSqsSender {
     constructor() {
@@ -29,25 +29,88 @@ let AWSSqsSender = class AWSSqsSender {
         });
     }
     buildParams(message) {
+        let MessageBody;
+        let QueueUrl;
+        switch (message.type) {
+            case 'email':
+                MessageBody = message.email.content;
+                QueueUrl = constants_1.CONSTANTS.QUEUES.EMAIL;
+                break;
+            case 'sms':
+                MessageBody = message.sms.content;
+                QueueUrl = constants_1.CONSTANTS.QUEUES.SMS;
+                break;
+            default:
+                return;
+        }
         return {
             DelaySeconds: 10,
-            MessageAttributes: {
-                "Title": {
-                    DataType: "String",
-                    StringValue: "The Whistler"
-                },
-                "Author": {
-                    DataType: "String",
-                    StringValue: "John Grisham"
-                },
-                "WeeksOn": {
-                    DataType: "Number",
-                    StringValue: "6"
-                }
-            },
-            MessageBody: message,
-            QueueUrl: "https://sqs.us-east-1.amazonaws.com/039444674434/NiceQueue"
+            MessageAttributes: this.buildMessageAttributes(message),
+            MessageBody,
+            QueueUrl
         };
+    }
+    buildMessageAttributes(message) {
+        switch (message.type) {
+            case 'email':
+                return {
+                    'Type': {
+                        DataType: 'String',
+                        StringValue: message.type
+                    },
+                    'From': {
+                        DataType: 'String',
+                        StringValue: 'info@olivierriccini.com' // TODO: Change
+                    },
+                    'To': {
+                        DataType: 'String',
+                        StringValue: message.email.to
+                    },
+                    'Subject': {
+                        DataType: 'String',
+                        StringValue: message.email.subject || 'No subject provided'
+                    },
+                    'Text': {
+                        DataType: 'String',
+                        StringValue: message.email.content
+                    }
+                };
+            case 'sms':
+                return {
+                    'Type': {
+                        DataType: 'String',
+                        StringValue: message.type
+                    },
+                    'Phone': {
+                        DataType: 'String',
+                        StringValue: message.sms.phone
+                    }
+                };
+            case 'facebook_messenger':
+                return {
+                    'Type': {
+                        DataType: 'String',
+                        StringValue: message.type
+                    },
+                    'FacebookId': {
+                        DataType: 'String',
+                        StringValue: message.facebook_messenger.facebookId
+                    }
+                };
+            case 'whatsApp':
+                return {
+                    'Type': {
+                        DataType: 'String',
+                        StringValue: message.type
+                    },
+                    'FacebookId': {
+                        DataType: 'String',
+                        StringValue: message.facebook_messenger.facebookId
+                    }
+                };
+            default:
+                return;
+        }
     }
 };
 AWSSqsSender = __decorate([

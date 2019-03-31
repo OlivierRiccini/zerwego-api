@@ -21,7 +21,7 @@ const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const routing_controllers_1 = require("routing-controllers");
 const secure_service_1 = require("./secure-service");
-const email_service_1 = require("./email-service");
+const messages_service_1 = require("./messages-service");
 let AuthService = class AuthService {
     constructor() { }
     register(req) {
@@ -46,7 +46,16 @@ let AuthService = class AuthService {
                 let user = users[0];
                 yield this.secureService.comparePassword(credentials.password, user.password);
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                this.emailService.sendEmail(`Welcome: ${user.name.toUpperCase()}!`);
+                yield this.messagesService.sendEmail({
+                    from: 'info@olivierriccini.com',
+                    subject: 'Welcome to Zerwego',
+                    to: user.email,
+                    content: `Welcome: ${user.name.toUpperCase()}!`
+                });
+                yield this.messagesService.sendSMS({
+                    phone: '+14383991332',
+                    content: `Welcome: ${user.name.toUpperCase()}!`
+                });
                 return tokens.accessToken;
             }
             catch (err) {
@@ -77,8 +86,8 @@ __decorate([
 ], AuthService.prototype, "userDAO", void 0);
 __decorate([
     typedi_1.Inject(),
-    __metadata("design:type", email_service_1.EmailService)
-], AuthService.prototype, "emailService", void 0);
+    __metadata("design:type", messages_service_1.MessagesService)
+], AuthService.prototype, "messagesService", void 0);
 AuthService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])

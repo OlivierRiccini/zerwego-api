@@ -2,13 +2,13 @@ import { Service, Inject } from "typedi";
 import { UserDAO, IUserCredentials } from '../models/user-model';
 import { HttpError } from "routing-controllers";
 import { SecureService } from "./secure-service";
-import { EmailService } from "./email-service";
+import { MessagesService } from "./messages-service";
 
 @Service()
 export class AuthService {
     @Inject() private secureService: SecureService;
     @Inject() private userDAO: UserDAO;
-    @Inject() private emailService: EmailService;
+    @Inject() private messagesService: MessagesService;
     
     constructor() { }
 
@@ -30,7 +30,18 @@ export class AuthService {
             let user = users[0];
             await this.secureService.comparePassword(credentials.password, user.password);
             const tokens = await this.secureService.generateAuthTokens(user);
-            this.emailService.sendEmail(`Welcome: ${user.name.toUpperCase()}!`);
+            await this.messagesService.sendEmail({
+                    from: 'info@olivierriccini.com',
+                    subject: 'Welcome to Zerwego',
+                    to: user.email,
+                    content: `Welcome: ${user.name.toUpperCase()}!`
+                });
+
+            await this.messagesService.sendSMS({
+                phone: '+14383991332',
+                content: `Welcome: ${user.name.toUpperCase()}!`
+            });
+
             return tokens.accessToken;
         } catch (err) {
             throw new HttpError(400, err);

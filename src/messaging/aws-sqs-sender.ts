@@ -1,6 +1,7 @@
 import { Service } from "typedi";
+import { IMessage } from "./message-interfaces";
+import { CONSTANTS } from "../persist/constants";
 
-// Load the SDK for JavaScript
 var AWS = require('aws-sdk');
 
 @Service()
@@ -12,7 +13,7 @@ export class AWSSqsSender {
     this.sqs = new AWS.SQS({apiVersion: '2012-11-05'});
   }
 
-  public sendMessageToQueue(message) {
+  public sendMessageToQueue(message: IMessage) {
     const params = this.buildParams(message);
     this.sqs.sendMessage(params, function(err, data) {
       if (err) {
@@ -23,26 +24,90 @@ export class AWSSqsSender {
     });
   }
   
-  private buildParams(message) {
+  private buildParams(message: IMessage) {
+    let MessageBody: string;
+    let QueueUrl: string;
+    switch(message.type) {
+      case 'email': 
+        MessageBody = message.email.content;
+        QueueUrl = CONSTANTS.QUEUES.EMAIL;
+        break;
+      case 'sms':
+        MessageBody = message.sms.content;
+        QueueUrl = CONSTANTS.QUEUES.SMS;
+        break;  
+      default:
+        return;
+    }
     return {
       DelaySeconds: 10,
-      MessageAttributes: {
-        "Title": {
-          DataType: "String",
-          StringValue: "The Whistler"
-        },
-        "Author": {
-          DataType: "String",
-          StringValue: "John Grisham"
-        },
-        "WeeksOn": {
-          DataType: "Number",
-          StringValue: "6"
-        }
-      },
-      MessageBody: message,
-      QueueUrl: "https://sqs.us-east-1.amazonaws.com/039444674434/NiceQueue"
+      MessageAttributes: this.buildMessageAttributes(message),
+      MessageBody,
+      QueueUrl
     };
+  }
+
+  private buildMessageAttributes(message) {
+    switch(message.type) {
+      case 'email':
+        return {
+          'Type': {
+            DataType: 'String',
+            StringValue: message.type
+          },
+          'From': {
+            DataType: 'String',
+            StringValue: 'info@olivierriccini.com' // TODO: Change
+          },
+          'To': {
+            DataType: 'String',
+            StringValue: message.email.to
+          },
+          'Subject': {
+            DataType: 'String',
+            StringValue: message.email.subject || 'No subject provided'
+          },
+          'Text': {
+            DataType: 'String',
+            StringValue: message.email.content
+          }
+        }
+      case 'sms':
+        return {
+          'Type': {
+            DataType: 'String',
+            StringValue: message.type
+          },
+          'Phone': {
+            DataType: 'String',
+            StringValue: message.sms.phone
+          }
+        }
+      case 'facebook_messenger':
+        return {
+          'Type': {
+            DataType: 'String',
+            StringValue: message.type
+          },
+          'FacebookId': {
+            DataType: 'String',
+            StringValue: message.facebook_messenger.facebookId
+          }
+        }
+      case 'whatsApp':
+        return {
+          'Type': {
+            DataType: 'String',
+            StringValue: message.type
+          },
+          'FacebookId': {
+            DataType: 'String',
+            StringValue: message.facebook_messenger.facebookId
+          }
+        }
+      default:
+        return;
+    }
   }
   
 }

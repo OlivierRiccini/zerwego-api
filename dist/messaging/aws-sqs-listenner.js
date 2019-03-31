@@ -20,21 +20,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const aws_ses_manager_1 = require("./aws-ses-manager");
 const typedi_1 = require("typedi");
 const aws_sns_manager_1 = require("./aws-sns-manager");
+const constants_1 = require("../persist/constants");
+// import { AWSSqsReceiver } from "./aws-sqs-receiver";
 const { Consumer } = require('sqs-consumer');
 let AWSSqsListenner = class AWSSqsListenner {
+    // aWSSqsReceiver: AWSSqsReceiver;
     constructor() {
         this.awsSesManager = new aws_ses_manager_1.AwsSESManager();
         this.awsSnsManager = new aws_sns_manager_1.AwsSNSManager();
     }
     init() {
+        for (const queueUrl in constants_1.CONSTANTS.QUEUES) {
+            ;
+            if (constants_1.CONSTANTS.QUEUES.hasOwnProperty(queueUrl)) {
+                this.initListener(constants_1.CONSTANTS.QUEUES[queueUrl]);
+            }
+        }
+    }
+    initListener(queueUrl) {
         // const awsSesManager = new AwsSESManager();
         const app = Consumer.create({
-            queueUrl: "https://sqs.us-east-1.amazonaws.com/039444674434/NiceQueue",
+            queueUrl,
+            messageAttributeNames: ["All"],
             handleMessage: (message) => __awaiter(this, void 0, void 0, function* () {
-                console.log(message.Body);
-                yield this.awsSesManager.formatAndSendEmail(message.Body);
-                yield this.awsSnsManager.formatAndSendSMS();
-                // do some work with `message`
+                const queue = queueUrl.split('/')[queueUrl.split('/').length - 1];
+                yield this.formatAndSendMessage(queue, message);
             })
         });
         app.on('error', (err) => {
@@ -44,6 +54,28 @@ let AWSSqsListenner = class AWSSqsListenner {
             console.error(err.message);
         });
         app.start();
+    }
+    formatAndSendMessage(queue, message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('------------- 3 --------------');
+            console.log(message);
+            switch (queue) {
+                case 'EMAIL_QUEUE':
+                    yield this.awsSesManager.formatAndSendEmail(message);
+                    break;
+                case 'SMS_QUEUE':
+                    yield this.awsSnsManager.formatAndSendSMS(message);
+                    break;
+                case 'facebook_messenger':
+                    // code block
+                    break;
+                case 'whatsApp':
+                    // code block
+                    break;
+                default:
+                // code block
+            }
+        });
     }
 };
 AWSSqsListenner = __decorate([

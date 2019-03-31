@@ -13,12 +13,13 @@ export class AwsSESManager {
     this.init(apiVersion, region);
   }
 
-  public async formatAndSendEmail(message) {
+  public async formatAndSendEmail(message: string) {
     const params = await this.createSendEmailParams(message);
+    console.log('Sending email....');
     this.sendPromise.sendEmail(params).promise()
       .then(
         function(data) {
-          console.log(data.MessageId);
+          console.log('Done! email sent => ' + data.MessageId);
         }).catch(
           function(err) {
           console.error(err, err.stack);
@@ -39,7 +40,7 @@ export class AwsSESManager {
         //   /* more items */
         // ],
         ToAddresses: [
-          'info@olivierriccini.com',
+          msg.MessageAttributes.To.StringValue,
           /* more items */
         ]
       },
@@ -47,19 +48,20 @@ export class AwsSESManager {
         Body: { /* required */
           Html: {
           Charset: "UTF-8",
-          Data: `<p>${msg}</p><br><a style="display: block; padding: 10px, 15px; background-color: blue" href="http://localhost:4200/trips/new/overview">Create a trip</a>`
+          Data: `<p>${msg.Body}</p><br>
+            <a href="http://localhost:4200/trips/new/overview">Create a trip</a>`
           },
           Text: {
           Charset: "UTF-8",
-          Data: msg
+          Data: msg.Body
           }
         },
         Subject: {
           Charset: 'UTF-8',
-          Data: 'Test email'
+          Data: msg.MessageAttributes.Subject.StringValue
         }
         },
-      Source: 'info@olivierriccini.com', /* required */
+      Source: msg.MessageAttributes.From.StringValue, /* required */
     //   ReplyToAddresses: [
     //      'EMAIL_ADDRESS',
     //     /* more items */
