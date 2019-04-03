@@ -21,10 +21,10 @@ const aws_ses_manager_1 = require("./aws-ses-manager");
 const typedi_1 = require("typedi");
 const aws_sns_manager_1 = require("./aws-sns-manager");
 const constants_1 = require("../persist/constants");
+const routing_controllers_1 = require("routing-controllers");
 // import { AWSSqsReceiver } from "./aws-sqs-receiver";
 const { Consumer } = require('sqs-consumer');
 let AWSSqsListenner = class AWSSqsListenner {
-    // aWSSqsReceiver: AWSSqsReceiver;
     constructor() {
         this.awsSesManager = new aws_ses_manager_1.AwsSESManager();
         this.awsSnsManager = new aws_sns_manager_1.AwsSNSManager();
@@ -38,7 +38,6 @@ let AWSSqsListenner = class AWSSqsListenner {
         }
     }
     initListener(queueUrl) {
-        // const awsSesManager = new AwsSESManager();
         const app = Consumer.create({
             queueUrl,
             messageAttributeNames: ["All"],
@@ -57,8 +56,6 @@ let AWSSqsListenner = class AWSSqsListenner {
     }
     formatAndSendMessage(queue, message) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('------------- 3 --------------');
-            console.log(message);
             switch (queue) {
                 case 'EMAIL_QUEUE':
                     yield this.awsSesManager.formatAndSendEmail(message);
@@ -73,7 +70,7 @@ let AWSSqsListenner = class AWSSqsListenner {
                     // code block
                     break;
                 default:
-                // code block
+                    throw new routing_controllers_1.BadRequestError('Message type provided not recognized');
             }
         });
     }

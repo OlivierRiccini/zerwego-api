@@ -6,18 +6,26 @@ const debug = require('debug')('DAO');
 
 delete mongoose.connection.models['User'];
 
+export type LoginType =
+| 'password'
+| 'facebook' 
+
 //Interface for model
 export interface IUser {
     id?: string,
     _id?: ObjectID,
     name?: string,
     email?: string,
-    password?: string,
+    password: string,
+    facebookId?: string
 };
 
 export interface IUserCredentials {
+    name?: string,
+    type: LoginType,
     email: string,
-    password: string
+    password?: string,
+    facebookId?: string
 };
 
 // Document
@@ -45,7 +53,8 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                 type: String,
                 require: true,
                 minlength: 6
-            }
+            },
+            facebookId: String
         });
        
         super('User', UserSchema);

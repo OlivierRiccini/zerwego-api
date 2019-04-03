@@ -48,6 +48,20 @@ export class AuthService {
         }
     };
 
+    public async handleFacebookLogin(credentials: IUserCredentials): Promise<string> {
+        const users = await this.userDAO.find({find:{email: credentials.email}});
+        if (users && users.length < 1) {
+            const newUser = {
+                name: credentials.name,
+                email: credentials.email,
+                password: 'test',
+                facebookId: credentials.facebookId
+            };
+            return await this.register(newUser);
+        } 
+        return await this.login(credentials);
+    }
+
     public async logout(token: string): Promise<void> {
         try {
             await this.secureService.removeSecure(token);

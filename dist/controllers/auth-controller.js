@@ -37,7 +37,13 @@ let AuthController = class AuthController {
     }
     login(credentials, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const token = yield this.authService.login(credentials);
+            let token;
+            if (credentials.type === 'facebook') {
+                token = yield this.authService.handleFacebookLogin(credentials);
+            }
+            else {
+                token = yield this.authService.login(credentials);
+            }
             const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
             response.header(headers);
             debug('POST /user/login => Successfully logged in!');

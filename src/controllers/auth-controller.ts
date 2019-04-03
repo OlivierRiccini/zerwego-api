@@ -22,7 +22,12 @@ export class AuthController {
 
   @Post('/login')
   async login(@Body() credentials: IUserCredentials, @Res() response: any) {
-    const token = await this.authService.login(credentials);
+    let token: string;
+    if (credentials.type === 'facebook') {
+      token = await this.authService.handleFacebookLogin(credentials);
+    } else {
+      token = await this.authService.login(credentials);
+    }
     const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
     response.header(headers);
     debug('POST /user/login => Successfully logged in!');

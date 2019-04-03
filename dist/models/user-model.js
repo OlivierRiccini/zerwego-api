@@ -26,7 +26,8 @@ class UserDAO extends dao_1.DAOImpl {
                 type: String,
                 require: true,
                 minlength: 6
-            }
+            },
+            facebookId: String
         });
         super('User', UserSchema);
     }

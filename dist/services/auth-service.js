@@ -64,6 +64,21 @@ let AuthService = class AuthService {
         });
     }
     ;
+    handleFacebookLogin(credentials) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.userDAO.find({ find: { email: credentials.email } });
+            if (users && users.length < 1) {
+                const newUser = {
+                    name: credentials.name,
+                    email: credentials.email,
+                    password: 'test',
+                    facebookId: credentials.facebookId
+                };
+                return yield this.register(newUser);
+            }
+            return yield this.login(credentials);
+        });
+    }
     logout(token) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
