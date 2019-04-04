@@ -28,7 +28,11 @@ export class AuthService {
         try {
             let users = await this.userDAO.find({find:{email: credentials.email}});
             let user = users[0];
-            await this.secureService.comparePassword(credentials.password, user.password);
+            if (credentials.type === 'password') {
+                await this.secureService.comparePassword(credentials.password, user.password);
+            }
+
+            // TODO; Maybe verify facebook token
             const tokens = await this.secureService.generateAuthTokens(user);
             await this.messagesService.sendEmail({
                     from: 'info@olivierriccini.com',

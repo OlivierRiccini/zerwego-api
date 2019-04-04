@@ -44,7 +44,9 @@ let AuthService = class AuthService {
             try {
                 let users = yield this.userDAO.find({ find: { email: credentials.email } });
                 let user = users[0];
-                yield this.secureService.comparePassword(credentials.password, user.password);
+                if (credentials.type === 'password') {
+                    yield this.secureService.comparePassword(credentials.password, user.password);
+                }
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 yield this.messagesService.sendEmail({
                     from: 'info@olivierriccini.com',

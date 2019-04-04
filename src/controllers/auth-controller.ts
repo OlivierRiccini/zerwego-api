@@ -22,6 +22,7 @@ export class AuthController {
 
   @Post('/login')
   async login(@Body() credentials: IUserCredentials, @Res() response: any) {
+    console.log(credentials);
     let token: string;
     if (credentials.type === 'facebook') {
       token = await this.authService.handleFacebookLogin(credentials);
