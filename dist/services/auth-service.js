@@ -22,15 +22,21 @@ const user_model_1 = require("../models/user-model");
 const routing_controllers_1 = require("routing-controllers");
 const secure_service_1 = require("./secure-service");
 const messages_service_1 = require("./messages-service");
+const generator = require('generate-password');
 let AuthService = class AuthService {
     constructor() { }
     register(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
+                const nonHashedPassword = user.password;
                 user.password = yield this.secureService.hashPassword(user);
                 user = yield this.userDAO.create(req);
                 const tokens = yield this.secureService.generateAuthTokens(user);
+                yield this.messagesService.sendSMS({
+                    phone: '+14383991332',
+                    content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
+                });
                 return tokens.accessToken;
             }
             catch (err) {
@@ -47,17 +53,18 @@ let AuthService = class AuthService {
                 if (credentials.type === 'password') {
                     yield this.secureService.comparePassword(credentials.password, user.password);
                 }
+                // TODO; Maybe verify facebook token
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                yield this.messagesService.sendEmail({
-                    from: 'info@olivierriccini.com',
-                    subject: 'Welcome to Zerwego',
-                    to: user.email,
-                    content: `Welcome: ${user.name.toUpperCase()}!`
-                });
-                yield this.messagesService.sendSMS({
-                    phone: '+14383991332',
-                    content: `Welcome: ${user.name.toUpperCase()}!`
-                });
+                // await this.messagesService.sendEmail({
+                //         from: 'info@olivierriccini.com',
+                //         subject: 'Welcome to Zerwego',
+                //         to: user.email,
+                //         content: `Welcome: ${user.name.toUpperCase()}!`
+                //     });
+                // await this.messagesService.sendSMS({
+                //     phone: '+14383991332',
+                //     content: `Welcome: ${user.name.toUpperCase()}!`
+                // });
                 return tokens.accessToken;
             }
             catch (err) {
@@ -69,15 +76,22 @@ let AuthService = class AuthService {
     handleFacebookLogin(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.userDAO.find({ find: { email: credentials.email } });
+            const password = generator.generate({
+                length: 10,
+                numbers: true
+            });
             if (users && users.length < 1) {
                 const newUser = {
                     name: credentials.name,
                     email: credentials.email,
-                    password: 'test',
+                    password,
                     facebookId: credentials.facebookId
                 };
                 return yield this.register(newUser);
             }
+            let user = users[0];
+            user.facebookId = credentials.facebookId;
+            yield this.userDAO.update(user, user.id);
             return yield this.login(credentials);
         });
     }
