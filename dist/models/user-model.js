@@ -5,8 +5,6 @@ const dao_1 = require("../persist/dao");
 const validator_1 = require("validator");
 const debug = require('debug')('DAO');
 delete mongoose.connection.models['User'];
-;
-;
 class UserDAO extends dao_1.DAOImpl {
     constructor() {
         const UserSchema = new mongoose.Schema({
@@ -22,6 +20,7 @@ class UserDAO extends dao_1.DAOImpl {
                     message: '{VALUE} is not a valid email'
                 }
             },
+            phone: String,
             password: {
                 type: String,
                 require: true,

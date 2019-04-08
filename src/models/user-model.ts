@@ -10,15 +10,20 @@ export type LoginType =
 | 'password'
 | 'facebook' 
 
+export type ForgotPasswordMode = 
+| 'email'
+| 'sms'
+
 //Interface for model
 export interface IUser {
     id?: string,
     _id?: ObjectID,
     name?: string,
     email?: string,
+    phone?: string,
     password: string,
     facebookId?: string
-};
+}
 
 export interface IUserCredentials {
     name?: string,
@@ -26,7 +31,13 @@ export interface IUserCredentials {
     email: string,
     password?: string,
     facebookId?: string
-};
+}
+
+export interface IForgotPassword {
+    type: ForgotPasswordMode,
+    email?: string,
+    phone?: string
+}
 
 // Document
 export interface UserDocument extends IUser, mongoose.Document {
@@ -49,6 +60,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                     message: '{VALUE} is not a valid email'
                 }
             },
+            phone: String,
             password: {
                 type: String,
                 require: true,

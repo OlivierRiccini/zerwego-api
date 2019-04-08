@@ -73,6 +73,37 @@ let AuthService = class AuthService {
         });
     }
     ;
+    forgotPassword(contact) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('------------ 2 -----------');
+                const result = yield this.generateNewPassword(contact);
+                console.log('------------ 3 -----------');
+                switch (contact.type) {
+                    case 'email':
+                        yield this.messagesService.sendEmail({
+                            from: 'info@olivierriccini.com',
+                            to: contact.email,
+                            subject: 'New Password',
+                            content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
+                        });
+                        break;
+                    case 'sms':
+                        console.log('------------ 4 -----------');
+                        yield this.messagesService.sendSMS({
+                            phone: contact.phone,
+                            content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
+                        });
+                        break;
+                    default:
+                        throw new routing_controllers_1.BadRequestError('Something went wrong while reinitilizing password');
+                }
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
     handleFacebookLogin(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.userDAO.find({ find: { email: credentials.email } });
@@ -106,6 +137,24 @@ let AuthService = class AuthService {
         });
     }
     ;
+    generateNewPassword(contact) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = contact.type === 'email' ? { email: contact.email } : { phone: contact.phone };
+            const users = yield this.userDAO.find({ find: query });
+            if (!users || users.length < 1) {
+                throw new routing_controllers_1.HttpError(400, 'No user was found during password reinitilization process');
+            }
+            const user = users[0];
+            const newPassword = generator.generate({
+                length: 10,
+                numbers: true
+            });
+            user.password = newPassword;
+            user.password = yield this.secureService.hashPassword(user);
+            yield this.userDAO.update(user, user.id);
+            return { newPassword, user };
+        });
+    }
 };
 __decorate([
     typedi_1.Inject(),

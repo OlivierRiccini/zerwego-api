@@ -55,16 +55,18 @@ let AuthController = class AuthController {
             return 'Successfully logged in!';
         });
     }
-    facebookLogin() {
-        // await this.authSocialService.facebookLogin();
-        debug('POST /auth/facebook => Successfully facebookLogin!');
-        return 'Zeubi trop fort!';
-    }
     logout(token) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.authService.logout(token);
             debug('POST /user/out => Successfully logged out!');
             return 'Successfully logged out!';
+        });
+    }
+    forgotPassord(contact) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('------------ 1 -----------');
+            yield this.authService.forgotPassword(contact);
+            return 'New Password created!';
         });
     }
 };
@@ -91,46 +93,23 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    routing_controllers_1.UseBefore(passport.authenticate('facebook', { session: false })),
-    routing_controllers_1.Post('/facebook'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AuthController.prototype, "facebookLogin", null);
-__decorate([
     routing_controllers_1.Delete('/logout/:token'),
     __param(0, routing_controllers_1.Param('token')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
+__decorate([
+    routing_controllers_1.Post('/forgot-password'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassord", null);
 AuthController = __decorate([
     routing_controllers_1.JsonController('/auth'),
     typedi_1.Service(),
     __metadata("design:paramtypes", [])
 ], AuthController);
 exports.AuthController = AuthController;
-passport.use('facebook', new FacebookStrategy({
-    clientID: '2290018351254667',
-    clientSecret: 'a2fde04b194e78d424a75ad0422ffce2'
-}, (accessToken, refreshToken, profile, done) => __awaiter(this, void 0, void 0, function* () {
-    try {
-        console.log('accessToken ' + accessToken);
-        console.log('refreshToken ' + refreshToken);
-        console.log('profile ' + profile);
-    }
-    catch (err) {
-        console.log('ERROR: ' + err);
-        done(err, false, err.message);
-    }
-    // next();
-    // return profile;
-    // response(accessToken);
-    // console.log('cb ' + cb);
-    // In this example, the user's Facebook profile is supplied as the user
-    // record. In a production-quality application, the Facebook profile should
-    // be associated with a user record in the application's database, which
-    // allows for account linking and authentication with other identity
-    // providers.
-})));
 //# sourceMappingURL=auth-controller.js.map

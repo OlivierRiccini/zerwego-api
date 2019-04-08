@@ -1,5 +1,5 @@
 import { Service, Inject } from "typedi";
-import { UserDAO, IUserCredentials } from '../models/user-model';
+import { UserDAO, IUserCredentials, IForgotPassword, IUser } from '../models/user-model';
 import { HttpError, BadRequestError } from "routing-controllers";
 import { SecureService } from "./secure-service";
 import { MessagesService } from "./messages-service";
@@ -58,6 +58,35 @@ export class AuthService {
         }
     };
 
+    public async forgotPassword(contact: IForgotPassword) {
+        try {
+            console.log('------------ 2 -----------');
+            const result = await this.generateNewPassword(contact);
+            console.log('------------ 3 -----------');
+            switch(contact.type) {
+                case 'email':
+                    await this.messagesService.sendEmail({
+                        from: 'info@olivierriccini.com',
+                        to: contact.email,
+                        subject: 'New Password',
+                        content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
+                    });
+                    break;
+                case 'sms':
+                console.log('------------ 4 -----------');
+                await this.messagesService.sendSMS({
+                    phone: contact.phone,
+                    content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
+                });
+                    break;
+                default:
+                    throw new BadRequestError('Something went wrong while reinitilizing password');
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
     public async handleFacebookLogin(credentials: IUserCredentials): Promise<string> {
         const users = await this.userDAO.find({find:{email: credentials.email}});
         const password = generator.generate({
@@ -86,4 +115,21 @@ export class AuthService {
             throw new HttpError(400, err);
         }
     };
+
+    private async generateNewPassword(contact: IForgotPassword): Promise<{newPassword: string, user: IUser}> {
+        const query = contact.type === 'email' ? {email: contact.email} : {phone: contact.phone};
+        const users = await this.userDAO.find({find:query});
+        if (!users || users.length < 1) {
+            throw new HttpError(400, 'No user was found during password reinitilization process')
+        }
+        const user = users[0];
+        const newPassword = generator.generate({
+            length: 10,
+            numbers: true
+        });
+        user.password = newPassword;
+        user.password = await this.secureService.hashPassword(user);
+        await this.userDAO.update(user, user.id);
+        return {newPassword, user};
+    }
 }
