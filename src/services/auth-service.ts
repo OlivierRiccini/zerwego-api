@@ -60,9 +60,7 @@ export class AuthService {
 
     public async forgotPassword(contact: IForgotPassword) {
         try {
-            console.log('------------ 2 -----------');
             const result = await this.generateNewPassword(contact);
-            console.log('------------ 3 -----------');
             switch(contact.type) {
                 case 'email':
                     await this.messagesService.sendEmail({
@@ -73,7 +71,6 @@ export class AuthService {
                     });
                     break;
                 case 'sms':
-                console.log('------------ 4 -----------');
                 await this.messagesService.sendSMS({
                     phone: contact.phone,
                     content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
@@ -118,9 +115,9 @@ export class AuthService {
 
     private async generateNewPassword(contact: IForgotPassword): Promise<{newPassword: string, user: IUser}> {
         const query = contact.type === 'email' ? {email: contact.email} : {phone: contact.phone};
-        const users = await this.userDAO.find({find:query});
-        if (!users || users.length < 1) {
-            throw new HttpError(400, 'No user was found during password reinitilization process')
+        const users = await this.userDAO.find({find: query});
+        if (!users || users.length < 1 || users.length > 1) {
+            throw new HttpError(400, 'No user or more than one user found during password reinitilization process')
         }
         const user = users[0];
         const newPassword = generator.generate({

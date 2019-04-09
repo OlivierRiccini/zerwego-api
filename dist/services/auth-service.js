@@ -76,9 +76,7 @@ let AuthService = class AuthService {
     forgotPassword(contact) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('------------ 2 -----------');
                 const result = yield this.generateNewPassword(contact);
-                console.log('------------ 3 -----------');
                 switch (contact.type) {
                     case 'email':
                         yield this.messagesService.sendEmail({
@@ -89,7 +87,6 @@ let AuthService = class AuthService {
                         });
                         break;
                     case 'sms':
-                        console.log('------------ 4 -----------');
                         yield this.messagesService.sendSMS({
                             phone: contact.phone,
                             content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
@@ -141,8 +138,8 @@ let AuthService = class AuthService {
         return __awaiter(this, void 0, void 0, function* () {
             const query = contact.type === 'email' ? { email: contact.email } : { phone: contact.phone };
             const users = yield this.userDAO.find({ find: query });
-            if (!users || users.length < 1) {
-                throw new routing_controllers_1.HttpError(400, 'No user was found during password reinitilization process');
+            if (!users || users.length < 1 || users.length > 1) {
+                throw new routing_controllers_1.HttpError(400, 'No user or more than one user found during password reinitilization process');
             }
             const user = users[0];
             const newPassword = generator.generate({
