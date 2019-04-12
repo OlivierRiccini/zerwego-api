@@ -33,10 +33,10 @@ let AuthService = class AuthService {
                 user.password = yield this.secureService.hashPassword(user);
                 user = yield this.userDAO.create(req);
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                yield this.messagesService.sendSMS({
-                    phone: '+14383991332',
-                    content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
-                });
+                // await this.messagesService.sendSMS({
+                //     phone: '+14383991332',
+                //     content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
+                // });
                 return tokens.accessToken;
             }
             catch (err) {

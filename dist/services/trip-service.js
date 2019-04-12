@@ -66,7 +66,7 @@ let TripService = class TripService {
             const registeredUsers = yield this.userDAO.find({ find: { 'email': { $in: emails } } });
             const unRegisteredUsers = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
             for (const participant of trip.participants) {
-                if (participant.status === 'admin') {
+                if (participant.isAdmin) {
                     yield this.sendConfirmation();
                 }
                 else if (registeredUsers.indexOf(participant) >= 0) {

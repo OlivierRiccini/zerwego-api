@@ -4,7 +4,6 @@ import { DAOImpl } from '../persist/dao';
 
 delete mongoose.connection.models['Trip'];
 
-//Interface for model
 export interface ITrip {
     id?: string,
     _id?: ObjectID,
@@ -17,7 +16,6 @@ export interface ITrip {
 };
 
 export type ParticipationStatus = 
-| 'admin'
 | 'pending'
 | 'request_accepted'
 | 'request_rejected'
@@ -29,10 +27,10 @@ export interface IParticipant {
         email: string,
         name: string
     },
+    isAdmin?: boolean,
     status: ParticipationStatus
 }
 
-// Document
 export interface TripDocument extends ITrip, mongoose.Document {
     id: string,
     _id: ObjectID
@@ -52,6 +50,7 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
                 email: String,
                 name: String
             },
+            isAdmin: Boolean,
             status: String 
         }, { _id: false });
 

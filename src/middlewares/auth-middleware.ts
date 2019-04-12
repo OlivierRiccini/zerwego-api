@@ -72,11 +72,11 @@ export class Authenticate implements ExpressMiddlewareInterface {
             if (!trip) {
                 return false;
             }
-            const admin = trip.participants.find(user => user.userId === userId);
-            if (!admin) {
+            const user = trip.participants.find(user => user.userId === userId);
+            if (!user) {
                 return false;
             }
-            if (admin && admin.status === 'admin') {
+            if (user && user.isAdmin) {
                 return true;
             }
             return false;

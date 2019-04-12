@@ -56,7 +56,7 @@ export class TripService {
         const unRegisteredUsers: any [] = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
 
         for (const participant of trip.participants) {
-            if (participant.status === 'admin') {
+            if (participant.isAdmin) {
                 await this.sendConfirmation();
             } else if (registeredUsers.indexOf(participant) >= 0) {
                 participant.status = 'pending';

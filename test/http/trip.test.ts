@@ -89,7 +89,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
           { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
           { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
           { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -141,7 +141,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
           { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
           { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
           { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -163,7 +163,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     }
   );
 
-  it.only('POSITIVE - Should create a valid trip if user authenticated', async () => {
+  it('POSITIVE - Should create a valid trip if user authenticated', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const validTrip: ITrip = {
         _id: new ObjectId('111111111111111111111111'),
@@ -173,7 +173,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
           { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
           { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
           { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -194,7 +194,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.body).to.have.property('startDate');
           expect(response.body).to.have.property('endDate');
           expect(response.body).to.have.property('participants');
-          expect(response.body.participants[0]).to.have.property('status').to.equal('admin');
+          expect(response.body.participants[0]).to.have.property('isAdmin').to.equal(true);
         },
         err => {
           debug(err)
@@ -213,7 +213,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
           { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
           { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
           { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -230,8 +230,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       })
   });
 
-  it.only('POSITIVE - Should delete a trip if user is Admin only', async () => {
-    
+  it('POSITIVE - Should delete a trip if user is Admin only', async () => {
     const ObjectId = mongoose.Types.ObjectId;
     const trip : ITrip = {
         _id: new ObjectId(),
@@ -241,7 +240,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
           { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
           { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
           { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -281,7 +280,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
           { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
           { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
           { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -319,7 +318,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
         { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
         { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
         { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -339,7 +338,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       endDate: new Date('2019-03-25'),
       participants: [
         { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'pending' },
-        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'admin' },
+        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'request_accepted', isAdmin: true },
         { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
         { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
       ]
@@ -371,7 +370,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
         { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
         { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
         { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
@@ -390,7 +389,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'admin' },
+        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
         { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
         { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
         { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },

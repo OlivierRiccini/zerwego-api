@@ -20,10 +20,10 @@ export class AuthService {
             user.password = await this.secureService.hashPassword(user);
             user = await this.userDAO.create(req);
             const tokens = await this.secureService.generateAuthTokens(user);
-            await this.messagesService.sendSMS({
-                phone: '+14383991332',
-                content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
-            });
+            // await this.messagesService.sendSMS({
+            //     phone: '+14383991332',
+            //     content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
+            // });
             return tokens.accessToken;
         } catch (err) {
             throw new HttpError(400, 'Smothing went wrong while creating new user');

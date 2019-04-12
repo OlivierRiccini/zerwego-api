@@ -12,6 +12,7 @@ class TripDAO extends dao_1.DAOImpl {
                 email: String,
                 name: String
             },
+            isAdmin: Boolean,
             status: String
         }, { _id: false });
         const TripSchema = new mongoose.Schema({
