@@ -40,6 +40,7 @@ let Authenticate = class Authenticate {
                     accessToken = accessToken.slice(7, accessToken.length);
                 }
                 if (accessToken && (yield this.secureService.accessTokenIsExpired(accessToken))) {
+                    console.log('-------------------- middleware ---------------');
                     accessToken = yield this.secureService.refreshTokens(accessToken);
                     // refreshToken = tokens.refreshToken;
                     response.set('Access-Control-Expose-Headers', '*');

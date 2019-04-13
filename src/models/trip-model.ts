@@ -25,7 +25,8 @@ export interface IParticipant {
     userId?: string,
     info: {
         username: string,
-        email: string
+        email?: string,
+        phone?: string
     },
     isAdmin?: boolean,
     status: ParticipationStatus

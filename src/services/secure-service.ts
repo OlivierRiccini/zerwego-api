@@ -16,6 +16,7 @@ export class SecureService {
     constructor() {};
 
     public async generateAuthTokens(user: IUser, refreshing?: boolean, secureId?: string): Promise<ITokens> {
+        console.log('------------------- generateAuthTokens --------------------');
         try {
             const accessToken = await this.generateAccessToken(user);
             const refreshToken = await this.generateRefreshToken(accessToken, user);
@@ -31,6 +32,7 @@ export class SecureService {
     }
 
     public async refreshTokens(token: string): Promise<string> {
+        console.log('--------------------- refreshTokens --------------------');
         try {
             const secure = await this.findISecureByAccessToken(token);
             const refreshToken = secure.refreshToken;
@@ -57,12 +59,13 @@ export class SecureService {
         try {
             await jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
         } catch (err) {
-            return err.username && err.username === 'TokenExpiredError'
+            return err.name && err.name === 'TokenExpiredError'
         }
         return false;
     }
 
     public async refreshTokenIsExpired(refreshToken: string): Promise<boolean> {
+        console.log('-------------------- refreshTokenIsExpired ---------------');
         try {
             const decodedRefreshToken = jwt.decode(refreshToken);
             const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
@@ -72,17 +75,20 @@ export class SecureService {
             const secret = CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
             jwt.verify(refreshToken, secret, null);
         } catch (err) {
-            return err.username && err.username === 'TokenExpiredError'
+            return err.name && err.name === 'TokenExpiredError'
         }
         return false;
     }
 
     private async findISecureByAccessToken(accessToken: string): Promise<ISecure> {
+        console.log('-------------------- findISecureByAccessToken ---------------');
         const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
+        console.log(results);
         return results.length > 0 ? results[0] : null;
     }
 
     private async generateAccessToken(user: IUser): Promise<string> {
+        console.log('-------------------- generateAccessToken ---------------');
         const payload = {
             id: user.id,
             username: user.username,
@@ -93,6 +99,7 @@ export class SecureService {
     }
 
     private async generateRefreshToken(accessToken: string, user: IUser): Promise<string> {
+        console.log('-------------------- generateRefreshToken ---------------');
         const payload = { accessToken, userId: user.id };
         const refreshSecret = CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
         const refreshToken = await jwt.sign({payload}, refreshSecret, { expiresIn: '30s' }).toString();
