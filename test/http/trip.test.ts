@@ -89,10 +89,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post Malone' }, status: 'not_registred' },
         ]
     };
     
@@ -141,10 +141,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
         ]
     };
     const response = await request
@@ -173,10 +173,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
         ]
     }
 
@@ -213,10 +213,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
         ]
     }
 
@@ -240,10 +240,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', username: 'ost malone' }, status: 'not_registred' },
         ]
     };
     
@@ -280,10 +280,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
         ]
     };
     
@@ -318,10 +318,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
       ]
     };
     
@@ -337,10 +337,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'pending' },
-        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'request_accepted', isAdmin: true },
-        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'pending' },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'request_accepted', isAdmin: true },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
       ]
     }
 
@@ -370,10 +370,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
       ]
     };
     
@@ -389,10 +389,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, name: USER.name }, status: 'request_accepted', isAdmin: true },
-        { userId: USER_2.id, info: { email: USER_2.email, name: USER_2.name }, status: 'pending' },
-        { userId: null, info: { email: 'info@olivierriccini.com', name: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', name: 'ost malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
       ]
     }
 

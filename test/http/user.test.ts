@@ -24,7 +24,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   const request = chai.request(app).keepOpen();
 
   let validUser: IUser = {
-    name: 'Lebron',
+    username: 'Lebron',
     email: 'lebron.james@lakers.com',
     password: 'Iamtheking',
   };
@@ -56,7 +56,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
   it('Should signUp a user and get token back set in the header', async () => {
     const newUser: IUser = {
-      name: 'Steph',
+      username: 'Steph',
       email: 'steph.curry@warrriors.com',
       password: 'shoot',
     };
@@ -77,7 +77,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     expect(response.status).to.equal(200);
     expect(user).to.have.property('id');
-    expect(user).to.have.property('name');
+    expect(user).to.have.property('username');
     expect(user).to.have.property('email');
   });
 
@@ -112,7 +112,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     expect(response.status).to.equal(200);
     expect(user).to.have.property('id');
-    expect(user).to.have.property('name');
+    expect(user).to.have.property('username');
     expect(user).to.have.property('email');
   });
 

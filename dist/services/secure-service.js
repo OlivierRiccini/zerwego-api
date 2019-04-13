@@ -77,7 +77,7 @@ let SecureService = class SecureService {
                 yield jwt.verify(token, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
             }
             catch (err) {
-                return err.name && err.name === 'TokenExpiredError';
+                return err.username && err.username === 'TokenExpiredError';
             }
             return false;
         });
@@ -94,7 +94,7 @@ let SecureService = class SecureService {
                 jwt.verify(refreshToken, secret, null);
             }
             catch (err) {
-                return err.name && err.name === 'TokenExpiredError';
+                return err.username && err.username === 'TokenExpiredError';
             }
             return false;
         });
@@ -109,7 +109,7 @@ let SecureService = class SecureService {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = {
                 id: user.id,
-                name: user.name,
+                username: user.username,
                 email: user.email
             };
             const accessToken = yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();

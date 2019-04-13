@@ -67,13 +67,13 @@ export class AuthService {
                         from: 'info@olivierriccini.com',
                         to: contact.email,
                         subject: 'New Password',
-                        content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
+                        content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
                     });
                     break;
                 case 'sms':
                 await this.messagesService.sendSMS({
                     phone: contact.phone,
-                    content: `Hey ${result.user.name.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
+                    content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
                 });
                     break;
                 default:
@@ -92,7 +92,7 @@ export class AuthService {
         });
         if (users && users.length < 1) {
             const newUser = {
-                name: credentials.name,
+                username: credentials.username,
                 email: credentials.email,
                 password,
                 facebookId: credentials.facebookId

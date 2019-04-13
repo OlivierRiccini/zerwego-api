@@ -9,8 +9,8 @@ class TripDAO extends dao_1.DAOImpl {
         const ParticipantSchema = new mongoose.Schema({
             userId: String,
             info: {
-                email: String,
-                name: String
+                username: String,
+                email: String
             },
             isAdmin: Boolean,
             status: String

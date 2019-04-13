@@ -57,7 +57,7 @@ export class SecureService {
         try {
             await jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
         } catch (err) {
-            return err.name && err.name === 'TokenExpiredError'
+            return err.username && err.username === 'TokenExpiredError'
         }
         return false;
     }
@@ -72,7 +72,7 @@ export class SecureService {
             const secret = CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
             jwt.verify(refreshToken, secret, null);
         } catch (err) {
-            return err.name && err.name === 'TokenExpiredError'
+            return err.username && err.username === 'TokenExpiredError'
         }
         return false;
     }
@@ -85,7 +85,7 @@ export class SecureService {
     private async generateAccessToken(user: IUser): Promise<string> {
         const payload = {
             id: user.id,
-            name: user.name,
+            username: user.username,
             email: user.email
         };
         const accessToken = await jwt.sign({payload}, CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();

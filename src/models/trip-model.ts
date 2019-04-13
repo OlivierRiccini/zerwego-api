@@ -24,8 +24,8 @@ export type ParticipationStatus =
 export interface IParticipant {
     userId?: string,
     info: {
-        email: string,
-        name: string
+        username: string,
+        email: string
     },
     isAdmin?: boolean,
     status: ParticipationStatus
@@ -37,7 +37,7 @@ export interface TripDocument extends ITrip, mongoose.Document {
 }
 
 export interface IWaitingUser {
-    name: string,
+    username: string,
     email: string
 }
 
@@ -47,8 +47,8 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
         const ParticipantSchema = new mongoose.Schema({
             userId: String,
             info: {
-                email: String,
-                name: String
+                username: String,
+                email: String
             },
             isAdmin: Boolean,
             status: String 

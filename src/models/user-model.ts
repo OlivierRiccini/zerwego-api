@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose';
 import { ObjectID } from 'bson';
 import { DAOImpl } from '../persist/dao';
 import validator from 'validator';
+import { ContactMode } from './shared-interfaces';
 const debug = require('debug')('DAO');
 
 delete mongoose.connection.models['User'];
@@ -10,15 +11,11 @@ export type LoginType =
 | 'password'
 | 'facebook' 
 
-export type ForgotPasswordMode = 
-| 'email'
-| 'sms'
-
 //Interface for model
 export interface IUser {
     id?: string,
     _id?: ObjectID,
-    name?: string,
+    username?: string,
     email?: string,
     phone?: string,
     password: string,
@@ -26,7 +23,7 @@ export interface IUser {
 }
 
 export interface IUserCredentials {
-    name?: string,
+    username?: string,
     type: LoginType,
     email: string,
     password?: string,
@@ -34,7 +31,7 @@ export interface IUserCredentials {
 }
 
 export interface IForgotPassword {
-    type: ForgotPasswordMode,
+    type: ContactMode,
     email?: string,
     phone?: string
 }
@@ -49,7 +46,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
     constructor() {
         const UserSchema = new mongoose.Schema({
             _id: String,
-            name: String,
+            username: String,
             email: {
                 type: String,
                 required: true,

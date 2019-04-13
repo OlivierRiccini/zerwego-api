@@ -9,7 +9,7 @@ class UserDAO extends dao_1.DAOImpl {
     constructor() {
         const UserSchema = new mongoose.Schema({
             _id: String,
-            name: String,
+            username: String,
             email: {
                 type: String,
                 required: true,
