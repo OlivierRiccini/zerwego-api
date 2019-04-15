@@ -19,7 +19,7 @@ export type ParticipationStatus =
 | 'pending'
 | 'request_accepted'
 | 'request_rejected'
-| 'not_registred'
+| 'not_registered'
 
 export interface IParticipant {
     userId?: string,
@@ -29,7 +29,7 @@ export interface IParticipant {
         phone?: string
     },
     isAdmin?: boolean,
-    status: ParticipationStatus
+    status?: ParticipationStatus
 }
 
 export interface TripDocument extends ITrip, mongoose.Document {

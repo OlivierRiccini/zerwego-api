@@ -12,7 +12,7 @@ export class TripService {
 
     constructor() { }
     
-    public async findTrips(userId: string){
+    public async findTrips(userId: string): Promise<ITrip[]> {
         return this.tripDAO.find({
             find: {
                 'participants.userId': userId
@@ -54,16 +54,20 @@ export class TripService {
         
         const registeredUsers: any[] = await this.userDAO.find({find: {'email': { $in: emails }}});
         const unRegisteredUsers: any [] = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
-
+        
         for (const participant of trip.participants) {
-            if (participant.isAdmin) {
+            const registeredUser: IUser = registeredUsers.find(user => user.email === participant.info.email);
+            if (participant.isAdmin && registeredUser) {
+                participant.userId = registeredUser.id;
+                participant.status = 'pending';
                 await this.sendConfirmation();
-            } else if (registeredUsers.indexOf(participant) >= 0) {
+            } else if (registeredUser) {
+                participant.userId =  registeredUser.id;
                 participant.status = 'pending';
                 await this.sendTripRequest('pending');
-            } else if (unRegisteredUsers.indexOf(participant) >= 0) {
-                participant.status = 'not_registred';
-                await this.sendTripRequest('not_registred');
+            } else if (!registeredUser) {
+                participant.status = 'not_registered';
+                await this.sendTripRequest('not_registered');
             } else {
                 throw new HttpError(400, 'Something went wring while handling partipants');
             }

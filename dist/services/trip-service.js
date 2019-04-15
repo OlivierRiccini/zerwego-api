@@ -66,16 +66,20 @@ let TripService = class TripService {
             const registeredUsers = yield this.userDAO.find({ find: { 'email': { $in: emails } } });
             const unRegisteredUsers = _.differenceWith(trip.participants, registeredUsers, _.isEqual);
             for (const participant of trip.participants) {
-                if (participant.isAdmin) {
+                const registeredUser = registeredUsers.find(user => user.email === participant.info.email);
+                if (participant.isAdmin && registeredUser) {
+                    participant.userId = registeredUser.id;
+                    participant.status = 'pending';
                     yield this.sendConfirmation();
                 }
-                else if (registeredUsers.indexOf(participant) >= 0) {
+                else if (registeredUser) {
+                    participant.userId = registeredUser.id;
                     participant.status = 'pending';
                     yield this.sendTripRequest('pending');
                 }
-                else if (unRegisteredUsers.indexOf(participant) >= 0) {
-                    participant.status = 'not_registred';
-                    yield this.sendTripRequest('not_registred');
+                else if (!registeredUser) {
+                    participant.status = 'not_registered';
+                    yield this.sendTripRequest('not_registered');
                 }
                 else {
                     throw new routing_controllers_1.HttpError(400, 'Something went wring while handling partipants');

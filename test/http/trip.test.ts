@@ -89,10 +89,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', username: 'Post Malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post Malone' }},
         ]
     };
     
@@ -118,7 +118,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
             expect(response.body).to.have.property('participants').to.have.length(4);
             expect(response.body.participants[0]).to.have.property('status').to.equal('admin');
             expect(response.body.participants[1]).to.have.property('status').to.equal('pending');
-            expect(response.body.participants[2]).to.have.property('status').to.equal('not_registred');
+            expect(response.body.participants[2]).to.have.property('status').to.equal('not_registered');
           },
           err => {
             debug(err);
@@ -141,10 +141,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
         ]
     };
     const response = await request
@@ -173,10 +173,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+          { info: { email: USER.email, username: USER.username }, isAdmin: true },
+          { info: { email: USER_2.email, username: USER_2.username } },
+          { info: { email: 'info@olivierriccini.com', username: 'olivier' } },
+          { info: { email: 'info@postmalone.com', username: 'Post malone' } },
         ]
     }
 
@@ -195,6 +195,14 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
           expect(response.body).to.have.property('endDate');
           expect(response.body).to.have.property('participants');
           expect(response.body.participants[0]).to.have.property('isAdmin').to.equal(true);
+          expect(response.body.participants[0]).to.have.property('userId').to.equal(USER.id);
+          expect(response.body.participants[0]).to.have.property('status').to.equal('pending');
+          expect(response.body.participants[1]).to.have.property('userId').to.equal(USER_2.id);
+          expect(response.body.participants[1]).to.have.property('status').to.equal('pending');
+          expect(response.body.participants[2]).to.not.have.property('userId');
+          expect(response.body.participants[2]).to.have.property('status').to.equal('not_registered');
+          expect(response.body.participants[3]).to.not.have.property('userId');
+          expect(response.body.participants[3]).to.have.property('status').to.equal('not_registered');
         },
         err => {
           debug(err)
@@ -213,10 +221,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
         ]
     }
 
@@ -240,10 +248,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', username: 'ost malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+          { userId: null, info: { email: 'info@postmalone.com', username: 'ost malone' }},
         ]
     };
     
@@ -280,10 +288,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
         startDate: new Date('2019-03-12'),
         endDate: new Date('2019-03-25'),
         participants: [
-          { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+          { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+          { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+          { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+          { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
         ]
     };
     
@@ -318,10 +326,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
       ]
     };
     
@@ -337,10 +345,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'pending' },
-        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'request_accepted', isAdmin: true },
-        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username } },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, isAdmin: true },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
       ]
     }
 
@@ -370,10 +378,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
       ]
     };
     
@@ -389,10 +397,10 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
       startDate: new Date('2019-03-12'),
       endDate: new Date('2019-03-25'),
       participants: [
-        { userId: USER.id, info: { email: USER.email, username: USER.username }, status: 'request_accepted', isAdmin: true },
-        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username }, status: 'pending' },
-        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }, status: 'not_registred' },
-        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }, status: 'not_registred' },
+        { userId: USER.id, info: { email: USER.email, username: USER.username }, isAdmin: true },
+        { userId: USER_2.id, info: { email: USER_2.email, username: USER_2.username } },
+        { userId: null, info: { email: 'info@olivierriccini.com', username: 'olivier' }},
+        { userId: null, info: { email: 'info@postmalone.com', username: 'Post malone' }},
       ]
     }
 

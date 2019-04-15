@@ -30,7 +30,6 @@ let SecureService = class SecureService {
     ;
     generateAuthTokens(user, refreshing, secureId) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('------------------- generateAuthTokens --------------------');
             try {
                 const accessToken = yield this.generateAccessToken(user);
                 const refreshToken = yield this.generateRefreshToken(accessToken, user);
@@ -49,7 +48,6 @@ let SecureService = class SecureService {
     }
     refreshTokens(token) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('--------------------- refreshTokens --------------------');
             try {
                 const secure = yield this.findISecureByAccessToken(token);
                 const refreshToken = secure.refreshToken;
@@ -86,7 +84,6 @@ let SecureService = class SecureService {
     }
     refreshTokenIsExpired(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('-------------------- refreshTokenIsExpired ---------------');
             try {
                 const decodedRefreshToken = jwt.decode(refreshToken);
                 const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
@@ -104,7 +101,6 @@ let SecureService = class SecureService {
     }
     findISecureByAccessToken(accessToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('-------------------- findISecureByAccessToken ---------------');
             const results = yield this.secureDAO.find({ find: { _accessToken: accessToken } });
             console.log(results);
             return results.length > 0 ? results[0] : null;
@@ -112,7 +108,6 @@ let SecureService = class SecureService {
     }
     generateAccessToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('-------------------- generateAccessToken ---------------');
             const payload = {
                 id: user.id,
                 username: user.username,
@@ -124,7 +119,6 @@ let SecureService = class SecureService {
     }
     generateRefreshToken(accessToken, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('-------------------- generateRefreshToken ---------------');
             const payload = { accessToken, userId: user.id };
             const refreshSecret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
             const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: '30s' }).toString();

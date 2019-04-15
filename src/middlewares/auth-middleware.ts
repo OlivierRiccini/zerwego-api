@@ -32,7 +32,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
             }   
 
             if (accessToken && await this.secureService.accessTokenIsExpired(accessToken)) {
-                console.log('-------------------- middleware ---------------');
                 accessToken = await this.secureService.refreshTokens(accessToken);
                 // refreshToken = tokens.refreshToken;
                 response.set('Access-Control-Expose-Headers', '*');
