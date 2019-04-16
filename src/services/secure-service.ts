@@ -41,7 +41,6 @@ export class SecureService {
                 const decodedRefreshToken = jwt.decode(refreshToken);
                 const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
                 const users = await this.userDAO.find({find: { id: userId}});
-                // console.log(users);
                 if (users.length <= 0) {
                     throw new HttpError(404, 'User was not found while refreshing tokens');
                 }
@@ -79,7 +78,6 @@ export class SecureService {
 
     private async findISecureByAccessToken(accessToken: string): Promise<ISecure> {
         const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
-        console.log(results);
         return results.length > 0 ? results[0] : null;
     }
 
@@ -89,14 +87,14 @@ export class SecureService {
             username: user.username,
             email: user.email
         };
-        const accessToken = await jwt.sign({payload}, CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();
+        const accessToken = await jwt.sign({payload}, CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: CONSTANTS.ACCESS_TOKEN_EXPIRES_IN }).toString();
         return accessToken;
     }
 
     private async generateRefreshToken(accessToken: string, user: IUser): Promise<string> {
         const payload = { accessToken, userId: user.id };
         const refreshSecret = CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
-        const refreshToken = await jwt.sign({payload}, refreshSecret, { expiresIn: '30s' }).toString();
+        const refreshToken = await jwt.sign({payload}, refreshSecret, { expiresIn: CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
         return refreshToken;
     }
 

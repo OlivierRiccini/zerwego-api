@@ -27,7 +27,6 @@ export class AuthController {
 
   @Post('/login')
   async login(@Body() credentials: IUserCredentials, @Res() response: any) {
-    console.log(credentials);
     let token: string;
     if (credentials.type === 'facebook') {
       token = await this.authService.handleFacebookLogin(credentials);
@@ -49,7 +48,6 @@ export class AuthController {
 
   @Post('/forgot-password')
   async forgotPassord(@Body() contact: IForgotPassword) {
-    console.log('------------ 1 -----------');
     await this.authService.forgotPassword(contact);
     return 'New Password created!'
   }

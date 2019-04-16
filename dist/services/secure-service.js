@@ -58,7 +58,6 @@ let SecureService = class SecureService {
                     const decodedRefreshToken = jwt.decode(refreshToken);
                     const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
                     const users = yield this.userDAO.find({ find: { id: userId } });
-                    // console.log(users);
                     if (users.length <= 0) {
                         throw new routing_controllers_1.HttpError(404, 'User was not found while refreshing tokens');
                     }
@@ -102,7 +101,6 @@ let SecureService = class SecureService {
     findISecureByAccessToken(accessToken) {
         return __awaiter(this, void 0, void 0, function* () {
             const results = yield this.secureDAO.find({ find: { _accessToken: accessToken } });
-            console.log(results);
             return results.length > 0 ? results[0] : null;
         });
     }
@@ -113,7 +111,7 @@ let SecureService = class SecureService {
                 username: user.username,
                 email: user.email
             };
-            const accessToken = yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: '10s' }).toString();
+            const accessToken = yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: constants_1.CONSTANTS.ACCESS_TOKEN_EXPIRES_IN }).toString();
             return accessToken;
         });
     }
@@ -121,7 +119,7 @@ let SecureService = class SecureService {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = { accessToken, userId: user.id };
             const refreshSecret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
-            const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: '30s' }).toString();
+            const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: constants_1.CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
             return refreshToken;
         });
     }

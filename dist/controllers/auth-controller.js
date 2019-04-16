@@ -41,7 +41,6 @@ let AuthController = class AuthController {
     }
     login(credentials, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(credentials);
             let token;
             if (credentials.type === 'facebook') {
                 token = yield this.authService.handleFacebookLogin(credentials);
@@ -64,7 +63,6 @@ let AuthController = class AuthController {
     }
     forgotPassord(contact) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('------------ 1 -----------');
             yield this.authService.forgotPassword(contact);
             return 'New Password created!';
         });

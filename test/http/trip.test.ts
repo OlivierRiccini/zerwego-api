@@ -42,12 +42,22 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     USER_2_TOKEN = user2.token;
   });
 
+  // beforeEach('', async () => {
+  //   const user1 = await userHelper.getUserAndToken(MODELS_DATA.User[0]);
+  //   USER = user1.user;
+  //   USER_TOKEN = user1.token;
+  //   const user2 = await userHelper.getUserAndToken(MODELS_DATA.User[1]);
+  //   USER_2 = user2.user;
+  //   USER_2_TOKEN = user2.token;
+  // })
+
   afterEach('Clean up', async () => {
     await tripHelper.deleteAllTrips();
-    await userHelper.deleteAllUsers();
+    // await userHelper.deleteAllUsers();
   }); 
 
   after('Clean up', async () => {
+    // await userHelper.deleteAllUsers();
     generalHelper.cleanDB()
   }); 
 
@@ -116,7 +126,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
             expect(response.body).to.have.property('startDate');
             expect(response.body).to.have.property('endDate');
             expect(response.body).to.have.property('participants').to.have.length(4);
-            expect(response.body.participants[0]).to.have.property('status').to.equal('admin');
+            expect(response.body.participants[0]).to.have.property('status').to.equal('pending');
             expect(response.body.participants[1]).to.have.property('status').to.equal('pending');
             expect(response.body.participants[2]).to.have.property('status').to.equal('not_registered');
           },
