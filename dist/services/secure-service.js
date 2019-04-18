@@ -100,6 +100,7 @@ let SecureService = class SecureService {
     }
     findISecureByAccessToken(accessToken) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(accessToken);
             const results = yield this.secureDAO.find({ find: { _accessToken: accessToken } });
             return results.length > 0 ? results[0] : null;
         });

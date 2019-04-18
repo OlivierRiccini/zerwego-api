@@ -5,8 +5,8 @@
       "MONGODB_URI": "mongodb://127.0.0.1:27017/zerwego-api-test",
       "ACCESS_TOKEN_SECRET": "cjze!9XN!HJKCÀKkd!!!HXjgV",
       "REFRESH_TOKEN_SECRET": "guyg6Wfty898xvx7!!!HXjgV",
-      "ACCESS_TOKEN_EXPIRES_IN": "10S",
-      "REFRESH_TOKEN_EXPIRES_IN": "60S",
+      "ACCESS_TOKEN_EXPIRES_IN": "5S",
+      "REFRESH_TOKEN_EXPIRES_IN": "10S",
       "amqp": "amqp://localhost",
       "queue": "nodemailer-amqp",
       "server": {

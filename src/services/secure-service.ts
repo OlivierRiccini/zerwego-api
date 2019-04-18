@@ -77,6 +77,7 @@ export class SecureService {
     }
 
     private async findISecureByAccessToken(accessToken: string): Promise<ISecure> {
+        console.log(accessToken);
         const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
         return results.length > 0 ? results[0] : null;
     }

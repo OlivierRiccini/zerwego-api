@@ -20,7 +20,8 @@ chai.use(chaiHttp);
 chai.should();
 
 describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
-  
+  this.timeout(15000);
+
   const request = chai.request(app).keepOpen();
 
   let validUser: IUser = {
@@ -62,8 +63,8 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     };
 
     const response = await request
-    .post('/auth/register')
-    .send(newUser);
+      .post('/auth/register')
+      .send(newUser);
        
     expect(response.header).to.have.property('authorization');
 
@@ -81,9 +82,33 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(user).to.have.property('email');
   });
 
-  it('POSITIVE - Should create a refresh token when login or signup', async () => {
-    
-  })
+  it.only('POSITIVE - Token should expire', done => {
+      // const test = text => console.log(text);
+      const newUser: IUser = {
+        username: 'Steph',
+        email: 'steph.curry@warrriors.com',
+        password: 'shoot',
+      };
+  
+      request.post('/auth/register').send(newUser).then(
+        response => {
+          let token = response.header['authorization'];
+          if (token.startsWith('Bearer ')) {
+            token = token.slice(7, token.length);
+          }
+          console.log('waiting 6s .....')
+          setTimeout(() => {
+            try {
+              const payload =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+              expect(payload).to.not.have.property('payload');
+            } catch (err) {
+              expect(err).to.have.property('name').to.equal('TokenExpiredError');
+            }
+            done() 
+          }, 6000); 
+        }
+      )
+  });
 
   it.skip('Should signOut a user by removing token', async () => {
     const response = await request
