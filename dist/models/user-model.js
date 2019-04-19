@@ -8,7 +8,6 @@ delete mongoose.connection.models['User'];
 class UserDAO extends dao_1.DAOImpl {
     constructor() {
         const UserSchema = new mongoose.Schema({
-            _id: String,
             username: String,
             email: {
                 type: String,

@@ -16,7 +16,6 @@ class TripDAO extends dao_1.DAOImpl {
             status: String
         }, { _id: false });
         const TripSchema = new mongoose.Schema({
-            id: String,
             tripName: String,
             destination: String,
             imageUrl: String,

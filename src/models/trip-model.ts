@@ -56,7 +56,6 @@ export class TripDAO extends DAOImpl<ITrip, TripDocument> {
         }, { _id: false });
 
         const TripSchema = new mongoose.Schema({
-            id: String,
             tripName: String,
             destination: String,
             imageUrl: String,

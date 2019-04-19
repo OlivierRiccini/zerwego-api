@@ -65,7 +65,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                 }
                 let document = res.toObject();
                 debug('create a document - OK => ' + JSON.stringify(document));
-                resolve(this.toClient(document));
+                resolve(this.idNormalizator(document));
             });
         })
     };
@@ -80,7 +80,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     reject(new Error(`Document with id => ${id} not found`));
                 } else {
                     debug('get - OK => ' + JSON.stringify(document));
-                    resolve(this.toClient(document));
+                    resolve(this.idNormalizator(document));
                 }
             })
         })
@@ -95,7 +95,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     debug('findById - FAILED => No documents found');
                     reject(new Error("No documents found"));
                 } else {
-                    resolve(this.toClient(res));
+                    resolve(this.idNormalizator(res));
                 }
             })
         });
@@ -111,14 +111,14 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
                 }
                 const _id = id ? new ObjectID(id) : new ObjectID( obj.id ? obj.id : obj._id);
-                this.model.findById(_id).exec(
+                this.model.findOne({_id}).exec(
                     (err, found) => {
                         if (err) { reject(err) };
                         if (!found) { resolve(found) };
                         let updated = _.merge(found, obj);
                         updated.save(
                             (err, updated) => {
-                                err ? reject(err) : resolve(this.toClient(updated).toObject())
+                                err ? reject(err) : resolve(this.idNormalizator(updated).toObject())
                             }
                         )
                     }
@@ -166,7 +166,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                     debug('find - FAILED => No documents found');
                     reject(new Error("No documents found"));
                 } else {
-                    resolve(this.toClient(res));
+                    resolve(this.idNormalizator(res));
                 }
             })
         });
@@ -200,7 +200,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
         });
     };
 
-    private toClient(data: any) {
+    private idNormalizator(data: any) {
         if (_.isArray(data)) {
             return _.map(data, obj => {
                 obj.id = obj._id ? obj._id.toString() : obj.id;

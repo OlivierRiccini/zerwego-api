@@ -100,8 +100,10 @@ export class AuthService {
             return await this.register(newUser);
         }
         let user = users[0];
-        user.facebookId = credentials.facebookId;
-        await this.userDAO.update(user, user.id);
+        if (!user.facebookId) {
+            user.facebookId = credentials.facebookId;
+            await this.userDAO.update(user, user.id);
+        }
         return await this.login(credentials);
     }
 

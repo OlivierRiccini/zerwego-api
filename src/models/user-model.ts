@@ -45,7 +45,6 @@ export interface UserDocument extends IUser, mongoose.Document {
 export class UserDAO extends DAOImpl<IUser, UserDocument> {
     constructor() {
         const UserSchema = new mongoose.Schema({
-            _id: String,
             username: String,
             email: {
                 type: String,

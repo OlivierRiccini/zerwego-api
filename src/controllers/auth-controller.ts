@@ -1,7 +1,7 @@
 const debug = require('debug')('http');
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook');
-import {JsonController, Body, Post, Res, Delete, Param, UseBefore} from "routing-controllers";
+import {JsonController, Body, Post, Res, Delete, Param, UseBefore, HeaderParam} from "routing-controllers";
 import { IUser, IUserCredentials, IForgotPassword } from "../models/user-model";
 import { Service, Inject } from "typedi";
 import { AuthService } from "../services/auth-service";
@@ -39,8 +39,8 @@ export class AuthController {
     return 'Successfully logged in!';
   }
   
-  @Delete('/logout/:token')
-  async logout(@Param('token') token: string) {
+  @Delete('/logout')
+  async logout(@HeaderParam("authorization") token: string) {
     await this.authService.logout(token);
     debug('POST /user/out => Successfully logged out!');
     return 'Successfully logged out!';

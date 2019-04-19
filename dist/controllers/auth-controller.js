@@ -91,8 +91,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    routing_controllers_1.Delete('/logout/:token'),
-    __param(0, routing_controllers_1.Param('token')),
+    routing_controllers_1.Delete('/logout'),
+    __param(0, routing_controllers_1.HeaderParam("authorization")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

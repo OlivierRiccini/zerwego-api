@@ -35,7 +35,7 @@ class DAOImpl {
                 }
                 let document = res.toObject();
                 debug('create a document - OK => ' + JSON.stringify(document));
-                resolve(this.toClient(document));
+                resolve(this.idNormalizator(document));
             });
         });
     }
@@ -51,7 +51,7 @@ class DAOImpl {
                 }
                 else {
                     debug('get - OK => ' + JSON.stringify(document));
-                    resolve(this.toClient(document));
+                    resolve(this.idNormalizator(document));
                 }
             });
         });
@@ -67,7 +67,7 @@ class DAOImpl {
                     reject(new Error("No documents found"));
                 }
                 else {
-                    resolve(this.toClient(res));
+                    resolve(this.idNormalizator(res));
                 }
             });
         });
@@ -82,7 +82,7 @@ class DAOImpl {
                 return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
             }
             const _id = id ? new bson_1.ObjectID(id) : new bson_1.ObjectID(obj.id ? obj.id : obj._id);
-            this.model.findById(_id).exec((err, found) => {
+            this.model.findOne({ _id }).exec((err, found) => {
                 if (err) {
                     reject(err);
                 }
@@ -93,7 +93,7 @@ class DAOImpl {
                 ;
                 let updated = _.merge(found, obj);
                 updated.save((err, updated) => {
-                    err ? reject(err) : resolve(this.toClient(updated).toObject());
+                    err ? reject(err) : resolve(this.idNormalizator(updated).toObject());
                 });
             });
         });
@@ -138,7 +138,7 @@ class DAOImpl {
                     reject(new Error("No documents found"));
                 }
                 else {
-                    resolve(this.toClient(res));
+                    resolve(this.idNormalizator(res));
                 }
             });
         });
@@ -172,7 +172,7 @@ class DAOImpl {
         });
     }
     ;
-    toClient(data) {
+    idNormalizator(data) {
         if (_.isArray(data)) {
             return _.map(data, obj => {
                 obj.id = obj._id ? obj._id.toString() : obj.id;

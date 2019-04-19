@@ -18,10 +18,10 @@ export interface SecureDocument extends ISecure, mongoose.Document {
     _id: ObjectID
 }
 
+
 export class SecureDAO extends DAOImpl<ISecure, SecureDocument> {
     constructor() {
         const SecureSchema = new mongoose.Schema({
-            id: String,
             refreshToken: String,
             _accessToken: String
         });

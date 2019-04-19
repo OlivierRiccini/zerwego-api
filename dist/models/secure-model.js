@@ -7,7 +7,6 @@ delete mongoose.connection.models['Secure'];
 class SecureDAO extends dao_1.DAOImpl {
     constructor() {
         const SecureSchema = new mongoose.Schema({
-            id: String,
             refreshToken: String,
             _accessToken: String
         });

@@ -118,8 +118,10 @@ let AuthService = class AuthService {
                 return yield this.register(newUser);
             }
             let user = users[0];
-            user.facebookId = credentials.facebookId;
-            yield this.userDAO.update(user, user.id);
+            if (!user.facebookId) {
+                user.facebookId = credentials.facebookId;
+                yield this.userDAO.update(user, user.id);
+            }
             return yield this.login(credentials);
         });
     }

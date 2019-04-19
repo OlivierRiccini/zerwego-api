@@ -57,16 +57,14 @@ let SecureService = class SecureService {
                 else {
                     const decodedRefreshToken = jwt.decode(refreshToken);
                     const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
-                    const users = yield this.userDAO.find({ find: { id: userId } });
-                    if (users.length <= 0) {
-                        throw new routing_controllers_1.HttpError(404, 'User was not found while refreshing tokens');
-                    }
-                    const tokens = yield this.generateAuthTokens(users[0], true, secure.id);
+                    // const users = await this.userDAO.find({find: { id: userId}});
+                    const user = yield this.userDAO.get(userId);
+                    const tokens = yield this.generateAuthTokens(user, true, secure.id);
                     return tokens.accessToken;
                 }
             }
             catch (err) {
-                throw new routing_controllers_1.HttpError(400, err);
+                throw new routing_controllers_1.HttpError(err.httpCode, err.message);
             }
         });
     }
@@ -100,7 +98,9 @@ let SecureService = class SecureService {
     }
     findISecureByAccessToken(accessToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(accessToken);
+            if (accessToken.startsWith('Bearer ')) {
+                accessToken = accessToken.slice(7, accessToken.length);
+            }
             const results = yield this.secureDAO.find({ find: { _accessToken: accessToken } });
             return results.length > 0 ? results[0] : null;
         });

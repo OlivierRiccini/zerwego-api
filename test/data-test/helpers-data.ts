@@ -7,6 +7,7 @@ import chaiHttp = require('chai-http');
 import { MODELS_DATA } from './common-data';
 import * as jwt from 'jsonwebtoken';
 import { CONSTANTS } from '../../src/persist/constants';
+import { ISecure, SecureDAO } from '../../src/models/secure-model';
 var mongoose = require('mongoose');
 
 chai.use(chaiHttp);
@@ -63,7 +64,7 @@ export class UserHelper {
             token = token.slice(7, token.length);
         }
 
-        const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+        const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
         const userResponse = decoded['payload'];
         return { user: userResponse, token };
     }
@@ -71,4 +72,17 @@ export class UserHelper {
     public async deleteAllUsers() {
         return this.userDAO.deleteAll();  
     }
+
+    public find
+}
+
+export class AuthHelper {
+    public secureDAO: SecureDAO;
+    constructor() {
+        this.secureDAO = new SecureDAO()
+    }
+    // public async findSecureByAccessToken(accessToken: string): Promise<ISecure> {
+    //     // const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
+    //     // return results.length > 0 ? results[0] : null;
+    // }
 }
