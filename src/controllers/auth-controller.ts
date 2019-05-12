@@ -18,8 +18,12 @@ export class AuthController {
 
   @Post('/register')
   async registerUser(@Body() user: IUser, @Res() response: any) {
-    const token = await this.authService.register(user);
-    const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
+    const tokens = await this.authService.register(user);
+    const headers = {
+      jwt: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      'Access-Control-Expose-Headers': '*'
+    };
     response.header(headers);
     debug('POST /user/register => Successfully registered!');
     return 'Successfully registered!';
@@ -27,22 +31,43 @@ export class AuthController {
 
   @Post('/login')
   async login(@Body() credentials: IUserCredentials, @Res() response: any) {
-    let token: string;
+    let tokens: any;
     if (credentials.type === 'facebook') {
-      token = await this.authService.handleFacebookLogin(credentials);
+      tokens = await this.authService.handleFacebookLogin(credentials);
     } else {
-      token = await this.authService.login(credentials);
+      tokens = await this.authService.login(credentials);
     }
-    const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
+    const headers = {
+      jwt: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      'Access-Control-Expose-Headers': '*'
+    };
     response.header(headers);
     debug('POST /user/login => Successfully logged in!');
     return 'Successfully logged in!';
   }
-  
-  @Delete('/logout')
-  async logout(@HeaderParam("authorization") token: string) {
-    await this.authService.logout(token);
-    debug('POST /user/out => Successfully logged out!');
+
+  @Post('/refresh')
+  async refresh(@HeaderParam('refreshToken') refreshToken: string, @Body() user: IUser, @Res() response: any) {
+    console.log('***************** REFRESH ********************');
+    console.log(refreshToken);
+    const newTokens: any = await this.authService.refreshTokens(refreshToken, user);
+    console.log('****************** NEW ***********************');
+    console.log(newTokens);
+    const headers = {
+      jwt: newTokens.accessToken,
+      refreshToken: newTokens.refreshToken,
+      'Access-Control-Expose-Headers': '*'
+    };
+    response.header(headers);
+    debug('POST /user/refresh => New Tokens successfully created!');
+    return 'New Tokens successfully created!';
+  }
+
+  @Post('/logout')
+  async logout(@HeaderParam('refreshToken') refreshToken: string) {
+    await this.authService.logout(refreshToken);
+    debug('POST /user/logout => Successfully logged out!');
     return 'Successfully logged out!';
   }
 

@@ -15,38 +15,13 @@ export class SecureService {
 
     constructor() {};
 
-    public async generateAuthTokens(user: IUser, refreshing?: boolean, secureId?: string): Promise<ITokens> {
+    public async generateAuthTokens(user: IUser): Promise<ITokens> {
         try {
             const accessToken = await this.generateAccessToken(user);
-            const refreshToken = await this.generateRefreshToken(accessToken, user);
-            if (!refreshing) {
-                await this.secureDAO.create({refreshToken, _accessToken: accessToken});
-            } else {
-                await this.secureDAO.update({refreshToken, _accessToken: accessToken}, secureId);
-            }
+            const refreshToken = await this.generateRefreshToken(user);
             return { refreshToken, accessToken };
         } catch (err) {
             throw new HttpError(401, 'Error while generating tokens');
-        }
-    }
-
-    public async refreshTokens(token: string): Promise<string> {
-        try {
-            const secure = await this.findISecureByAccessToken(token);
-            const refreshToken = secure.refreshToken;
-            
-            if (await this.refreshTokenIsExpired(refreshToken)) {
-                throw new HttpError(403, 'Refresh token is expired, user has to login');
-            } else {
-                const decodedRefreshToken = jwt.decode(refreshToken);
-                const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
-                // const users = await this.userDAO.find({find: { id: userId}});
-                const user = await this.userDAO.get(userId);
-                const tokens: ITokens= await this.generateAuthTokens(user, true, secure.id);
-                return tokens.accessToken;
-            }
-        } catch (err) {
-            throw new HttpError(err.httpCode, err.message);
         }
     }
 
@@ -64,7 +39,7 @@ export class SecureService {
             const decodedRefreshToken = jwt.decode(refreshToken);
             const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
             if (users.length <= 0) {
-                throw new HttpError(404, 'User was not found while refreshing tokens');
+                throw new HttpError(401, 'User was not found while refreshing tokens');
             }
             const secret = CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
             jwt.verify(refreshToken, secret, null);
@@ -74,15 +49,7 @@ export class SecureService {
         return false;
     }
 
-    public async findISecureByAccessToken(accessToken: string): Promise<ISecure> {
-        if (accessToken.startsWith('Bearer ')) {
-            accessToken = accessToken.slice(7, accessToken.length);
-        }
-        const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
-        return results.length > 0 ? results[0] : null;
-    }
-
-    private async generateAccessToken(user: IUser): Promise<string> {
+    public async generateAccessToken(user: IUser): Promise<string> {
         const payload = {
             id: user.id,
             username: user.username,
@@ -92,19 +59,28 @@ export class SecureService {
         return accessToken;
     }
 
-    private async generateRefreshToken(accessToken: string, user: IUser): Promise<string> {
-        const payload = { accessToken, userId: user.id };
-        const refreshSecret = CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
-        const refreshToken = await jwt.sign({payload}, refreshSecret, { expiresIn: CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
-        return refreshToken;
+    public async generateRefreshToken(user: IUser): Promise<string> {
+        try {
+            const payload = { userId: user.id };
+            const refreshSecret = CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
+            const refreshToken = await jwt.sign({payload}, refreshSecret, { expiresIn: CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
+            await this.secureDAO.create({ refreshToken });
+            return refreshToken;
+        } catch (err) {
+            throw new HttpError(404, err.message);
+        }
     }
 
-    public async removeSecure(token: string): Promise<void> {
-        const secure: ISecure = await this.findISecureByAccessToken(token);
-        if (secure) {
-            await this.secureDAO.delete(secure.id);
-        } else {
-            throw new HttpError(400, 'Something went wrong while removing token');
+    public async removeRefreshToken(refreshToken: string): Promise<void> {
+        try {
+            console.log(refreshToken);
+            const secures: ISecure[] = await this.secureDAO.find({find: { refreshToken }});
+            if (secures && secures.length < 1) {
+                throw new HttpError(401, 'Refresh token not found when trying to delete it');
+            }
+            await this.secureDAO.delete(secures[0].id);
+        } catch (err) {
+            throw new HttpError(404, err.message);
         }
     }
 

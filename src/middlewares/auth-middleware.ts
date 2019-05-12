@@ -20,26 +20,19 @@ export class Authenticate implements ExpressMiddlewareInterface {
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
         let accessToken = request.header('Authorization');  
+        console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
+        console.log(accessToken);
+        console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
         // let refreshToken = request.header('Refresh_token');  
         try {
             if (!accessToken) {
                 throw new HttpError(401, 'No authorization token provided');
             }
-
             if (accessToken.startsWith('Bearer ')) {
                 // Remove Bearer from string
                 accessToken = accessToken.slice(7, accessToken.length);
-            }   
-
-            if (accessToken && await this.secureService.accessTokenIsExpired(accessToken)) {
-                accessToken = await this.secureService.refreshTokens(accessToken);
-                // refreshToken = tokens.refreshToken;
-                response.set('Access-Control-Expose-Headers', '*');
-                response.set('Authorization', accessToken);
-            }
-
+            } 
             const decoded = jwt.verify(accessToken, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-
             if (typeof decoded === 'undefined') {
                 throw new HttpError(401, 'Authorizationt token cannot be decoded');
             };
@@ -57,10 +50,16 @@ export class Authenticate implements ExpressMiddlewareInterface {
                     throw new HttpError(401, 'Only administrator can perform this task');             
                 };
             }
+            console.log(accessToken);
+            console.log('####################################################################################################');
+            console.log('####################################################################################################');
+
             request.user = user;
             request.token = accessToken;
             next(); 
         } catch(err) {
+            console.log('--------------- Middleware 4 ---------------')
+            console.log(err)
             response.status(err.httpCode ? err.httpCode : 401).send(err)
         }
 

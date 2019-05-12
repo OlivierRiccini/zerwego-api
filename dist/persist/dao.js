@@ -41,6 +41,7 @@ class DAOImpl {
     }
     ;
     get(id) {
+        console.log(id);
         return new Promise((resolve, reject) => {
             this.model.findOne({ _id: new bson_1.ObjectID(id) })
                 .lean()

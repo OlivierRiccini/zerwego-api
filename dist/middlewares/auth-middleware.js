@@ -30,6 +30,9 @@ let Authenticate = class Authenticate {
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let accessToken = request.header('Authorization');
+            console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
+            console.log(accessToken);
+            console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
             // let refreshToken = request.header('Refresh_token');  
             try {
                 if (!accessToken) {
@@ -38,12 +41,6 @@ let Authenticate = class Authenticate {
                 if (accessToken.startsWith('Bearer ')) {
                     // Remove Bearer from string
                     accessToken = accessToken.slice(7, accessToken.length);
-                }
-                if (accessToken && (yield this.secureService.accessTokenIsExpired(accessToken))) {
-                    accessToken = yield this.secureService.refreshTokens(accessToken);
-                    // refreshToken = tokens.refreshToken;
-                    response.set('Access-Control-Expose-Headers', '*');
-                    response.set('Authorization', accessToken);
                 }
                 const decoded = jwt.verify(accessToken, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
                 if (typeof decoded === 'undefined') {
@@ -63,11 +60,16 @@ let Authenticate = class Authenticate {
                     }
                     ;
                 }
+                console.log(accessToken);
+                console.log('####################################################################################################');
+                console.log('####################################################################################################');
                 request.user = user;
                 request.token = accessToken;
                 next();
             }
             catch (err) {
+                console.log('--------------- Middleware 4 ---------------');
+                console.log(err);
                 response.status(err.httpCode ? err.httpCode : 401).send(err);
             }
         });

@@ -37,7 +37,7 @@ let AuthService = class AuthService {
                 //     phone: '+14383991332',
                 //     content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
                 // });
-                return tokens.accessToken;
+                return tokens;
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, 'Smothing went wrong while creating new user');
@@ -53,19 +53,8 @@ let AuthService = class AuthService {
                 if (credentials.type === 'password') {
                     yield this.secureService.comparePassword(credentials.password, user.password);
                 }
-                // TODO; Maybe verify facebook token
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                // await this.messagesService.sendEmail({
-                //         from: 'info@olivierriccini.com',
-                //         subject: 'Welcome to Zerwego',
-                //         to: user.email,
-                //         content: `Welcome: ${user.name.toUpperCase()}!`
-                //     });
-                // await this.messagesService.sendSMS({
-                //     phone: '+14383991332',
-                //     content: `Welcome: ${user.name.toUpperCase()}!`
-                // });
-                return tokens.accessToken;
+                return tokens;
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, err);
@@ -73,6 +62,21 @@ let AuthService = class AuthService {
         });
     }
     ;
+    refreshTokens(refreshToken, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const refreshTokenIsExpired = yield this.secureService.refreshTokenIsExpired(refreshToken);
+                if (refreshTokenIsExpired) {
+                    throw new routing_controllers_1.HttpError(401, 'Refresh token is no longer valid, user has to login');
+                }
+                const tokens = yield this.secureService.generateAuthTokens(user);
+                return tokens;
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(400, err);
+            }
+        });
+    }
     forgotPassword(contact) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -125,10 +129,10 @@ let AuthService = class AuthService {
             return yield this.login(credentials);
         });
     }
-    logout(token) {
+    logout(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.secureService.removeSecure(token);
+                yield this.secureService.removeRefreshToken(refreshToken);
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, err);

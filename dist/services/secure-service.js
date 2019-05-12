@@ -28,43 +28,15 @@ const secure_model_1 = require("../models/secure-model");
 let SecureService = class SecureService {
     constructor() { }
     ;
-    generateAuthTokens(user, refreshing, secureId) {
+    generateAuthTokens(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const accessToken = yield this.generateAccessToken(user);
-                const refreshToken = yield this.generateRefreshToken(accessToken, user);
-                if (!refreshing) {
-                    yield this.secureDAO.create({ refreshToken, _accessToken: accessToken });
-                }
-                else {
-                    yield this.secureDAO.update({ refreshToken, _accessToken: accessToken }, secureId);
-                }
+                const refreshToken = yield this.generateRefreshToken(user);
                 return { refreshToken, accessToken };
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(401, 'Error while generating tokens');
-            }
-        });
-    }
-    refreshTokens(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const secure = yield this.findISecureByAccessToken(token);
-                const refreshToken = secure.refreshToken;
-                if (yield this.refreshTokenIsExpired(refreshToken)) {
-                    throw new routing_controllers_1.HttpError(403, 'Refresh token is expired, user has to login');
-                }
-                else {
-                    const decodedRefreshToken = jwt.decode(refreshToken);
-                    const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
-                    // const users = await this.userDAO.find({find: { id: userId}});
-                    const user = yield this.userDAO.get(userId);
-                    const tokens = yield this.generateAuthTokens(user, true, secure.id);
-                    return tokens.accessToken;
-                }
-            }
-            catch (err) {
-                throw new routing_controllers_1.HttpError(err.httpCode, err.message);
             }
         });
     }
@@ -85,7 +57,7 @@ let SecureService = class SecureService {
                 const decodedRefreshToken = jwt.decode(refreshToken);
                 const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
                 if (users.length <= 0) {
-                    throw new routing_controllers_1.HttpError(404, 'User was not found while refreshing tokens');
+                    throw new routing_controllers_1.HttpError(401, 'User was not found while refreshing tokens');
                 }
                 const secret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
                 jwt.verify(refreshToken, secret, null);
@@ -94,15 +66,6 @@ let SecureService = class SecureService {
                 return err.name && err.name === 'TokenExpiredError';
             }
             return false;
-        });
-    }
-    findISecureByAccessToken(accessToken) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (accessToken.startsWith('Bearer ')) {
-                accessToken = accessToken.slice(7, accessToken.length);
-            }
-            const results = yield this.secureDAO.find({ find: { _accessToken: accessToken } });
-            return results.length > 0 ? results[0] : null;
         });
     }
     generateAccessToken(user) {
@@ -116,22 +79,32 @@ let SecureService = class SecureService {
             return accessToken;
         });
     }
-    generateRefreshToken(accessToken, user) {
+    generateRefreshToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const payload = { accessToken, userId: user.id };
-            const refreshSecret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
-            const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: constants_1.CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
-            return refreshToken;
+            try {
+                const payload = { userId: user.id };
+                const refreshSecret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
+                const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: constants_1.CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
+                yield this.secureDAO.create({ refreshToken });
+                return refreshToken;
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(404, err.message);
+            }
         });
     }
-    removeSecure(token) {
+    removeRefreshToken(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            const secure = yield this.findISecureByAccessToken(token);
-            if (secure) {
-                yield this.secureDAO.delete(secure.id);
+            try {
+                console.log(refreshToken);
+                const secures = yield this.secureDAO.find({ find: { refreshToken } });
+                if (secures && secures.length < 1) {
+                    throw new routing_controllers_1.HttpError(401, 'Refresh token not found when trying to delete it');
+                }
+                yield this.secureDAO.delete(secures[0].id);
             }
-            else {
-                throw new routing_controllers_1.HttpError(400, 'Something went wrong while removing token');
+            catch (err) {
+                throw new routing_controllers_1.HttpError(404, err.message);
             }
         });
     }

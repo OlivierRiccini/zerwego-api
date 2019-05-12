@@ -32,8 +32,12 @@ let AuthController = class AuthController {
     constructor() { }
     registerUser(user, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const token = yield this.authService.register(user);
-            const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
+            const tokens = yield this.authService.register(user);
+            const headers = {
+                jwt: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                'Access-Control-Expose-Headers': '*'
+            };
             response.header(headers);
             debug('POST /user/register => Successfully registered!');
             return 'Successfully registered!';
@@ -41,23 +45,44 @@ let AuthController = class AuthController {
     }
     login(credentials, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            let token;
+            let tokens;
             if (credentials.type === 'facebook') {
-                token = yield this.authService.handleFacebookLogin(credentials);
+                tokens = yield this.authService.handleFacebookLogin(credentials);
             }
             else {
-                token = yield this.authService.login(credentials);
+                tokens = yield this.authService.login(credentials);
             }
-            const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
+            const headers = {
+                jwt: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                'Access-Control-Expose-Headers': '*'
+            };
             response.header(headers);
             debug('POST /user/login => Successfully logged in!');
             return 'Successfully logged in!';
         });
     }
-    logout(token) {
+    refresh(refreshToken, user, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.authService.logout(token);
-            debug('POST /user/out => Successfully logged out!');
+            console.log('***************** REFRESH ********************');
+            console.log(refreshToken);
+            const newTokens = yield this.authService.refreshTokens(refreshToken, user);
+            console.log('****************** NEW ***********************');
+            console.log(newTokens);
+            const headers = {
+                jwt: newTokens.accessToken,
+                refreshToken: newTokens.refreshToken,
+                'Access-Control-Expose-Headers': '*'
+            };
+            response.header(headers);
+            debug('POST /user/refresh => New Tokens successfully created!');
+            return 'New Tokens successfully created!';
+        });
+    }
+    logout(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.authService.logout(refreshToken);
+            debug('POST /user/logout => Successfully logged out!');
             return 'Successfully logged out!';
         });
     }
@@ -91,8 +116,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    routing_controllers_1.Delete('/logout'),
-    __param(0, routing_controllers_1.HeaderParam("authorization")),
+    routing_controllers_1.Post('/refresh'),
+    __param(0, routing_controllers_1.HeaderParam('refreshToken')), __param(1, routing_controllers_1.Body()), __param(2, routing_controllers_1.Res()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "refresh", null);
+__decorate([
+    routing_controllers_1.Post('/logout'),
+    __param(0, routing_controllers_1.HeaderParam('refreshToken')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

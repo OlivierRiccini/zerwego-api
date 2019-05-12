@@ -13,7 +13,7 @@ export class AuthService {
     
     constructor() { }
 
-    public async register(req: any): Promise<string> {         
+    public async register(req: any): Promise<any> {         
         try {
             let user = req;
             const nonHashedPassword = user.password;
@@ -24,39 +24,38 @@ export class AuthService {
             //     phone: '+14383991332',
             //     content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
             // });
-            return tokens.accessToken;
+            return tokens;
         } catch (err) {
             throw new HttpError(400, 'Smothing went wrong while creating new user');
         }
     };
 
-    public async login(credentials: IUserCredentials): Promise<string> {
+    public async login(credentials: IUserCredentials): Promise<any> {
         try {
             let users = await this.userDAO.find({find:{email: credentials.email}});
             let user = users[0];
             if (credentials.type === 'password') {
                 await this.secureService.comparePassword(credentials.password, user.password);
             }
-
-            // TODO; Maybe verify facebook token
-            const tokens = await this.secureService.generateAuthTokens(user);
-            // await this.messagesService.sendEmail({
-            //         from: 'info@olivierriccini.com',
-            //         subject: 'Welcome to Zerwego',
-            //         to: user.email,
-            //         content: `Welcome: ${user.name.toUpperCase()}!`
-            //     });
-
-            // await this.messagesService.sendSMS({
-            //     phone: '+14383991332',
-            //     content: `Welcome: ${user.name.toUpperCase()}!`
-            // });
-
-            return tokens.accessToken;
+            const tokens = await this.secureService.generateAuthTokens(user);  
+            return tokens;
         } catch (err) {
             throw new HttpError(400, err);
         }
     };
+
+    public async refreshTokens(refreshToken: string, user: IUser) {
+        try {
+            const refreshTokenIsExpired: boolean = await this.secureService.refreshTokenIsExpired(refreshToken);
+            if (refreshTokenIsExpired) {
+                throw new HttpError(401, 'Refresh token is no longer valid, user has to login');
+            }
+            const tokens = await this.secureService.generateAuthTokens(user);
+            return tokens;
+        } catch (err) {
+            throw new HttpError(400, err);
+        }
+    }
 
     public async forgotPassword(contact: IForgotPassword) {
         try {
@@ -107,9 +106,9 @@ export class AuthService {
         return await this.login(credentials);
     }
 
-    public async logout(token: string): Promise<void> {
+    public async logout(refreshToken: string): Promise<void> {
         try {
-            await this.secureService.removeSecure(token);
+            await this.secureService.removeRefreshToken(refreshToken);
         } catch (err) {
             throw new HttpError(400, err);
         }
