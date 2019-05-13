@@ -44,16 +44,22 @@ export class AuthService {
         }
     };
 
-    public async refreshTokens(refreshToken: string, user: IUser) {
+    public async refreshTokens(refreshToken: string, userId: string) {
         try {
+            console.log('"""""""""""""""""""" 1 """""""""""""""""""""""');
+            const user: IUser= await this.userDAO.get(userId)
+            console.log(user);
             const refreshTokenIsExpired: boolean = await this.secureService.refreshTokenIsExpired(refreshToken);
+            console.log('""""""""""""""""""" 3 """""""""""""""""""""""');
+            console.log(refreshTokenIsExpired);
             if (refreshTokenIsExpired) {
+                // console.log('Refresh token is no longer valid, user has to login');
                 throw new HttpError(401, 'Refresh token is no longer valid, user has to login');
             }
             const tokens = await this.secureService.generateAuthTokens(user);
             return tokens;
         } catch (err) {
-            throw new HttpError(400, err);
+            throw new HttpError(err.httpCode, err.message);
         }
     }
 

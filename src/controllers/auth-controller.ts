@@ -1,18 +1,18 @@
 const debug = require('debug')('http');
-const passport = require('passport');
-const FacebookStrategy = require('passport-facebook');
-import {JsonController, Body, Post, Res, Delete, Param, UseBefore, HeaderParam} from "routing-controllers";
+// const passport = require('passport');
+// const FacebookStrategy = require('passport-facebook');
+import {JsonController, Body, Post, Res, HeaderParam} from "routing-controllers";
 import { IUser, IUserCredentials, IForgotPassword } from "../models/user-model";
 import { Service, Inject } from "typedi";
 import { AuthService } from "../services/auth-service";
-import { AuthSocialService } from "../services/auth-social.service";
+// import { AuthSocialService } from "../services/auth-social.service";
 // import { AuthFacebook } from "../middlewares/auth-facebook-middleware";
 
 @JsonController('/auth')
 @Service()
 export class AuthController {
   @Inject() private authService: AuthService;
-  @Inject() private authSocialService: AuthSocialService;
+  // @Inject() private authSocialService: AuthSocialService;
   
   constructor() { }
 
@@ -49,11 +49,7 @@ export class AuthController {
 
   @Post('/refresh')
   async refresh(@HeaderParam('refreshToken') refreshToken: string, @Body() user: IUser, @Res() response: any) {
-    console.log('***************** REFRESH ********************');
-    console.log(refreshToken);
-    const newTokens: any = await this.authService.refreshTokens(refreshToken, user);
-    console.log('****************** NEW ***********************');
-    console.log(newTokens);
+    const newTokens: any = await this.authService.refreshTokens(refreshToken, user.id);
     const headers = {
       jwt: newTokens.accessToken,
       refreshToken: newTokens.refreshToken,

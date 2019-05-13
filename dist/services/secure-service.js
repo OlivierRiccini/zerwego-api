@@ -53,16 +53,31 @@ let SecureService = class SecureService {
     }
     refreshTokenIsExpired(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('---------------- refreshToken ---------------------------');
+            console.log(refreshToken);
+            console.log('--------------------------------------------------');
             try {
                 const decodedRefreshToken = jwt.decode(refreshToken);
                 const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
+                // TODO: change this way
                 if (users.length <= 0) {
                     throw new routing_controllers_1.HttpError(401, 'User was not found while refreshing tokens');
                 }
+                console.log('------------------- users ------------------------');
+                console.log(users[0]);
                 const secret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
-                jwt.verify(refreshToken, secret, null);
+                console.log('------------------- secret ------------------------');
+                console.log(secret);
+                console.log('--------------------------------------------------');
+                const test = jwt.verify(refreshToken, secret, null);
+                console.log('---------------- verify ---------------------------');
+                console.log(test);
+                console.log('--------------------------------------------------');
             }
             catch (err) {
+                console.log('--------------------------------------------------');
+                console.log(err);
+                console.log('--------------------------------------------------');
                 return err.name && err.name === 'TokenExpiredError';
             }
             return false;
@@ -96,7 +111,6 @@ let SecureService = class SecureService {
     removeRefreshToken(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log(refreshToken);
                 const secures = yield this.secureDAO.find({ find: { refreshToken } });
                 if (secures && secures.length < 1) {
                     throw new routing_controllers_1.HttpError(401, 'Refresh token not found when trying to delete it');

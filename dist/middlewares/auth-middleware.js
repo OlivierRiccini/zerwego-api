@@ -22,7 +22,6 @@ const trip_model_1 = require("../models/trip-model");
 const jwt = require("jsonwebtoken");
 const typedi_1 = require("typedi");
 const constants_1 = require("../persist/constants");
-const secure_service_1 = require("../services/secure-service");
 let Authenticate = class Authenticate {
     constructor(isAdmin) {
         this.isAdmin = isAdmin;
@@ -30,10 +29,6 @@ let Authenticate = class Authenticate {
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let accessToken = request.header('Authorization');
-            console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-            console.log(accessToken);
-            console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-            // let refreshToken = request.header('Refresh_token');  
             try {
                 if (!accessToken) {
                     throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
@@ -60,16 +55,11 @@ let Authenticate = class Authenticate {
                     }
                     ;
                 }
-                console.log(accessToken);
-                console.log('####################################################################################################');
-                console.log('####################################################################################################');
                 request.user = user;
                 request.token = accessToken;
                 next();
             }
             catch (err) {
-                console.log('--------------- Middleware 4 ---------------');
-                console.log(err);
                 response.status(err.httpCode ? err.httpCode : 401).send(err);
             }
         });
@@ -98,10 +88,6 @@ let Authenticate = class Authenticate {
 };
 __decorate([
     typedi_1.Inject(),
-    __metadata("design:type", secure_service_1.SecureService)
-], Authenticate.prototype, "secureService", void 0);
-__decorate([
-    typedi_1.Inject(),
     __metadata("design:type", trip_model_1.TripDAO)
 ], Authenticate.prototype, "tripDAO", void 0);
 Authenticate = __decorate([
@@ -109,7 +95,6 @@ Authenticate = __decorate([
     __metadata("design:paramtypes", [Boolean])
 ], Authenticate);
 exports.Authenticate = Authenticate;
-// @Middleware()
 class AdminOnly extends Authenticate {
     constructor() {
         super(true);

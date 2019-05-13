@@ -1,15 +1,11 @@
-import { ExpressMiddlewareInterface, HttpError, NotFoundError } from "routing-controllers";
-import { UserDAO } from "../models/user-model";
+import { ExpressMiddlewareInterface, HttpError } from "routing-controllers";
 import { TripDAO, ITrip } from "../models/trip-model";
 import * as jwt from 'jsonwebtoken';
 import { Service, Inject } from "typedi";
 import { CONSTANTS } from '../persist/constants'
-import { SecureService } from "../services/secure-service";
-import { SecureDAO } from "../models/secure-model";
 
 @Service()
 export class Authenticate implements ExpressMiddlewareInterface {
-    @Inject() private secureService: SecureService;
     @Inject() private tripDAO: TripDAO;
 
     private isAdmin: boolean;
@@ -20,10 +16,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
         let accessToken = request.header('Authorization');  
-        console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-        console.log(accessToken);
-        console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-        // let refreshToken = request.header('Refresh_token');  
         try {
             if (!accessToken) {
                 throw new HttpError(401, 'No authorization token provided');
@@ -46,20 +38,14 @@ export class Authenticate implements ExpressMiddlewareInterface {
            if (request.url.includes('/trips') && this.isAdmin) {
                 const tripId: string = request.params.id;
                 const isTripAdmin = await this.isUserTripAdmin(user.id, tripId);
-                if (!isTripAdmin) { 
+                if (!isTripAdmin) {
                     throw new HttpError(401, 'Only administrator can perform this task');             
                 };
             }
-            console.log(accessToken);
-            console.log('####################################################################################################');
-            console.log('####################################################################################################');
-
             request.user = user;
             request.token = accessToken;
-            next(); 
+            next();
         } catch(err) {
-            console.log('--------------- Middleware 4 ---------------')
-            console.log(err)
             response.status(err.httpCode ? err.httpCode : 401).send(err)
         }
 
@@ -86,7 +72,6 @@ export class Authenticate implements ExpressMiddlewareInterface {
 
 }
 
-// @Middleware()
 export class AdminOnly extends Authenticate implements ExpressMiddlewareInterface {
     constructor() {
         super(true);
