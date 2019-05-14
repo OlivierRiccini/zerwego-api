@@ -35,9 +35,6 @@ export class SecureService {
     }
     
     public async refreshTokenIsExpired(refreshToken: string): Promise<boolean> {
-        console.log('---------------- refreshToken ---------------------------');
-        console.log(refreshToken);
-        console.log('--------------------------------------------------');
         try {
             const decodedRefreshToken = jwt.decode(refreshToken);
             const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
@@ -45,20 +42,9 @@ export class SecureService {
             if (users.length <= 0) {
                 throw new HttpError(401, 'User was not found while refreshing tokens');
             }
-            console.log('------------------- users ------------------------');
-            console.log(users[0]);
             const secret = CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
-            console.log('------------------- secret ------------------------');
-            console.log(secret);
-            console.log('--------------------------------------------------');
-            const test = jwt.verify(refreshToken, secret, null);
-            console.log('---------------- verify ---------------------------');
-            console.log(test);
-            console.log('--------------------------------------------------');
+            jwt.verify(refreshToken, secret, null);
         } catch (err) {
-            console.log('--------------------------------------------------');
-            console.log(err);
-            console.log('--------------------------------------------------');
             return err.name && err.name === 'TokenExpiredError'
         }
         return false;
