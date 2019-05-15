@@ -65,16 +65,12 @@ let AuthService = class AuthService {
     refreshTokens(refreshToken, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('"""""""""""""""""""" 1 """""""""""""""""""""""');
                 const user = yield this.userDAO.get(userId);
-                console.log(user);
                 const refreshTokenIsExpired = yield this.secureService.refreshTokenIsExpired(refreshToken);
-                console.log('""""""""""""""""""" 3 """""""""""""""""""""""');
-                console.log(refreshTokenIsExpired);
                 if (refreshTokenIsExpired) {
-                    // console.log('Refresh token is no longer valid, user has to login');
                     throw new routing_controllers_1.HttpError(401, 'Refresh token is no longer valid, user has to login');
                 }
+                // await this.secureService.removeRefreshToken(refreshToken);
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 return tokens;
             }

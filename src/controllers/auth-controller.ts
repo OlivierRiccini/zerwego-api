@@ -21,7 +21,7 @@ export class AuthController {
     const tokens = await this.authService.register(user);
     const headers = {
       jwt: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      'refresh-token': tokens.refreshToken,
       'Access-Control-Expose-Headers': '*'
     };
     response.header(headers);
@@ -39,7 +39,7 @@ export class AuthController {
     }
     const headers = {
       jwt: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
+      'refresh-token': tokens.refreshToken,
       'Access-Control-Expose-Headers': '*'
     };
     response.header(headers);
@@ -48,11 +48,11 @@ export class AuthController {
   }
 
   @Post('/refresh')
-  async refresh(@HeaderParam('refreshToken') refreshToken: string, @Body() user: IUser, @Res() response: any) {
+  async refresh(@HeaderParam('refresh-token') refreshToken: string, @Body() user: IUser, @Res() response: any) {
     const newTokens: any = await this.authService.refreshTokens(refreshToken, user.id);
     const headers = {
       jwt: newTokens.accessToken,
-      refreshToken: newTokens.refreshToken,
+      'refresh-token': newTokens.refreshToken,
       'Access-Control-Expose-Headers': '*'
     };
     response.header(headers);

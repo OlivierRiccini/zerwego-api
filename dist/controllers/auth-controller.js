@@ -36,7 +36,7 @@ let AuthController = class AuthController {
             const tokens = yield this.authService.register(user);
             const headers = {
                 jwt: tokens.accessToken,
-                refreshToken: tokens.refreshToken,
+                'refresh-token': tokens.refreshToken,
                 'Access-Control-Expose-Headers': '*'
             };
             response.header(headers);
@@ -55,7 +55,7 @@ let AuthController = class AuthController {
             }
             const headers = {
                 jwt: tokens.accessToken,
-                refreshToken: tokens.refreshToken,
+                'refresh-token': tokens.refreshToken,
                 'Access-Control-Expose-Headers': '*'
             };
             response.header(headers);
@@ -68,7 +68,7 @@ let AuthController = class AuthController {
             const newTokens = yield this.authService.refreshTokens(refreshToken, user.id);
             const headers = {
                 jwt: newTokens.accessToken,
-                refreshToken: newTokens.refreshToken,
+                'refresh-token': newTokens.refreshToken,
                 'Access-Control-Expose-Headers': '*'
             };
             response.header(headers);
@@ -110,7 +110,7 @@ __decorate([
 ], AuthController.prototype, "login", null);
 __decorate([
     routing_controllers_1.Post('/refresh'),
-    __param(0, routing_controllers_1.HeaderParam('refreshToken')), __param(1, routing_controllers_1.Body()), __param(2, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.HeaderParam('refresh-token')), __param(1, routing_controllers_1.Body()), __param(2, routing_controllers_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)

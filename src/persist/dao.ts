@@ -71,7 +71,6 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
     };
 
     get(id: number  | string): Promise<T|any> {
-        console.log(id);
         return new Promise((resolve, reject) => {
             this.model.findOne({ _id: new ObjectID(id) })
             .lean()

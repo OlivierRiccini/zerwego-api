@@ -53,9 +53,6 @@ let SecureService = class SecureService {
     }
     refreshTokenIsExpired(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('---------------- refreshToken ---------------------------');
-            console.log(refreshToken);
-            console.log('--------------------------------------------------');
             try {
                 const decodedRefreshToken = jwt.decode(refreshToken);
                 const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
@@ -63,21 +60,10 @@ let SecureService = class SecureService {
                 if (users.length <= 0) {
                     throw new routing_controllers_1.HttpError(401, 'User was not found while refreshing tokens');
                 }
-                console.log('------------------- users ------------------------');
-                console.log(users[0]);
                 const secret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
-                console.log('------------------- secret ------------------------');
-                console.log(secret);
-                console.log('--------------------------------------------------');
-                const test = jwt.verify(refreshToken, secret, null);
-                console.log('---------------- verify ---------------------------');
-                console.log(test);
-                console.log('--------------------------------------------------');
+                jwt.verify(refreshToken, secret, null);
             }
             catch (err) {
-                console.log('--------------------------------------------------');
-                console.log(err);
-                console.log('--------------------------------------------------');
                 return err.name && err.name === 'TokenExpiredError';
             }
             return false;
