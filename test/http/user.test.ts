@@ -3,16 +3,12 @@ process.env.NODE_ENV = 'test';
 var app = require('../../dist/app').app;
 
 import 'mocha';
-// import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { IUser } from '../../src/models/user-model';
+import { IUser, IUserCredentials } from '../../src/models/user-model';
 import { CONSTANTS } from '../../src/persist/constants';
 import * as jwt from 'jsonwebtoken';
 import { GeneralHelper } from '../data-test/helpers-data';
-// import { SecureService } from '../../src/services/secure-service';
-// import { ISecure, SecureDAO } from '../../src/models/secure-model';
-// import { ITrip } from '../../src/models/trip-model';
 
 const debug = require('debug')('test');
 
@@ -31,6 +27,19 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     username: 'Lebron',
     email: 'lebron.james@lakers.com',
     password: 'Iamtheking',
+    phone: '+14383991332'
+  };
+
+  const VALID_USER_CREDENTIALS_EMAIL: IUserCredentials = {
+    type: 'password',
+    email: 'lebron.james@lakers.com',
+    password: 'Iamtheking'  
+  };
+
+  const VALID_USER_CREDENTIALS_PHONE: IUserCredentials = {
+    type: 'password',
+    email: 'lebron.james@lakers.com',
+    password: 'Iamtheking'
   };
 
   let VALID_USER_TOKEN: string;
@@ -47,7 +56,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       token = token.slice(7, token.length);
     }
 
-    const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+    const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
     const user = decoded['payload'];
     // Assign id to VALID_USER to reuse in other tests
     VALID_USER.id = user.id;
@@ -58,7 +67,6 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   after('Cleaning DB', async () => {
     generalHelper.cleanDB();
   });
-
 
   it('Should signUp a user and get token back set in the header', async () => {
     const newUser: IUser = {
@@ -86,12 +94,14 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(user).to.have.property('id');
     expect(user).to.have.property('username');
     expect(user).to.have.property('email');
+
+    await request.post('/auth/logout').set('authorization', token);
   });
 
-  it('Should signIn a user and get a token back set in the header', async () => {
+  it('Should login a user using password and email, and get a token back set in the header', async () => {
     const response = await request
       .post('/auth/login')
-      .send({email: VALID_USER.email, password: VALID_USER.password});
+      .send(VALID_USER_CREDENTIALS_EMAIL);
     
     expect(response.header).to.have.property('jwt');
     
@@ -102,13 +112,89 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     }
     const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
     const user = decoded['payload'];
-
     expect(response.status).to.equal(200);
     expect(user).to.have.property('id');
     expect(user).to.have.property('username');
     expect(user).to.have.property('email');
 
+    await request.post('/auth/logout').set('authorization', VALID_USER_TOKEN);
+  });
+
+  it('Should login a user using password and phone, and get a token back set in the header', async () => {
+      const response = await request
+        .post('/auth/login')
+        .send(VALID_USER_CREDENTIALS_PHONE);
+      
+      expect(response.status).to.equal(200);
+      expect(response.header).to.have.property('jwt');
+      
+      let token = response.header['jwt'];
+      if (token.startsWith('Bearer ')) {
+        // Remove Bearer from string
+        token = token.slice(7, token.length);
+      }
+      const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+      const user = decoded['payload'];
+  
+      expect(user).to.have.property('id');
+      expect(user).to.have.property('username');
+      expect(user).to.have.property('phone');
+
     await request.del('/auth/logout').set('authorization', VALID_USER_TOKEN);
+  });
+
+  it('NEGATIVE - Should not login a user if no type was precised in credentials', async () => {
+    const response = await request
+      .post('/auth/login')
+      .send({phone: null, password: VALID_USER.password});
+    
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Credentials should have a property type equal either \'password\' or \'facebook\'');
+  });
+
+  it('NEGATIVE - Should not login a user if no email nor phone provided', async () => {
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', phone: null, password: VALID_USER.password});
+    
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('User credentials should at least contain an email or a phone property');
+  });
+
+  it('NEGATIVE - Should not login a user if email provided is not valid', async () => {
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', email: 'notvalidemail', password: VALID_USER.password});
+
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Provided email is not valid');
+  });
+
+  it('NEGATIVE - Should not login a user if phone provided is not valid', async () => {
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', phone: 'notvalidphone', password: VALID_USER.password});
+
+      expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Provided phone number is not valid');
+  });
+
+  it('NEGATIVE - Should not login if user was not found in DB', async () => {
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', phone: '+1777666550', password: VALID_USER.password});
+    
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('User was not found while login');
+  });
+
+  it('NEGATIVE - Should not login if possword provided is wrong', async () => {
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', email: VALID_USER.email, password: 'wrongpassword'});
+    
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Wrong password');    
   });
 
   it('POSITIVE - Jwt Token should expire', done => {
@@ -119,7 +205,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
 
-      request.post('/auth/login').send({email: VALID_USER.email, password: VALID_USER.password}).then(
+      request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
         response  => {
           const refreshToken = response.header['refresh-token'];
           let token = response.header['jwt'];
@@ -157,7 +243,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     //   password: 'shoot',
     // };
 
-    request.post('/auth/login').send({email: VALID_USER.email, password: VALID_USER.password}).then(
+    request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       response => {
         let refreshToken = response.header['refresh-token'];
         setTimeout(() => {
@@ -185,7 +271,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
 
-    request.post('/auth/login').send({email: VALID_USER.email, password: VALID_USER.password}).then(
+    request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       registerRespo => {
         const oldJwtToken = registerRespo.header['jwt'];
         const oldRefreshToken = registerRespo.header['refresh-token'];
@@ -223,7 +309,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
 
-    request.post('/auth/login').send({email: VALID_USER.email, password: VALID_USER.password}).then(
+    request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       response => {
         const refreshToken = response.header['refresh-token'];
           setTimeout(() => {

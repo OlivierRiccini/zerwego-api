@@ -23,15 +23,23 @@ export interface IUser {
 }
 
 export interface IUserCredentials {
-    username?: string,
     type: LoginType,
-    email: string,
+    username?: string,
+    email?: string,
+    phone?: string,
     password?: string,
     facebookId?: string
 }
 
 export interface IForgotPassword {
     type: ContactMode,
+    email?: string,
+    phone?: string
+}
+
+export interface IPayload {
+    id: string,
+    username: string,
     email?: string,
     phone?: string
 }

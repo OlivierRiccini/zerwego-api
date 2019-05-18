@@ -74,7 +74,8 @@ let SecureService = class SecureService {
             const payload = {
                 id: user.id,
                 username: user.username,
-                email: user.email
+                email: user.email || null,
+                phone: user.phone || null
             };
             const accessToken = yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: constants_1.CONSTANTS.ACCESS_TOKEN_EXPIRES_IN }).toString();
             return accessToken;
@@ -134,7 +135,7 @@ let SecureService = class SecureService {
                         resolve();
                     }
                     else {
-                        reject("Wrong password");
+                        reject(new Error('Wrong password'));
                     }
                 });
             });

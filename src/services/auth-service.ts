@@ -3,6 +3,7 @@ import { UserDAO, IUserCredentials, IForgotPassword, IUser } from '../models/use
 import { HttpError, BadRequestError } from "routing-controllers";
 import { SecureService } from "./secure-service";
 import { MessagesService } from "./messages-service";
+import validator from 'validator';
 const generator = require('generate-password');
 
 @Service()
@@ -32,7 +33,14 @@ export class AuthService {
 
     public async login(credentials: IUserCredentials): Promise<any> {
         try {
-            let users = await this.userDAO.find({find:{email: credentials.email}});
+            this.validateLoginType(credentials);
+            const emailOrPhone: 'email' | 'phone' = this.defineEmailOrPhone(credentials);
+            this.validateProvidedCredentials(credentials);
+            const query = emailOrPhone === 'email' ? {find:{email: credentials.email}} : {find:{phone: credentials.phone}};
+            let users = await this.userDAO.find(query);
+            if (!users || users.length <= 0) {
+                throw new Error('User was not found while login');
+            }
             let user = users[0];
             if (credentials.type === 'password') {
                 await this.secureService.comparePassword(credentials.password, user.password);
@@ -40,7 +48,7 @@ export class AuthService {
             const tokens = await this.secureService.generateAuthTokens(user);  
             return tokens;
         } catch (err) {
-            throw new HttpError(400, err);
+            throw new HttpError(400, err.message);
         }
     };
 
@@ -49,13 +57,13 @@ export class AuthService {
             const user: IUser= await this.userDAO.get(userId);
             const refreshTokenIsExpired: boolean = await this.secureService.refreshTokenIsExpired(refreshToken);
             if (refreshTokenIsExpired) {
-                throw new HttpError(401, 'Refresh token is no longer valid, user has to login');
+                throw new Error('Refresh token is no longer valid, user has to login');
             }
             // await this.secureService.removeRefreshToken(refreshToken);
             const tokens = await this.secureService.generateAuthTokens(user);
             return tokens;
         } catch (err) {
-            throw new HttpError(err.httpCode, err.message);
+            throw new HttpError(401, err.message);
         }
     }
 
@@ -131,5 +139,41 @@ export class AuthService {
         user.password = await this.secureService.hashPassword(user);
         await this.userDAO.update(user, user.id);
         return {newPassword, user};
+    }
+
+    private defineEmailOrPhone(credentials: IUserCredentials): 'email' | 'phone' {
+        if (this.credentialsHadEmail(credentials)) {
+            return 'email'
+        }
+        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
+            return 'phone'
+        }
+        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
+            throw new HttpError(400, 'User credentials should at least contain an email or a phone property');
+        }
+    }
+
+    private validateProvidedCredentials(credentials: IUserCredentials): void {
+        if (this.credentialsHadEmail(credentials) && !validator.isEmail(credentials.email)) {
+            throw new Error('Provided email is not valid');
+        }
+        if (this.credentialsHasPhone(credentials)
+            && !validator.isMobilePhone(credentials.phone, 'any', {strictMode: true})) {
+            throw new Error('Provided phone number is not valid');
+        }
+    }
+
+    private credentialsHadEmail(credentials: IUserCredentials): boolean {
+        return credentials.hasOwnProperty('email') && !!credentials.email;
+    }
+
+    private credentialsHasPhone(credentials: IUserCredentials): boolean {
+        return credentials.hasOwnProperty('phone') && !!credentials.phone;
+    }
+
+    private validateLoginType(credentials: IUserCredentials): void {
+        if (!credentials.hasOwnProperty('type') || credentials.type !== 'password' && credentials.type !== 'facebook') {
+            throw new Error('Credentials should have a property type equal either \'password\' or \'facebook\'');
+        }
     }
 }

@@ -1,5 +1,5 @@
 import { Service, Inject } from "typedi";
-import { IUser, UserDAO} from '../models/user-model';
+import { IUser, UserDAO, IPayload} from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { CONSTANTS } from "../persist/constants";
@@ -51,10 +51,11 @@ export class SecureService {
     }
 
     public async generateAccessToken(user: IUser): Promise<string> {
-        const payload = {
+        const payload : IPayload = {
             id: user.id,
             username: user.username,
-            email: user.email
+            email: user.email || null,
+            phone: user.phone || null
         };
         const accessToken = await jwt.sign({payload}, CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: CONSTANTS.ACCESS_TOKEN_EXPIRES_IN }).toString();
         return accessToken;
@@ -104,7 +105,7 @@ export class SecureService {
                 if (res) {
                     resolve();
                 } else {
-                    reject("Wrong password");
+                    reject(new Error('Wrong password'));
                 }
             });
         });
