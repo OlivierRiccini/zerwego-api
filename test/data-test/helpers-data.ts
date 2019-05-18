@@ -33,9 +33,9 @@ export class TripHelper {
     public async addTrips(user) {
         for (const trip of this.trips) {
             trip.participants.push({ 
-                    userId: user.id,
-                    info: {email: user.email, username: user.username},
-                    status: 'request_accepted', isAdmin: true });
+                userId: user.id,
+                info: {email: user.email, username: user.username},
+                status: 'request_accepted', isAdmin: true });
             await this.tripDAO.create(trip);
         }   
     }
@@ -57,7 +57,7 @@ export class UserHelper {
             .post('/auth/register')
             .send(newUser)
         
-        let token = response.header['authorization'];
+        let token = response.header['jwt'];
 
         if (token.startsWith('Bearer ')) {
             // Remove Bearer from string
@@ -73,7 +73,6 @@ export class UserHelper {
         return this.userDAO.deleteAll();  
     }
 
-    public find
 }
 
 export class AuthHelper {
