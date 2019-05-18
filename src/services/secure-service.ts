@@ -33,16 +33,22 @@ export class SecureService {
         }
         return false;
     }
+
+    public async validateRefreshToken(refreshToken: string): Promise<void> {
+        try {
+            const secret: string = await this.getSecretFromRefreshToken(refreshToken);
+            jwt.verify(refreshToken, secret, null); 
+        } catch (err) {
+            if (err.name && err.name === 'TokenExpiredError') {
+                throw new Error('Refresh token is no longer valid, user has to login');
+            }
+            throw new Error(err);
+        }
+    }
     
     public async refreshTokenIsExpired(refreshToken: string): Promise<boolean> {
         try {
-            const decodedRefreshToken = jwt.decode(refreshToken);
-            const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
-            // TODO: change this way
-            if (users.length <= 0) {
-                throw new HttpError(401, 'User was not found while refreshing tokens');
-            }
-            const secret = CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
+            const secret: string = await this.getSecretFromRefreshToken(refreshToken);
             jwt.verify(refreshToken, secret, null);
         } catch (err) {
             return err.name && err.name === 'TokenExpiredError'
@@ -110,4 +116,14 @@ export class SecureService {
             });
         });
     };
+
+    private async getSecretFromRefreshToken(refreshToken: string): Promise<string> {
+        const decodedRefreshToken = jwt.decode(refreshToken);
+        const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
+        // TODO: change this way
+        if (users.length <= 0) {
+            throw new Error('User was not found while refreshing tokens');
+        }
+        return CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
+    }
 }

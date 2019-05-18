@@ -200,7 +200,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it('POSITIVE - Jwt Token should expire', done => {
     const testDuration: number = Number(CONSTANTS.ACCESS_TOKEN_EXPIRES_IN) + 1000;
     console.log('*********************************************************************************');
-    console.log(`Testing Jwt Token should expire...should take max ${(testDuration / 1000)} seconds... 1 / 4`);
+    console.log(`Testing Jwt Token should expire...should take max ${(testDuration / 1000)} seconds... 1 / 5`);
     console.log('*********************************************************************************');
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
@@ -232,16 +232,10 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it.skip('POSITIVE - Refresh should expire', done => {
     const testDuration: number = Number(CONSTANTS.REFRESH_TOKEN_EXPIRES_IN) + 1000;
     console.log('*********************************************************************************');
-    console.log(`Testing Refresh should expire...should take max ${(testDuration / 1000)} seconds... 2 / 4`);
+    console.log(`Testing Refresh should expire...should take max ${(testDuration / 1000)} seconds... 2 / 5`);
     console.log('*********************************************************************************');
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
-
-    // const newUser: IUser = {
-    //   username: 'Steph',
-    //   email: 'steph.curry@warrriors.com',
-    //   password: 'shoot',
-    // };
 
     request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       response => {
@@ -266,7 +260,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it('POSITIVE - Should return new tokens { jwt, refreshToken } when refreshing', done => {
     const testDuration: number = Number(CONSTANTS.ACCESS_TOKEN_EXPIRES_IN) + 1000;
     console.log('*********************************************************************************');
-    console.log(`Testing refreshing tokens...should take max ${(testDuration / 1000)} seconds... 3 / 4`);
+    console.log(`Testing refreshing tokens...should take max ${(testDuration / 1000)} seconds... 3 / 5`);
     console.log('*********************************************************************************');
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
@@ -301,10 +295,50 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     )
   });
 
+  it('NEGATIVE - Should throw error if refresh token is not provided', done => {
+    const testDuration: number = Number(CONSTANTS.ACCESS_TOKEN_EXPIRES_IN) + 1000;
+    console.log('*********************************************************************************');
+    console.log(`Testing refreshing tokens...should take max ${(testDuration / 1000)} seconds... 4 / 5`);
+    console.log('*********************************************************************************');
+    let i = testDuration / 1000 + 1;
+    const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);
+
+    request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
+      registerRespo => {
+        const oldJwtToken = registerRespo.header['jwt'];
+        const oldRefreshToken = registerRespo.header['refresh-token'];
+
+        setTimeout(() => {
+          clearInterval(intervalLogger);
+          process.stdout.write(`\n`);
+          request.post('/auth/refresh').set('refresh-token', null).send(VALID_USER).then(
+            refreshRespo => {
+              try {
+                expect(refreshRespo.status).to.equal(401);
+                expect(refreshRespo.body).to.have.property('name');
+                expect(refreshRespo.body.name).to.equal('HttpError');
+                expect(refreshRespo.body).to.have.property('message');
+                expect(refreshRespo.body.message).to.equal('TypeError: Cannot read property \'payload\' of null');
+                expect(refreshRespo.header).to.not.have.property('jwt');
+                expect(refreshRespo.header).to.not.have.property('refresh-token');
+                request.post('/auth/logout').set('refresh-token', oldRefreshToken).then(() => {
+                  done();
+                })
+              } catch (err) {
+                done(err);
+              }
+            }); 
+        }, testDuration); 
+      }
+    )
+  });
+
+  // 'TypeError: Cannot read property \'payload\' of null'
+
   it('POSITIVE - Should ask to login again if refresh token is expired when refreshing', done => {
     const testDuration: number = Number(CONSTANTS.REFRESH_TOKEN_EXPIRES_IN) + 1000;
     console.log('*********************************************************************************');
-    console.log(`Testing refresh token is expired when refreshing...should take max ${(testDuration / 1000)} seconds... 4 / 4`);
+    console.log(`Testing refresh token is expired when refreshing...should take max ${(testDuration / 1000)} seconds... 5 / 5`);
     console.log('*********************************************************************************');
     let i = testDuration / 1000 + 1;
     const intervalLogger = setInterval(() => process.stdout.write(` - ${i -= 1} - `), 1000);

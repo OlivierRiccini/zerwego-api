@@ -51,16 +51,28 @@ let SecureService = class SecureService {
             return false;
         });
     }
+    validateRefreshToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const secret = yield this.getSecretFromRefreshToken(refreshToken);
+                jwt.verify(refreshToken, secret, null);
+                // const refreshIsTokenExpired: boolean = await this.refreshTokenIsExpired(refreshToken);
+                // if (refreshIsTokenExpired) {
+                //     throw new Error('Refresh token is no longer valid, user has to login');
+                // }
+            }
+            catch (err) {
+                if (err.name && err.name === 'TokenExpiredError') {
+                    throw new Error('Refresh token is no longer valid, user has to login');
+                }
+                throw new Error(err);
+            }
+        });
+    }
     refreshTokenIsExpired(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const decodedRefreshToken = jwt.decode(refreshToken);
-                const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
-                // TODO: change this way
-                if (users.length <= 0) {
-                    throw new routing_controllers_1.HttpError(401, 'User was not found while refreshing tokens');
-                }
-                const secret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
+                const secret = yield this.getSecretFromRefreshToken(refreshToken);
                 jwt.verify(refreshToken, secret, null);
             }
             catch (err) {
@@ -142,6 +154,17 @@ let SecureService = class SecureService {
         });
     }
     ;
+    getSecretFromRefreshToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const decodedRefreshToken = jwt.decode(refreshToken);
+            const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
+            // TODO: change this way
+            if (users.length <= 0) {
+                throw new Error('User was not found while refreshing tokens');
+            }
+            return constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
+        });
+    }
 };
 __decorate([
     typedi_1.Inject(),

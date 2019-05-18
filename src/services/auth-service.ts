@@ -55,11 +55,7 @@ export class AuthService {
     public async refreshTokens(refreshToken: string, userId: string) {
         try {
             const user: IUser= await this.userDAO.get(userId);
-            const refreshTokenIsExpired: boolean = await this.secureService.refreshTokenIsExpired(refreshToken);
-            if (refreshTokenIsExpired) {
-                throw new Error('Refresh token is no longer valid, user has to login');
-            }
-            // await this.secureService.removeRefreshToken(refreshToken);
+            await this.secureService.validateRefreshToken(refreshToken);
             const tokens = await this.secureService.generateAuthTokens(user);
             return tokens;
         } catch (err) {
