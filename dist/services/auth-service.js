@@ -75,11 +75,6 @@ let AuthService = class AuthService {
             try {
                 const user = yield this.userDAO.get(userId);
                 yield this.secureService.validateRefreshToken(refreshToken);
-                // const refreshTokenIsExpired: boolean = await this.secureService.refreshTokenIsExpired(refreshToken);
-                // if (refreshTokenIsExpired) {
-                //     throw new Error('Refresh token is no longer valid, user has to login');
-                // }
-                // await this.secureService.removeRefreshToken(refreshToken);
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 return tokens;
             }

@@ -56,10 +56,6 @@ let SecureService = class SecureService {
             try {
                 const secret = yield this.getSecretFromRefreshToken(refreshToken);
                 jwt.verify(refreshToken, secret, null);
-                // const refreshIsTokenExpired: boolean = await this.refreshTokenIsExpired(refreshToken);
-                // if (refreshIsTokenExpired) {
-                //     throw new Error('Refresh token is no longer valid, user has to login');
-                // }
             }
             catch (err) {
                 if (err.name && err.name === 'TokenExpiredError') {
