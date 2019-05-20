@@ -16,6 +16,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
     
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
         let accessToken = request.header('Authorization');  
+        // console.log('///////////////////// 1 ////////////////////////////');
         try {
             if (!accessToken) {
                 throw new HttpError(401, 'No authorization token provided');
@@ -25,12 +26,13 @@ export class Authenticate implements ExpressMiddlewareInterface {
                 accessToken = accessToken.slice(7, accessToken.length);
             } 
             const decoded = jwt.verify(accessToken, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+            // console.log('///////////////////// 2 //////////////////////////////');
             if (typeof decoded === 'undefined') {
                 throw new HttpError(401, 'Authorizationt token cannot be decoded');
             };
 
            const user = decoded['payload'];
-          
+        //   console.log('//////////////////// 3 //////////////////////////////');
            if (!user) {
                 throw new HttpError(401, 'This token is not related to any user');
            };

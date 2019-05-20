@@ -1,18 +1,13 @@
 const debug = require('debug')('http');
-// const passport = require('passport');
-// const FacebookStrategy = require('passport-facebook');
 import {JsonController, Body, Post, Res, HeaderParam} from "routing-controllers";
 import { IUser, IUserCredentials, IForgotPassword } from "../models/user-model";
 import { Service, Inject } from "typedi";
 import { AuthService } from "../services/auth-service";
-// import { AuthSocialService } from "../services/auth-social.service";
-// import { AuthFacebook } from "../middlewares/auth-facebook-middleware";
 
 @JsonController('/auth')
 @Service()
 export class AuthController {
   @Inject() private authService: AuthService;
-  // @Inject() private authSocialService: AuthSocialService;
   
   constructor() { }
 

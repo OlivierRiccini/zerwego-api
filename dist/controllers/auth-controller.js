@@ -21,15 +21,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('http');
-// const passport = require('passport');
-// const FacebookStrategy = require('passport-facebook');
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const auth_service_1 = require("../services/auth-service");
-// import { AuthSocialService } from "../services/auth-social.service";
-// import { AuthFacebook } from "../middlewares/auth-facebook-middleware";
 let AuthController = class AuthController {
-    // @Inject() private authSocialService: AuthSocialService;
     constructor() { }
     registerUser(user, response) {
         return __awaiter(this, void 0, void 0, function* () {

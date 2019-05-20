@@ -29,6 +29,7 @@ let Authenticate = class Authenticate {
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let accessToken = request.header('Authorization');
+            // console.log('///////////////////// 1 ////////////////////////////');
             try {
                 if (!accessToken) {
                     throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
@@ -38,11 +39,13 @@ let Authenticate = class Authenticate {
                     accessToken = accessToken.slice(7, accessToken.length);
                 }
                 const decoded = jwt.verify(accessToken, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
+                // console.log('///////////////////// 2 //////////////////////////////');
                 if (typeof decoded === 'undefined') {
                     throw new routing_controllers_1.HttpError(401, 'Authorizationt token cannot be decoded');
                 }
                 ;
                 const user = decoded['payload'];
+                //   console.log('//////////////////// 3 //////////////////////////////');
                 if (!user) {
                     throw new routing_controllers_1.HttpError(401, 'This token is not related to any user');
                 }
