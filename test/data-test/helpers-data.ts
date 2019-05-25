@@ -57,7 +57,7 @@ export class UserHelper {
             .post('/auth/register')
             .send(newUser)
         
-        let token = response.header['jwt'];
+        let token = response.body['jwt'];
 
         if (token.startsWith('Bearer ')) {
             // Remove Bearer from string

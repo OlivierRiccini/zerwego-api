@@ -50,7 +50,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     const response = await request
       .post('/auth/register')
       .send(VALID_USER);
-    let token = response.header['jwt'];
+    let token = response.body['jwt'];
     if (token.startsWith('Bearer ')) {
       // Remove Bearer from string
       token = token.slice(7, token.length);
@@ -68,7 +68,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     generalHelper.cleanDB();
   });
 
-  it('Should signUp a user and get token back set in the header', async () => {
+  it('Should signUp a user and get token back', async () => {
     const newUser: IUser = {
       username: 'Steph',
       email: 'steph.curry@warrriors.com',
@@ -79,10 +79,10 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       .post('/auth/register')
       .send(newUser);
        
-    expect(response.header).to.have.property('jwt');
-    expect(response.header).to.have.property('refresh-token');
+    expect(response.body).to.have.property('jwt');
+    expect(response.body).to.have.property('refresh-token');
 
-    let token = response.header['jwt'];
+    let token = response.body['jwt'];
     if (token.startsWith('Bearer ')) {
       // Remove Bearer from string
       token = token.slice(7, token.length);
@@ -98,14 +98,14 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     await request.post('/auth/logout').set('authorization', token);
   });
 
-  it('Should login a user using password and email, and get a token back set in the header', async () => {
+  it('Should login a user using password and email, and get a token back', async () => {
     const response = await request
       .post('/auth/login')
       .send(VALID_USER_CREDENTIALS_EMAIL);
     
-    expect(response.header).to.have.property('jwt');
+    expect(response.body).to.have.property('jwt');
     
-    let token = response.header['jwt'];
+    let token = response.body['jwt'];
     if (token.startsWith('Bearer ')) {
       // Remove Bearer from string
       token = token.slice(7, token.length);
@@ -126,9 +126,9 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
         .send(VALID_USER_CREDENTIALS_PHONE);
       
       expect(response.status).to.equal(200);
-      expect(response.header).to.have.property('jwt');
+      expect(response.body).to.have.property('jwt');
       
-      let token = response.header['jwt'];
+      let token = response.body['jwt'];
       if (token.startsWith('Bearer ')) {
         // Remove Bearer from string
         token = token.slice(7, token.length);
@@ -207,8 +207,8 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
       request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
         response  => {
-          const refreshToken = response.header['refresh-token'];
-          let token = response.header['jwt'];
+          const refreshToken = response.body['refresh-token'];
+          let token = response.body['jwt'];
           if (token.startsWith('Bearer ')) {
             token = token.slice(7, token.length);
           }
@@ -239,7 +239,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       response => {
-        let refreshToken = response.header['refresh-token'];
+        let refreshToken = response.body['refresh-token'];
         setTimeout(() => {
           clearInterval(intervalLogger);
           process.stdout.write(`\n`);
@@ -267,8 +267,8 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       registerRespo => {
-        const oldJwtToken = registerRespo.header['jwt'];
-        const oldRefreshToken = registerRespo.header['refresh-token'];
+        const oldJwtToken = registerRespo.body['jwt'];
+        const oldRefreshToken = registerRespo.body['refresh-token'];
 
         setTimeout(() => {
           clearInterval(intervalLogger);
@@ -276,11 +276,11 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
           request.post('/auth/refresh').set('refresh-token', oldRefreshToken).send(VALID_USER).then(
             refreshRespo => {
               try {
-                const newJwtToken = refreshRespo.header['jwt'];
-                const newRefreshToken = refreshRespo.header['refresh-token'];
+                const newJwtToken = refreshRespo.body['jwt'];
+                const newRefreshToken = refreshRespo.body['refresh-token'];
                 expect(refreshRespo.status).to.equal(200);
-                expect(refreshRespo.header).to.have.property('jwt');
-                expect(refreshRespo.header).to.have.property('refresh-token');
+                expect(refreshRespo.body).to.have.property('jwt');
+                expect(refreshRespo.body).to.have.property('refresh-token');
                 expect(newJwtToken).to.not.equals(oldJwtToken);
                 expect(newRefreshToken).to.not.equals(oldRefreshToken);
                 request.post('/auth/logout').set('refresh-token', newRefreshToken).then(() => {
@@ -305,8 +305,8 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       registerRespo => {
-        const oldJwtToken = registerRespo.header['jwt'];
-        const oldRefreshToken = registerRespo.header['refresh-token'];
+        const oldJwtToken = registerRespo.body['jwt'];
+        const oldRefreshToken = registerRespo.body['refresh-token'];
 
         setTimeout(() => {
           clearInterval(intervalLogger);
@@ -319,8 +319,8 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
                 expect(refreshRespo.body.name).to.equal('HttpError');
                 expect(refreshRespo.body).to.have.property('message');
                 expect(refreshRespo.body.message).to.equal('TypeError: Cannot read property \'payload\' of null');
-                expect(refreshRespo.header).to.not.have.property('jwt');
-                expect(refreshRespo.header).to.not.have.property('refresh-token');
+                expect(refreshRespo).to.not.have.property('jwt');
+                expect(refreshRespo).to.not.have.property('refresh-token');
                 request.post('/auth/logout').set('refresh-token', oldRefreshToken).then(() => {
                   done();
                 })
@@ -345,7 +345,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
     request.post('/auth/login').send(VALID_USER_CREDENTIALS_EMAIL).then(
       response => {
-        const refreshToken = response.header['refresh-token'];
+        const refreshToken = response.body['refresh-token'];
           setTimeout(() => {
             process.stdout.write(`\n`);
             clearInterval(intervalLogger);

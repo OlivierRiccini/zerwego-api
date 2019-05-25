@@ -12,47 +12,38 @@ export class AuthController {
   constructor() { }
 
   @Post('/register')
-  async registerUser(@Body() user: IUser, @Res() response: any) {
+  async registerUser(@Body() user: IUser) {
     const tokens = await this.authService.register(user);
-    const headers = {
-      jwt: tokens.accessToken,
-      'refresh-token': tokens.refreshToken,
-      'Access-Control-Expose-Headers': '*'
-    };
-    response.header(headers);
     debug('POST /user/register => Successfully registered!');
-    return 'Successfully registered!';
+    return {
+      jwt: tokens.accessToken,
+      'refresh-token': tokens.refreshToken
+    };
   }
 
   @Post('/login')
-  async login(@Body() credentials: IUserCredentials, @Res() response: any) {
+  async login(@Body() credentials: IUserCredentials) {
     let tokens: any;
     if (credentials.type === 'facebook') {
       tokens = await this.authService.handleFacebookLogin(credentials);
     } else {
       tokens = await this.authService.login(credentials);
     }
-    const headers = {
-      jwt: tokens.accessToken,
-      'refresh-token': tokens.refreshToken,
-      'Access-Control-Expose-Headers': '*'
-    };
-    response.header(headers);
     debug('POST /user/login => Successfully logged in!');
-    return 'Successfully logged in!';
+    return {
+      jwt: tokens.accessToken,
+      'refresh-token': tokens.refreshToken
+    };
   }
 
   @Post('/refresh')
-  async refresh(@HeaderParam('refresh-token') refreshToken: string, @Body() user: IUser, @Res() response: any) {
+  async refresh(@HeaderParam('refresh-token') refreshToken: string, @Body() user: IUser) {
     const newTokens: any = await this.authService.refreshTokens(refreshToken, user.id);
-    const headers = {
-      jwt: newTokens.accessToken,
-      'refresh-token': newTokens.refreshToken,
-      'Access-Control-Expose-Headers': '*'
-    };
-    response.header(headers);
     debug('POST /user/refresh => New Tokens successfully created!');
-    return 'New Tokens successfully created!';
+    return {
+      jwt: newTokens.accessToken,
+      'refresh-token': newTokens.refreshToken
+    };
   }
 
   @Post('/logout')

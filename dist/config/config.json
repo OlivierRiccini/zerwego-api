@@ -21,7 +21,7 @@
         "ACCESS_TOKEN_SECRET": "dzidkpaz0akzncHHdkn('cazza",
         "REFRESH_TOKEN_SECRET": "skjgsc!87YhhGHH§6TFVTÈXu",
         "ACCESS_TOKEN_EXPIRES_IN": "10S",
-        "REFRESH_TOKEN_EXPIRES_IN": "20S",
+        "REFRESH_TOKEN_EXPIRES_IN": "3600S",
         "amqp": "amqp://localhost",
         "queue": "nodemailer-amqp",
         "server": {

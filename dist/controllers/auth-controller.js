@@ -26,20 +26,17 @@ const typedi_1 = require("typedi");
 const auth_service_1 = require("../services/auth-service");
 let AuthController = class AuthController {
     constructor() { }
-    registerUser(user, response) {
+    registerUser(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const tokens = yield this.authService.register(user);
-            const headers = {
-                jwt: tokens.accessToken,
-                'refresh-token': tokens.refreshToken,
-                'Access-Control-Expose-Headers': '*'
-            };
-            response.header(headers);
             debug('POST /user/register => Successfully registered!');
-            return 'Successfully registered!';
+            return {
+                jwt: tokens.accessToken,
+                'refresh-token': tokens.refreshToken
+            };
         });
     }
-    login(credentials, response) {
+    login(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             let tokens;
             if (credentials.type === 'facebook') {
@@ -48,27 +45,21 @@ let AuthController = class AuthController {
             else {
                 tokens = yield this.authService.login(credentials);
             }
-            const headers = {
-                jwt: tokens.accessToken,
-                'refresh-token': tokens.refreshToken,
-                'Access-Control-Expose-Headers': '*'
-            };
-            response.header(headers);
             debug('POST /user/login => Successfully logged in!');
-            return 'Successfully logged in!';
+            return {
+                jwt: tokens.accessToken,
+                'refresh-token': tokens.refreshToken
+            };
         });
     }
-    refresh(refreshToken, user, response) {
+    refresh(refreshToken, user) {
         return __awaiter(this, void 0, void 0, function* () {
             const newTokens = yield this.authService.refreshTokens(refreshToken, user.id);
-            const headers = {
-                jwt: newTokens.accessToken,
-                'refresh-token': newTokens.refreshToken,
-                'Access-Control-Expose-Headers': '*'
-            };
-            response.header(headers);
             debug('POST /user/refresh => New Tokens successfully created!');
-            return 'New Tokens successfully created!';
+            return {
+                jwt: newTokens.accessToken,
+                'refresh-token': newTokens.refreshToken
+            };
         });
     }
     logout(refreshToken) {
@@ -91,23 +82,23 @@ __decorate([
 ], AuthController.prototype, "authService", void 0);
 __decorate([
     routing_controllers_1.Post('/register'),
-    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerUser", null);
 __decorate([
     routing_controllers_1.Post('/login'),
-    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
     routing_controllers_1.Post('/refresh'),
-    __param(0, routing_controllers_1.HeaderParam('refresh-token')), __param(1, routing_controllers_1.Body()), __param(2, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.HeaderParam('refresh-token')), __param(1, routing_controllers_1.Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refresh", null);
 __decorate([
