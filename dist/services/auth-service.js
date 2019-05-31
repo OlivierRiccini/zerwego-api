@@ -30,8 +30,16 @@ let AuthService = class AuthService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
-                const nonHashedPassword = user.password;
+                // const nonHashedPassword = user.password;
                 user.password = yield this.secureService.hashPassword(user);
+                if (user.email) {
+                    yield this.emailValidation(user.email);
+                }
+                ;
+                if (user.phone) {
+                    yield this.phoneValidation(user.phone);
+                }
+                ;
                 user = yield this.userDAO.create(req);
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 // await this.messagesService.sendSMS({
@@ -41,7 +49,7 @@ let AuthService = class AuthService {
                 return tokens;
             }
             catch (err) {
-                throw new routing_controllers_1.HttpError(400, 'Smothing went wrong while creating new user');
+                throw new routing_controllers_1.HttpError(400, err.message);
             }
         });
     }
@@ -146,6 +154,28 @@ let AuthService = class AuthService {
         });
     }
     ;
+    emailValidation(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.userDAO.find({ find: { email } });
+            if (users.length > 0) {
+                throw new Error('Email address already belong to an account');
+            }
+            if (!validator_1.default.isEmail(email)) {
+                throw new Error('Email address provided is not valid');
+            }
+        });
+    }
+    phoneValidation(phone) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.userDAO.find({ find: { phone } });
+            if (users.length > 0) {
+                throw new Error('Phone number already belong to an account');
+            }
+            if (!validator_1.default.isMobilePhone(phone, 'any', { strictMode: true })) {
+                throw new Error('Phone number provided is not valid');
+            }
+        });
+    }
     generateNewPassword(contact) {
         return __awaiter(this, void 0, void 0, function* () {
             const query = contact.type === 'email' ? { email: contact.email } : { phone: contact.phone };

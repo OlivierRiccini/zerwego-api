@@ -120,7 +120,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     await request.post('/auth/logout').set('authorization', VALID_USER_TOKEN);
   });
 
-  it('Should login a user using password and phone, and get a token back set in the header', async () => {
+  it('Should login a user using password and phone, and get a token', async () => {
       const response = await request
         .post('/auth/login')
         .send(VALID_USER_CREDENTIALS_PHONE);
@@ -150,6 +150,66 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     
     expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('Credentials should have a property type equal either \'password\' or \'facebook\'');
+  });
+
+  it('NEGATIVE - Should not register a user if email is already taken', async () => {
+    let newUser: IUser = {
+      username: 'New User',
+      email: 'lebron.james@lakers.com',
+      password: 'Iamtheking',
+      phone: '+16666668809'
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Email address already belongs to an account');
+  });
+
+  it('NEGATIVE - Should not register a user if phone is already taken', async () => {
+    let newUser: IUser = {
+      username: 'New User',
+      email: 'blabla.blabla@bla.com',
+      password: 'Iamtheking',
+      phone: '+14383991332'
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Phone number already belongs to an account');
+  });
+
+  it('NEGATIVE - Should not register a user if phone is not valid', async () => {
+    let newUser: IUser = {
+      username: 'New User',
+      email: 'ttt.ttt@tt.com',
+      password: 'Iamtheking',
+      phone: '+199999999' // one digit missed 
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Phone number provided is not valid');
+  });
+
+  it('NEGATIVE - Should not register a user if email is not valid', async () => {
+    let newUser: IUser = {
+      username: 'New User',
+      email: 'ttttt.com',
+      password: 'Iamtheking',
+      phone: '+18989898989'
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Email address provided is not valid');
   });
 
   it('NEGATIVE - Should not login a user if no email nor phone provided', async () => {

@@ -17,8 +17,10 @@ export class AuthService {
     public async register(req: any): Promise<any> {         
         try {
             let user = req;
-            const nonHashedPassword = user.password;
+            // const nonHashedPassword = user.password;
             user.password = await this.secureService.hashPassword(user);
+            if (user.email) { await this.emailValidation(user.email) };
+            if (user.phone) { await this.phoneValidation(user.phone) };
             user = await this.userDAO.create(req);
             const tokens = await this.secureService.generateAuthTokens(user);
             // await this.messagesService.sendSMS({
@@ -27,7 +29,7 @@ export class AuthService {
             // });
             return tokens;
         } catch (err) {
-            throw new HttpError(400, 'Smothing went wrong while creating new user');
+            throw new HttpError(400, err.message);
         }
     };
 
@@ -119,6 +121,26 @@ export class AuthService {
             throw new HttpError(400, err);
         }
     };
+
+    private async emailValidation(email: string): Promise<void> {  
+        const users: IUser[] = await this.userDAO.find({find: { email }});
+        if (users.length > 0) {
+            throw new Error('Email address already belongs to an account');
+        }
+        if (!validator.isEmail(email)) {
+            throw new Error('Email address provided is not valid');
+        }
+    }
+
+    private async phoneValidation(phone: string): Promise<void> {  
+        const users: IUser[] = await this.userDAO.find({find: { phone }});
+        if (users.length > 0) {
+            throw new Error('Phone number already belongs to an account');
+        }
+        if (!validator.isMobilePhone(phone, 'any', {strictMode: true})) {
+            throw new Error('Phone number provided is not valid');
+        }
+    }
 
     private async generateNewPassword(contact: IForgotPassword): Promise<{newPassword: string, user: IUser}> {
         const query = contact.type === 'email' ? {email: contact.email} : {phone: contact.phone};

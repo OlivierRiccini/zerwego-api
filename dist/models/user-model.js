@@ -19,7 +19,11 @@ class UserDAO extends dao_1.DAOImpl {
                     message: '{VALUE} is not a valid email'
                 }
             },
-            phone: String,
+            phone: {
+                type: String,
+                trim: true,
+                unique: true
+            },
             password: {
                 type: String,
                 require: true,

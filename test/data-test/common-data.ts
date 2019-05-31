@@ -19,12 +19,14 @@ export const MODELS_DATA = {
             _id: new ObjectID('111111111111111111111111'),
             username: "Lebron James",
             email: "lebron.james@lakers.com",
+            phone: '+33674990099',
             password: "123456"
         },
         {
             _id: new ObjectID('222222222222222222222222'),
             username: "Stephen Curry",
             email: "stephen.curry@warriors.com",
+            phone: '+14383991332',
             password: "123456"
         }
     ],
