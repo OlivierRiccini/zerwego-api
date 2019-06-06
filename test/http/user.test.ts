@@ -512,4 +512,23 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(response.body).to.be.false;
   });
 
+  it('POSITIVE - Should return false if password provided is wrong', async () => {  
+    const response = await request
+      .post('/auth/password-is-valid')
+      .send({email: 'lebron.james@lakers.com', password: 'wrong'})
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.be.false;
+  });
+
+  it('POSITIVE - Should return true if password provided is right', async () => {  
+    const response = await request
+    .post('/auth/password-is-valid')
+      .send({email: 'lebron.james@lakers.com', password: 'Iamtheking'})
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.be.true;
+  });
+
+
 });

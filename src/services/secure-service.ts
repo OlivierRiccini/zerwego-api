@@ -1,15 +1,17 @@
 import { Service, Inject } from "typedi";
-import { IUser, UserDAO, IPayload} from '../models/user-model';
+import { IUser, UserDAO, IPayload, IUserCredentials} from '../models/user-model';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
 import { CONSTANTS } from "../persist/constants";
 import { HttpError } from "routing-controllers";
 import { SecureDAO, ISecure } from "../models/secure-model";
+import { AuthService } from "./auth-service";
 
 export interface ITokens { accessToken: string, refreshToken: string };
 
 @Service()
 export class SecureService {
+    @Inject(type => AuthService) private authService: AuthService;
     @Inject() private userDAO: UserDAO;
     @Inject() private secureDAO: SecureDAO;
 
@@ -116,6 +118,19 @@ export class SecureService {
             });
         });
     };
+
+    public async isPasswordValid(credentials: IUserCredentials): Promise<boolean> {
+        try {
+            const emailOrPhone: 'email' | 'phone' = this.authService.defineEmailOrPhone(credentials);
+            const query = emailOrPhone === 'email' ? {find:{email: credentials.email}} : {find:{phone: credentials.phone}};
+            const users = await this.userDAO.find(query);
+            const user = users[0];
+            await this.comparePassword(credentials.password, user.password);
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
 
     private async getSecretFromRefreshToken(refreshToken: string): Promise<string> {
         const decodedRefreshToken = jwt.decode(refreshToken);

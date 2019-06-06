@@ -24,6 +24,7 @@ const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const auth_service_1 = require("../services/auth-service");
+const secure_service_1 = require("../services/secure-service");
 let AuthController = class AuthController {
     constructor() { }
     registerUser(user) {
@@ -64,6 +65,12 @@ let AuthController = class AuthController {
             return yield this.authService.isPhoneAlreadyTaken(phone.phone);
         });
     }
+    isPasswordValid(credentials) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('POST /auth/password-is-valid => Successfully checked!');
+            return yield this.secureService.isPasswordValid(credentials);
+        });
+    }
     refresh(refreshToken, user) {
         return __awaiter(this, void 0, void 0, function* () {
             const newTokens = yield this.authService.refreshTokens(refreshToken, user.id);
@@ -93,6 +100,10 @@ __decorate([
     __metadata("design:type", auth_service_1.AuthService)
 ], AuthController.prototype, "authService", void 0);
 __decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", secure_service_1.SecureService)
+], AuthController.prototype, "secureService", void 0);
+__decorate([
     routing_controllers_1.Post('/register'),
     __param(0, routing_controllers_1.Body()),
     __metadata("design:type", Function),
@@ -120,6 +131,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "isPhoneAlreadyTaken", null);
+__decorate([
+    routing_controllers_1.Post('/password-is-valid'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "isPasswordValid", null);
 __decorate([
     routing_controllers_1.Post('/refresh'),
     __param(0, routing_controllers_1.HeaderParam('refresh-token')), __param(1, routing_controllers_1.Body()),

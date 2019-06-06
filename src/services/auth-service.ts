@@ -8,7 +8,7 @@ const generator = require('generate-password');
 
 @Service()
 export class AuthService {
-    @Inject() private secureService: SecureService;
+    @Inject(type => SecureService) private secureService: SecureService;
     @Inject() private userDAO: UserDAO;
     @Inject() private messagesService: MessagesService;
     
@@ -132,6 +132,18 @@ export class AuthService {
         return users.length > 0;
     }
 
+    public defineEmailOrPhone(credentials: IUserCredentials): 'email' | 'phone' {
+        if (this.credentialsHadEmail(credentials)) {
+            return 'email'
+        }
+        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
+            return 'phone'
+        }
+        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
+            throw new HttpError(400, 'User credentials should at least contain an email or a phone property');
+        }
+    }
+
     private async emailValidation(email: string): Promise<void> {  
         if (await this.isEmailAlreadyTaken(email)) {
             throw new Error('Email address already belongs to an account');
@@ -165,18 +177,6 @@ export class AuthService {
         user.password = await this.secureService.hashPassword(user);
         await this.userDAO.update(user, user.id);
         return {newPassword, user};
-    }
-
-    private defineEmailOrPhone(credentials: IUserCredentials): 'email' | 'phone' {
-        if (this.credentialsHadEmail(credentials)) {
-            return 'email'
-        }
-        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
-            return 'phone'
-        }
-        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
-            throw new HttpError(400, 'User credentials should at least contain an email or a phone property');
-        }
     }
 
     private validateProvidedCredentials(credentials: IUserCredentials): void {

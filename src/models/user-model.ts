@@ -60,9 +60,7 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                 trim: true,
                 unique: true,
                 validate: {
-                    validator: validator.isEmail,
-                    message: '{VALUE} is not a valid email'
-                }
+                    validator: validator.isEmail                }
             },
             phone: {
                 type: String,

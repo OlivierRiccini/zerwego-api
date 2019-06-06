@@ -166,6 +166,17 @@ let AuthService = class AuthService {
             return users.length > 0;
         });
     }
+    defineEmailOrPhone(credentials) {
+        if (this.credentialsHadEmail(credentials)) {
+            return 'email';
+        }
+        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
+            return 'phone';
+        }
+        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
+            throw new routing_controllers_1.HttpError(400, 'User credentials should at least contain an email or a phone property');
+        }
+    }
     emailValidation(email) {
         return __awaiter(this, void 0, void 0, function* () {
             if (yield this.isEmailAlreadyTaken(email)) {
@@ -204,17 +215,6 @@ let AuthService = class AuthService {
             return { newPassword, user };
         });
     }
-    defineEmailOrPhone(credentials) {
-        if (this.credentialsHadEmail(credentials)) {
-            return 'email';
-        }
-        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
-            return 'phone';
-        }
-        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
-            throw new routing_controllers_1.HttpError(400, 'User credentials should at least contain an email or a phone property');
-        }
-    }
     validateProvidedCredentials(credentials) {
         if (this.credentialsHadEmail(credentials) && !validator_1.default.isEmail(credentials.email)) {
             throw new Error('Provided email is not valid');
@@ -237,7 +237,7 @@ let AuthService = class AuthService {
     }
 };
 __decorate([
-    typedi_1.Inject(),
+    typedi_1.Inject(type => secure_service_1.SecureService),
     __metadata("design:type", secure_service_1.SecureService)
 ], AuthService.prototype, "secureService", void 0);
 __decorate([

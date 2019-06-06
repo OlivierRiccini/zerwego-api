@@ -3,11 +3,13 @@ import {JsonController, Body, Post, Res, HeaderParam} from "routing-controllers"
 import { IUser, IUserCredentials, IForgotPassword } from "../models/user-model";
 import { Service, Inject } from "typedi";
 import { AuthService } from "../services/auth-service";
+import { SecureService } from "../services/secure-service";
 
 @JsonController('/auth')
 @Service()
 export class AuthController {
   @Inject() private authService: AuthService;
+  @Inject() private secureService: SecureService;
   
   constructor() { }
 
@@ -46,6 +48,12 @@ export class AuthController {
   async isPhoneAlreadyTaken(@Body() phone: {phone: string}) {
     debug('POST /auth/phone-already-taken => Successfully checked!');
     return await this.authService.isPhoneAlreadyTaken(phone.phone);
+  }
+
+  @Post('/password-is-valid')
+  async isPasswordValid(@Body() credentials: IUserCredentials) {
+    debug('POST /auth/password-is-valid => Successfully checked!');
+    return await this.secureService.isPasswordValid(credentials);
   }
 
   @Post('/refresh')

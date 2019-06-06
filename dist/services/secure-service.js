@@ -24,6 +24,7 @@ const bcrypt = require("bcryptjs");
 const constants_1 = require("../persist/constants");
 const routing_controllers_1 = require("routing-controllers");
 const secure_model_1 = require("../models/secure-model");
+const auth_service_1 = require("./auth-service");
 ;
 let SecureService = class SecureService {
     constructor() { }
@@ -150,6 +151,21 @@ let SecureService = class SecureService {
         });
     }
     ;
+    isPasswordValid(credentials) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const emailOrPhone = this.authService.defineEmailOrPhone(credentials);
+                const query = emailOrPhone === 'email' ? { find: { email: credentials.email } } : { find: { phone: credentials.phone } };
+                const users = yield this.userDAO.find(query);
+                const user = users[0];
+                yield this.comparePassword(credentials.password, user.password);
+                return true;
+            }
+            catch (err) {
+                return false;
+            }
+        });
+    }
     getSecretFromRefreshToken(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             const decodedRefreshToken = jwt.decode(refreshToken);
@@ -162,6 +178,10 @@ let SecureService = class SecureService {
         });
     }
 };
+__decorate([
+    typedi_1.Inject(type => auth_service_1.AuthService),
+    __metadata("design:type", auth_service_1.AuthService)
+], SecureService.prototype, "authService", void 0);
 __decorate([
     typedi_1.Inject(),
     __metadata("design:type", user_model_1.UserDAO)
