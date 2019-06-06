@@ -29,7 +29,7 @@ let AuthController = class AuthController {
     registerUser(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const tokens = yield this.authService.register(user);
-            debug('POST /user/register => Successfully registered!');
+            debug('POST /auth/register => Successfully registered!');
             return {
                 jwt: tokens.accessToken,
                 'refresh-token': tokens.refreshToken
@@ -45,17 +45,29 @@ let AuthController = class AuthController {
             else {
                 tokens = yield this.authService.login(credentials);
             }
-            debug('POST /user/login => Successfully logged in!');
+            debug('POST /auth/login => Successfully logged in!');
             return {
                 jwt: tokens.accessToken,
                 'refresh-token': tokens.refreshToken
             };
         });
     }
+    isEmailAlreadyTaken(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('POST /auth/email-already-taken => Successfully checked!');
+            return yield this.authService.isEmailAlreadyTaken(email.email);
+        });
+    }
+    isPhoneAlreadyTaken(phone) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('POST /auth/phone-already-taken => Successfully checked!');
+            return yield this.authService.isPhoneAlreadyTaken(phone.phone);
+        });
+    }
     refresh(refreshToken, user) {
         return __awaiter(this, void 0, void 0, function* () {
             const newTokens = yield this.authService.refreshTokens(refreshToken, user.id);
-            debug('POST /user/refresh => New Tokens successfully created!');
+            debug('POST /auth/refresh => New Tokens successfully created!');
             return {
                 jwt: newTokens.accessToken,
                 'refresh-token': newTokens.refreshToken
@@ -65,7 +77,7 @@ let AuthController = class AuthController {
     logout(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.authService.logout(refreshToken);
-            debug('POST /user/logout => Successfully logged out!');
+            debug('POST /auth/logout => Successfully logged out!');
             return 'Successfully logged out!';
         });
     }
@@ -94,6 +106,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    routing_controllers_1.Post('/email-already-taken'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "isEmailAlreadyTaken", null);
+__decorate([
+    routing_controllers_1.Post('/phone-already-taken'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "isPhoneAlreadyTaken", null);
 __decorate([
     routing_controllers_1.Post('/refresh'),
     __param(0, routing_controllers_1.HeaderParam('refresh-token')), __param(1, routing_controllers_1.Body()),

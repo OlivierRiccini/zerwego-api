@@ -154,11 +154,22 @@ let AuthService = class AuthService {
         });
     }
     ;
-    emailValidation(email) {
+    isEmailAlreadyTaken(email) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.userDAO.find({ find: { email } });
-            if (users.length > 0) {
-                throw new Error('Email address already belong to an account');
+            return users.length > 0;
+        });
+    }
+    isPhoneAlreadyTaken(phone) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.userDAO.find({ find: { phone } });
+            return users.length > 0;
+        });
+    }
+    emailValidation(email) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (yield this.isEmailAlreadyTaken(email)) {
+                throw new Error('Email address already belongs to an account');
             }
             if (!validator_1.default.isEmail(email)) {
                 throw new Error('Email address provided is not valid');
@@ -167,9 +178,8 @@ let AuthService = class AuthService {
     }
     phoneValidation(phone) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userDAO.find({ find: { phone } });
-            if (users.length > 0) {
-                throw new Error('Phone number already belong to an account');
+            if (yield this.isPhoneAlreadyTaken(phone)) {
+                throw new Error('Phone number already belongs to an account');
             }
             if (!validator_1.default.isMobilePhone(phone, 'any', { strictMode: true })) {
                 throw new Error('Phone number provided is not valid');

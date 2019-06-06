@@ -235,7 +235,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       .post('/auth/login')
       .send({type: 'password', phone: 'notvalidphone', password: VALID_USER.password});
 
-      expect(response.status).to.equal(400);
+    expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('Provided phone number is not valid');
   });
 
@@ -437,6 +437,79 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     
     expect(response.status).to.equal(200);
     expect(response.body).to.equal('Successfully logged out!');
+  });
+
+  it('POSITIVE - Should return true if email provided is already taken', async () => {
+    const newUser: IUser = {
+      username: 'TestEmail',
+      email: 'email@taken.com',
+      password: 'xxx',
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+
+    let token = response.body['jwt'];
+    if (token.startsWith('Bearer ')) {
+      // Remove Bearer from string
+      token = token.slice(7, token.length);
+    }
+  
+    const response2 = await request
+      .post('/auth/email-already-taken')
+      .send({email: newUser.email})
+
+    expect(response2.status).to.equal(200);
+    expect(response2.body).to.be.true;
+
+    await request.post('/auth/logout').set('authorization', token);
+  });
+
+  it('POSITIVE - Should return false if email provided is not already taken', async () => {  
+    const response = await request
+      .post('/auth/email-already-taken')
+      .send({email: 'random.email@unique.com'})
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.be.false;
+  });
+
+  it('POSITIVE - Should return true if phone provided is already taken', async () => {
+    const newUser: IUser = {
+      username: 'TestEmail',
+      email: 'email@email.com',
+      phone: '+12222222222',
+      password: 'xxx',
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+
+    let token = response.body['jwt'];
+    if (token.startsWith('Bearer ')) {
+      // Remove Bearer from string
+      token = token.slice(7, token.length);
+    }
+  
+    const response2 = await request
+      .post('/auth/phone-already-taken')
+      .send({phone: newUser.phone})
+
+    expect(response2.status).to.equal(200);
+    expect(response2.body).to.be.true;
+
+    await request.post('/auth/logout').set('authorization', token);
+  });
+
+  it('POSITIVE - Should return false if phone provided is not already taken', async () => {  
+    const response = await request
+      .post('/auth/phone-already-taken')
+      .send({phone: '+14444444444'})
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.be.false;
   });
 
 });

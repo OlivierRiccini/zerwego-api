@@ -122,9 +122,18 @@ export class AuthService {
         }
     };
 
-    private async emailValidation(email: string): Promise<void> {  
+    public async isEmailAlreadyTaken(email: string): Promise<boolean> {
         const users: IUser[] = await this.userDAO.find({find: { email }});
-        if (users.length > 0) {
+        return users.length > 0;
+    }
+
+    public async isPhoneAlreadyTaken(phone: string): Promise<boolean> {
+        const users: IUser[] = await this.userDAO.find({find: { phone }});
+        return users.length > 0;
+    }
+
+    private async emailValidation(email: string): Promise<void> {  
+        if (await this.isEmailAlreadyTaken(email)) {
             throw new Error('Email address already belongs to an account');
         }
         if (!validator.isEmail(email)) {
@@ -133,8 +142,7 @@ export class AuthService {
     }
 
     private async phoneValidation(phone: string): Promise<void> {  
-        const users: IUser[] = await this.userDAO.find({find: { phone }});
-        if (users.length > 0) {
+        if (await this.isPhoneAlreadyTaken(phone)) {
             throw new Error('Phone number already belongs to an account');
         }
         if (!validator.isMobilePhone(phone, 'any', {strictMode: true})) {

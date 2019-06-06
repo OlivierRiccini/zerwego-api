@@ -14,7 +14,7 @@ export class AuthController {
   @Post('/register')
   async registerUser(@Body() user: IUser) {
     const tokens = await this.authService.register(user);
-    debug('POST /user/register => Successfully registered!');
+    debug('POST /auth/register => Successfully registered!');
     return {
       jwt: tokens.accessToken,
       'refresh-token': tokens.refreshToken
@@ -29,17 +29,29 @@ export class AuthController {
     } else {
       tokens = await this.authService.login(credentials);
     }
-    debug('POST /user/login => Successfully logged in!');
+    debug('POST /auth/login => Successfully logged in!');
     return {
       jwt: tokens.accessToken,
       'refresh-token': tokens.refreshToken
     };
   }
 
+  @Post('/email-already-taken')
+  async isEmailAlreadyTaken(@Body() email: {email: string}) {
+    debug('POST /auth/email-already-taken => Successfully checked!');
+    return await this.authService.isEmailAlreadyTaken(email.email);
+  }
+
+  @Post('/phone-already-taken')
+  async isPhoneAlreadyTaken(@Body() phone: {phone: string}) {
+    debug('POST /auth/phone-already-taken => Successfully checked!');
+    return await this.authService.isPhoneAlreadyTaken(phone.phone);
+  }
+
   @Post('/refresh')
   async refresh(@HeaderParam('refresh-token') refreshToken: string, @Body() user: IUser) {
     const newTokens: any = await this.authService.refreshTokens(refreshToken, user.id);
-    debug('POST /user/refresh => New Tokens successfully created!');
+    debug('POST /auth/refresh => New Tokens successfully created!');
     return {
       jwt: newTokens.accessToken,
       'refresh-token': newTokens.refreshToken
@@ -49,7 +61,7 @@ export class AuthController {
   @Post('/logout')
   async logout(@HeaderParam('refreshToken') refreshToken: string) {
     await this.authService.logout(refreshToken);
-    debug('POST /user/logout => Successfully logged out!');
+    debug('POST /auth/logout => Successfully logged out!');
     return 'Successfully logged out!';
   }
 
