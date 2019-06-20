@@ -106,7 +106,7 @@ let AuthService = class AuthService {
                         break;
                     case 'sms':
                         yield this.messagesService.sendSMS({
-                            phone: contact.phone,
+                            phone: contact.phone.number,
                             content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
                         });
                         break;
@@ -162,7 +162,7 @@ let AuthService = class AuthService {
     }
     isPhoneAlreadyTaken(phone) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userDAO.find({ find: { phone } });
+            const users = yield this.userDAO.find({ find: { 'phone.internationalNumber': phone.internationalNumber } });
             return users.length > 0;
         });
     }
@@ -189,10 +189,12 @@ let AuthService = class AuthService {
     }
     phoneValidation(phone) {
         return __awaiter(this, void 0, void 0, function* () {
+            const formatedPhoneNumber = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
             if (yield this.isPhoneAlreadyTaken(phone)) {
                 throw new Error('Phone number already belongs to an account');
             }
-            if (!validator_1.default.isMobilePhone(phone, 'any', { strictMode: true })) {
+            if (!phone.hasOwnProperty('internationalNumber')
+                || (!validator_1.default.isMobilePhone(formatedPhoneNumber, 'any', { strictMode: true }))) {
                 throw new Error('Phone number provided is not valid');
             }
         });
@@ -220,7 +222,7 @@ let AuthService = class AuthService {
             throw new Error('Provided email is not valid');
         }
         if (this.credentialsHasPhone(credentials)
-            && !validator_1.default.isMobilePhone(credentials.phone, 'any', { strictMode: true })) {
+            && !validator_1.default.isMobilePhone(credentials.phone.number, 'any', { strictMode: true })) {
             throw new Error('Provided phone number is not valid');
         }
     }
@@ -228,7 +230,7 @@ let AuthService = class AuthService {
         return credentials.hasOwnProperty('email') && !!credentials.email;
     }
     credentialsHasPhone(credentials) {
-        return credentials.hasOwnProperty('phone') && !!credentials.phone;
+        return credentials.phone && credentials.phone.hasOwnProperty('number');
     }
     validateLoginType(credentials) {
         if (!credentials.hasOwnProperty('type') || credentials.type !== 'password' && credentials.type !== 'facebook') {

@@ -62,7 +62,7 @@ let AuthController = class AuthController {
     isPhoneAlreadyTaken(phone) {
         return __awaiter(this, void 0, void 0, function* () {
             debug('POST /auth/phone-already-taken => Successfully checked!');
-            return yield this.authService.isPhoneAlreadyTaken(phone.phone);
+            return yield this.authService.isPhoneAlreadyTaken(phone);
         });
     }
     isPasswordValid(credentials) {

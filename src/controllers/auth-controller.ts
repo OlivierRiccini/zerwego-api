@@ -1,6 +1,6 @@
 const debug = require('debug')('http');
 import {JsonController, Body, Post, Res, HeaderParam} from "routing-controllers";
-import { IUser, IUserCredentials, IForgotPassword } from "../models/user-model";
+import { IUser, IUserCredentials, IForgotPassword, IPhone } from "../models/user-model";
 import { Service, Inject } from "typedi";
 import { AuthService } from "../services/auth-service";
 import { SecureService } from "../services/secure-service";
@@ -45,9 +45,9 @@ export class AuthController {
   }
 
   @Post('/phone-already-taken')
-  async isPhoneAlreadyTaken(@Body() phone: {phone: string}) {
+  async isPhoneAlreadyTaken(@Body() phone: IPhone) {
     debug('POST /auth/phone-already-taken => Successfully checked!');
-    return await this.authService.isPhoneAlreadyTaken(phone.phone);
+    return await this.authService.isPhoneAlreadyTaken(phone);
   }
 
   @Post('/password-is-valid')

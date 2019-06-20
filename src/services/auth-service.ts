@@ -1,5 +1,5 @@
 import { Service, Inject } from "typedi";
-import { UserDAO, IUserCredentials, IForgotPassword, IUser } from '../models/user-model';
+import { UserDAO, IUserCredentials, IForgotPassword, IUser, IPhone } from '../models/user-model';
 import { HttpError, BadRequestError } from "routing-controllers";
 import { SecureService } from "./secure-service";
 import { MessagesService } from "./messages-service";
@@ -79,7 +79,7 @@ export class AuthService {
                     break;
                 case 'sms':
                 await this.messagesService.sendSMS({
-                    phone: contact.phone,
+                    phone: contact.phone.number,
                     content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
                 });
                     break;
@@ -127,8 +127,8 @@ export class AuthService {
         return users.length > 0;
     }
 
-    public async isPhoneAlreadyTaken(phone: string): Promise<boolean> {
-        const users: IUser[] = await this.userDAO.find({find: { phone }});
+    public async isPhoneAlreadyTaken(phone: any): Promise<boolean> {
+        const users: IUser[] = await this.userDAO.find({find: { 'phone.internationalNumber': phone.internationalNumber }});
         return users.length > 0;
     }
 
@@ -144,7 +144,7 @@ export class AuthService {
         }
     }
 
-    private async emailValidation(email: string): Promise<void> {  
+    public async emailValidation(email: string): Promise<void> {  
         if (await this.isEmailAlreadyTaken(email)) {
             throw new Error('Email address already belongs to an account');
         }
@@ -153,11 +153,13 @@ export class AuthService {
         }
     }
 
-    private async phoneValidation(phone: string): Promise<void> {  
+    public async phoneValidation(phone: IPhone): Promise<void> {
+        const formatedPhoneNumber: string = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
         if (await this.isPhoneAlreadyTaken(phone)) {
             throw new Error('Phone number already belongs to an account');
         }
-        if (!validator.isMobilePhone(phone, 'any', {strictMode: true})) {
+        if (!phone.hasOwnProperty('internationalNumber')
+            || (!validator.isMobilePhone(formatedPhoneNumber, 'any', {strictMode: true}))) {
             throw new Error('Phone number provided is not valid');
         }
     }
@@ -184,7 +186,7 @@ export class AuthService {
             throw new Error('Provided email is not valid');
         }
         if (this.credentialsHasPhone(credentials)
-            && !validator.isMobilePhone(credentials.phone, 'any', {strictMode: true})) {
+            && !validator.isMobilePhone(credentials.phone.number, 'any', {strictMode: true})) {
             throw new Error('Provided phone number is not valid');
         }
     }
@@ -194,7 +196,7 @@ export class AuthService {
     }
 
     private credentialsHasPhone(credentials: IUserCredentials): boolean {
-        return credentials.hasOwnProperty('phone') && !!credentials.phone;
+        return credentials.phone && credentials.phone.hasOwnProperty('number');
     }
 
     private validateLoginType(credentials: IUserCredentials): void {

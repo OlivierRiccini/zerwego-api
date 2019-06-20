@@ -10,8 +10,6 @@ import { CONSTANTS } from '../../src/persist/constants';
 import * as jwt from 'jsonwebtoken';
 import { GeneralHelper } from '../data-test/helpers-data';
 
-const debug = require('debug')('test');
-
 const generalHelper: GeneralHelper = new GeneralHelper();
 
 const expect = chai.expect;
@@ -26,27 +24,31 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   let VALID_USER: IUser = {
     username: 'Lebron',
     email: 'lebron.james@lakers.com',
-    password: 'Iamtheking',
-    phone: '+14383991332'
+    password: 'IamTheKing',
+    phone: {
+      countryCode: "US",
+      internationalNumber: "+1 438-399-1332",
+      nationalNumber: "(438) 399-1332",
+      number: "+14383991332"
+    },
   };
 
   const VALID_USER_CREDENTIALS_EMAIL: IUserCredentials = {
     type: 'password',
     email: 'lebron.james@lakers.com',
-    password: 'Iamtheking'  
+    password: 'IamTheKing'  
   };
 
   const VALID_USER_CREDENTIALS_PHONE: IUserCredentials = {
     type: 'password',
     email: 'lebron.james@lakers.com',
-    password: 'Iamtheking'
+    password: 'IamTheKing'
   };
 
   let VALID_USER_TOKEN: string;
 
-  let VALID_USER_HASHED_PASSWORD: string;
-
   before('Create user', async () => {
+    generalHelper.cleanDB();
     const response = await request
       .post('/auth/register')
       .send(VALID_USER);
@@ -55,7 +57,6 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       // Remove Bearer from string
       token = token.slice(7, token.length);
     }
-
     const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
     const user = decoded['payload'];
     // Assign id to VALID_USER to reuse in other tests
@@ -139,6 +140,10 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       expect(user).to.have.property('id');
       expect(user).to.have.property('username');
       expect(user).to.have.property('phone');
+      expect(user.phone).to.have.property('countryCode');
+      expect(user.phone).to.have.property('internationalNumber');
+      expect(user.phone).to.have.property('nationalNumber');
+      expect(user.phone).to.have.property('number');
 
     await request.del('/auth/logout').set('authorization', VALID_USER_TOKEN);
   });
@@ -156,8 +161,13 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let newUser: IUser = {
       username: 'New User',
       email: 'lebron.james@lakers.com',
-      password: 'Iamtheking',
-      phone: '+16666668809'
+      password: 'IamTheKing',
+      phone: {
+        countryCode: "US",
+        internationalNumber: "+1 666-666-8809",
+        nationalNumber: "(666) 666-8809",
+        number: "+16666668809"
+      },
     };
 
     const response = await request
@@ -171,8 +181,13 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let newUser: IUser = {
       username: 'New User',
       email: 'blabla.blabla@bla.com',
-      password: 'Iamtheking',
-      phone: '+14383991332'
+      password: 'IamTheKing',
+      phone: {
+        countryCode: "US",
+        internationalNumber: "+1 438-399-1332",
+        nationalNumber: "(438) 399-1332",
+        number: "+14383991332"
+      }
     };
 
     const response = await request
@@ -186,8 +201,13 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let newUser: IUser = {
       username: 'New User',
       email: 'ttt.ttt@tt.com',
-      password: 'Iamtheking',
-      phone: '+199999999' // one digit missed 
+      password: 'IamTheKing',
+      phone: {
+        countryCode: "US",
+        internationalNumber: "+1 234-000-5654",
+        nationalNumber: "(234) 000-5654",
+        number: "+123400054" // one digit missed 
+      }
     };
 
     const response = await request
@@ -201,8 +221,13 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     let newUser: IUser = {
       username: 'New User',
       email: 'ttttt.com',
-      password: 'Iamtheking',
-      phone: '+18989898989'
+      password: 'IamTheKing',
+      phone: {
+        countryCode: "US",
+        internationalNumber: "+1 898-898-8989",
+        nationalNumber: "(898) 898-8989",
+        number: "+18989898989"
+      }
     };
 
     const response = await request
@@ -212,7 +237,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(response.body.message).to.equals('Email address provided is not valid');
   });
 
-  it('NEGATIVE - Should not login a user if no email nor phone provided', async () => {
+  it('NEGATIVE - Should not login a user if neither email nor phone provided', async () => {
     const response = await request
       .post('/auth/login')
       .send({type: 'password', phone: null, password: VALID_USER.password});
@@ -233,7 +258,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it('NEGATIVE - Should not login a user if phone provided is not valid', async () => {
     const response = await request
       .post('/auth/login')
-      .send({type: 'password', phone: 'notvalidphone', password: VALID_USER.password});
+      .send({type: 'password', phone: { number: 'notvalidphone' }, password: VALID_USER.password});
 
     expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('Provided phone number is not valid');
@@ -242,7 +267,16 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it('NEGATIVE - Should not login if user was not found in DB', async () => {
     const response = await request
       .post('/auth/login')
-      .send({type: 'password', phone: '+1777666550', password: VALID_USER.password});
+      .send({
+          type: 'password',
+          phone: {
+            countryCode: "US",
+            internationalNumber: "+1 343-343-3434",
+            nationalNumber: "(343) 343-3434",
+            number: "+13434343434"
+          },
+          password: VALID_USER.password
+      });
     
     expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('User was not found while login');
@@ -443,7 +477,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     const newUser: IUser = {
       username: 'TestEmail',
       email: 'email@taken.com',
-      password: 'xxx',
+      password: 'xxx'
     };
 
     const response = await request
@@ -479,7 +513,12 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     const newUser: IUser = {
       username: 'TestEmail',
       email: 'email@email.com',
-      phone: '+12222222222',
+      phone: {
+        countryCode: "US",
+        internationalNumber: "+1 234-222-2222",
+        nationalNumber: "(234) 222-2222",
+        number: "+12342222222"
+      },
       password: 'xxx',
     };
 
@@ -506,7 +545,13 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it('POSITIVE - Should return false if phone provided is not already taken', async () => {  
     const response = await request
       .post('/auth/phone-already-taken')
-      .send({phone: '+14444444444'})
+      .send({
+          countryCode: "US",
+          internationalNumber: "+1 222-222-2222",
+          nationalNumber: "(222) 222-2222",
+          number: "2222222220"
+        },
+      )
 
     expect(response.status).to.equal(200);
     expect(response.body).to.be.false;
@@ -524,10 +569,49 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
   it('POSITIVE - Should return true if password provided is right', async () => {  
     const response = await request
     .post('/auth/password-is-valid')
-      .send({email: 'lebron.james@lakers.com', password: 'Iamtheking'})
+      .send({email: 'lebron.james@lakers.com', password: 'IamTheKing'})
 
     expect(response.status).to.equal(200);
     expect(response.body).to.be.true;
+  });
+
+  it.only('POSTIVE - Should update user profile', async () => {
+    let newUser: IUser = {
+      username: 'French user',
+      email: 'french@user.fr',
+      password: 'zidane',
+      phone: {
+        countryCode: "FR",
+        internationalNumber: "+33 6 74 99 00 99",
+        nationalNumber: "06 74 99 00 99",
+        number: "0674990099"
+      }
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(newUser);
+    expect(response.status).to.equal(200);
+
+    let token = response.body['jwt'];
+    if (token.startsWith('Bearer ')) {
+      // Remove Bearer from string
+      token = token.slice(7, token.length);
+    }
+    const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+    const user = decoded['payload'];
+    // Assign id to VALID_USER to reuse in other tests
+    const userId: string = user.id;
+        // Updating
+    newUser.username = 'Zizou';
+    newUser.email = 'zizou@zz.fr';
+
+    const response2 = await request
+      .put(`/users/${userId}/update`)
+      .send(newUser);
+    expect(response2.status).to.equal(200);
+
+
   });
 
 

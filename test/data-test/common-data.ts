@@ -19,14 +19,24 @@ export const MODELS_DATA = {
             _id: new ObjectID('111111111111111111111111'),
             username: "Lebron James",
             email: "lebron.james@lakers.com",
-            phone: '+33674990099',
+            phone: {
+                countryCode: "US",
+                internationalNumber: "+1 234-243-5654",
+                nationalNumber: "(234) 243-5654",
+                number: "+12342435654"
+            },
             password: "123456"
         },
         {
             _id: new ObjectID('222222222222222222222222'),
             username: "Stephen Curry",
             email: "stephen.curry@warriors.com",
-            phone: '+14383991332',
+            phone: {
+                countryCode: "US",
+                internationalNumber: "+1 234-243-0000",
+                nationalNumber: "(234) 243-0000",
+                number: "+12342430000"
+            },
             password: "123456"
         }
     ],
