@@ -1,13 +1,15 @@
 const debug = require('debug')('http');
-import {JsonController, Body, Post, Res, HeaderParam, Put, Params, Param} from "routing-controllers";
-import { IUser, IUserCredentials, IForgotPassword, IPhone } from "../models/user-model";
+import {JsonController, Body, Put, Param} from "routing-controllers";
+import { IUser } from "../models/user-model";
 import { Service, Inject } from "typedi";
+import { UserService } from "../services/user-service";
 // import { AuthService } from "../services/auth-service";
 // import { SecureService } from "../services/secure-service";
 
 @JsonController('/users')
 @Service()
 export class UserController {
+  @Inject() private userService: UserService;
 //   @Inject() private authService: AuthService;
 //   @Inject() private secureService: SecureService;
   
@@ -15,11 +17,9 @@ export class UserController {
 
   @Put('/:id/update')
   async updateUser(@Param('id') id: string , @Body() user: IUser) {
-    console.log('/////////////////////////////////// CONTROLLER ////////////////////////////////////////');
-    console.log(id);
-    console.log(user);
+    const updatedUser: IUser = await this.userService.updateUser(user, id);
     debug('POST /user/update => Successfully updated!');
-    return 'wouuuuu';
+    return updatedUser;
   }
  
 }

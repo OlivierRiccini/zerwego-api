@@ -118,7 +118,8 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                         let updated = _.merge(found, obj);
                         updated.save(
                             (err, updated) => {
-                                err ? reject(err) : resolve(this.idNormalizator(updated).toObject())
+                                // console.log(updated);
+                                err ? reject(err) : resolve(this.idNormalizator(updated.toObject()))
                             }
                         )
                     }
@@ -163,8 +164,8 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             .lean()
             .exec((err: any, res: any) => {
                 if (err) {
-                    debug('find - FAILED => No documents found');
-                    reject(new Error("No documents found"));
+                    debug(err.message);
+                    reject(new Error(err.message));
                 } else {
                     resolve(this.idNormalizator(res));
                 }

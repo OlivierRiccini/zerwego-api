@@ -23,6 +23,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
+const user_service_1 = require("../services/user-service");
 // import { AuthService } from "../services/auth-service";
 // import { SecureService } from "../services/secure-service";
 let UserController = class UserController {
@@ -31,14 +32,16 @@ let UserController = class UserController {
     constructor() { }
     updateUser(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('/////////////////////////////////// CONTROLLER ////////////////////////////////////////');
-            console.log(id);
-            console.log(user);
+            const updatedUser = yield this.userService.updateUser(user, id);
             debug('POST /user/update => Successfully updated!');
-            return 'wouuuuu';
+            return updatedUser;
         });
     }
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", user_service_1.UserService)
+], UserController.prototype, "userService", void 0);
 __decorate([
     routing_controllers_1.Put('/:id/update'),
     __param(0, routing_controllers_1.Param('id')), __param(1, routing_controllers_1.Body()),

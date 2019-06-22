@@ -19,93 +19,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-;
+const auth_service_1 = require("./auth-service");
+const routing_controllers_1 = require("routing-controllers");
 let UserService = class UserService {
-    constructor(userDAO) {
-        this.userDAO = userDAO;
-        this.secret = process.env.ACCESS_TOKEN_SECRET;
-    }
-    ;
-    hashPassword(user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(user.password, salt, (err, hash) => {
-                        if (err) {
-                            reject(new Error("Something went wrong while hashing password"));
-                        }
-                        else {
-                            resolve(hash);
-                        }
-                        ;
-                    });
-                });
-            });
-        });
-    }
-    ;
-    comparePassword(credentialPassword, userPassword) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                bcrypt.compare(credentialPassword, userPassword, (err, res) => {
-                    if (res) {
-                        resolve();
-                    }
-                    else {
-                        reject("Wrong password");
-                    }
-                });
-            });
-        });
-    }
-    ;
-    generateAuthToken(user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const payload = {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            };
-            return yield jwt.sign({ payload }, this.secret, { expiresIn: '10s' }).toString();
-        });
-    }
-    ;
-    register(req) {
+    // @Inject() private messagesService: MessagesService;
+    constructor() { }
+    updateUser(user, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let user = req;
-                user.password = yield this.hashPassword(user);
-                user = yield this.userDAO.create(req);
-                const token = yield this.generateAuthToken(user);
-                return token;
+                yield this.authService.emailValidation(user.email, userId);
+                yield this.authService.phoneValidation(user.phone, userId);
+                return yield this.userDAO.update(user, userId);
             }
             catch (err) {
-                console.log('Smothing went wrong while creating new user');
+                throw new routing_controllers_1.HttpError(400, err.message);
             }
         });
     }
-    ;
-    login(credentials) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let users = yield this.userDAO.find({ find: { email: credentials.email } });
-                let user = users[0];
-                yield this.comparePassword(credentials.password, user.password);
-                const token = yield this.generateAuthToken(user);
-                return token;
-            }
-            catch (err) {
-                throw new Error('Err= ' + err);
-            }
-        });
-    }
-    ;
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", user_model_1.UserDAO)
+], UserService.prototype, "userDAO", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", auth_service_1.AuthService)
+], UserService.prototype, "authService", void 0);
 UserService = __decorate([
     typedi_1.Service(),
-    __metadata("design:paramtypes", [user_model_1.UserDAO])
+    __metadata("design:paramtypes", [])
 ], UserService);
 exports.UserService = UserService;
 //# sourceMappingURL=user-service.js.map

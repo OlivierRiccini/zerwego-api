@@ -154,16 +154,25 @@ let AuthService = class AuthService {
         });
     }
     ;
-    isEmailAlreadyTaken(email) {
+    isEmailAlreadyTaken(email, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userDAO.find({ find: { email } });
-            return users.length > 0;
+            const users = yield this.userDAO.find({
+                find: {
+                    email
+                }
+            });
+            return users.length > 0 && users.some(user => user.id !== userId);
         });
     }
-    isPhoneAlreadyTaken(phone) {
+    isPhoneAlreadyTaken(phone, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const users = yield this.userDAO.find({ find: { 'phone.internationalNumber': phone.internationalNumber } });
-            return users.length > 0;
+            const users = yield this.userDAO.find({
+                find: {
+                    'phone.internationalNumber': phone.internationalNumber
+                }
+            });
+            return users.length > 0 && users.some(user => user.id !== userId);
+            ;
         });
     }
     defineEmailOrPhone(credentials) {
@@ -177,9 +186,9 @@ let AuthService = class AuthService {
             throw new routing_controllers_1.HttpError(400, 'User credentials should at least contain an email or a phone property');
         }
     }
-    emailValidation(email) {
+    emailValidation(email, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (yield this.isEmailAlreadyTaken(email)) {
+            if (yield this.isEmailAlreadyTaken(email, userId || null)) {
                 throw new Error('Email address already belongs to an account');
             }
             if (!validator_1.default.isEmail(email)) {
@@ -187,10 +196,10 @@ let AuthService = class AuthService {
             }
         });
     }
-    phoneValidation(phone) {
+    phoneValidation(phone, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const formatedPhoneNumber = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
-            if (yield this.isPhoneAlreadyTaken(phone)) {
+            if (yield this.isPhoneAlreadyTaken(phone, userId || null)) {
                 throw new Error('Phone number already belongs to an account');
             }
             if (!phone.hasOwnProperty('internationalNumber')

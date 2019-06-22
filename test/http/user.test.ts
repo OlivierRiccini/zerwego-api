@@ -5,12 +5,15 @@ var app = require('../../dist/app').app;
 import 'mocha';
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { IUser, IUserCredentials } from '../../src/models/user-model';
+import { IUser, IUserCredentials, UserDAO } from '../../src/models/user-model';
 import { CONSTANTS } from '../../src/persist/constants';
 import * as jwt from 'jsonwebtoken';
-import { GeneralHelper } from '../data-test/helpers-data';
+import * as helpers from '../data-test/helpers-data';
 
-const generalHelper: GeneralHelper = new GeneralHelper();
+const generalHelper: helpers.GeneralHelper = new helpers.GeneralHelper();
+
+const userDAO: UserDAO = new UserDAO();
+const userHelper: helpers.UserHelper = new helpers.UserHelper(userDAO);
 
 const expect = chai.expect;
 chai.use(chaiHttp);
@@ -53,15 +56,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       .post('/auth/register')
       .send(VALID_USER);
     let token = response.body['jwt'];
-    if (token.startsWith('Bearer ')) {
-      // Remove Bearer from string
-      token = token.slice(7, token.length);
-    }
-    const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-    const user = decoded['payload'];
-    // Assign id to VALID_USER to reuse in other tests
-    VALID_USER.id = user.id;
-    // Save token to reuse in other tests
+    VALID_USER.id = userHelper.getIdByToken(token);
     VALID_USER_TOKEN = token; 
   });
 
@@ -575,7 +570,7 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
     expect(response.body).to.be.true;
   });
 
-  it.only('POSTIVE - Should update user profile', async () => {
+  it('POSTIVE - Should update user profile', async () => {
     let newUser: IUser = {
       username: 'French user',
       email: 'french@user.fr',
@@ -593,26 +588,115 @@ describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
       .send(newUser);
     expect(response.status).to.equal(200);
 
+    
     let token = response.body['jwt'];
-    if (token.startsWith('Bearer ')) {
-      // Remove Bearer from string
-      token = token.slice(7, token.length);
-    }
-    const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-    const user = decoded['payload'];
-    // Assign id to VALID_USER to reuse in other tests
-    const userId: string = user.id;
-        // Updating
+    const userId: string = userHelper.getIdByToken(token);
     newUser.username = 'Zizou';
     newUser.email = 'zizou@zz.fr';
+    
+    const response2 = await request
+    .put(`/users/${userId}/update`)
+    .send(newUser);
+    expect(response2.status).to.equal(200);
+    expect(response2.body.username).to.equal('Zizou');
+    expect(response2.body.email).to.equal('zizou@zz.fr');
+
+    await userHelper.delete(userId);
+  });
+
+  it('NEGATIVE - Should not update user email address if not valid', async () => {
+    VALID_USER.email = 'notvalidemail';
+
+    // Updating
+    const response = await request
+      .put(`/users/${VALID_USER}/update`)
+      .send(VALID_USER);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Email address provided is not valid');
+  });
+
+  it('NEGATIVE - Should not update user email address is already taken', async () => {
+    let user: IUser = {
+      username: 'Test USer',
+      email: 'test@user.fr',
+      password: 'test',
+      phone: {
+        countryCode: "FR",
+        internationalNumber: "+33 6 77 99 99 99",
+        nationalNumber: "06 77 99 99 99",
+        number: "0677999999"
+      }
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(user);
+    expect(response.status).to.equal(200);
+
+    let token = response.body['jwt'];
+    const userId: string = userHelper.getIdByToken(token);
+
+    // Updating our main VALID_USER
+    VALID_USER.email = user.email;
 
     const response2 = await request
-      .put(`/users/${userId}/update`)
-      .send(newUser);
-    expect(response2.status).to.equal(200);
-
-
+      .put(`/users/${VALID_USER}/update`)
+      .send(VALID_USER);
+      expect(response2.status).to.equal(400);
+      expect(response2.body.message).to.equals('Email address already belongs to an account');
+    
+    await userHelper.delete(userId);  
   });
+
+  it('NEGATIVE - Should not update user phone number if not valid', async () => {
+    VALID_USER.phone = {
+      countryCode: "US",
+      internationalNumber: "438-399-1332", // missing +1
+      nationalNumber: "(438) 399-1332",
+      number: "+14383991332"
+    };
+
+    // Updating
+    const response = await request
+      .put(`/users/${VALID_USER}/update`)
+      .send(VALID_USER);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Phone number provided is not valid');
+  });
+
+  it('NEGATIVE - Should not update user if phone number is already taken', async () => {
+    let anotherUser: IUser = {
+      username: 'Test anotherUser',
+      email: 'test@anotherUser.fr',
+      password: 'test',
+      phone: {
+        countryCode: "FR",
+        internationalNumber: "+33 6 77 11 11 11",
+        nationalNumber: "06 77 11 11 11",
+        number: "0677111111"
+      }
+    };
+
+    const response = await request
+      .post('/auth/register')
+      .send(anotherUser);
+    expect(response.status).to.equal(200);
+
+    let token = response.body['jwt'];
+    const userId: string = userHelper.getIdByToken(token);
+
+    // Updating our main VALID_USER
+    VALID_USER.phone = anotherUser.phone;
+
+    const response2 = await request
+      .put(`/users/${VALID_USER}/update`)
+      .send(VALID_USER);
+      expect(response2.status).to.equal(400);
+      expect(response2.body.message).to.equals('Phone number already belongs to an account');
+    
+    await userHelper.delete(userId);  
+  });
+  
 
 
 });

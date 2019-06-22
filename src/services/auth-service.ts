@@ -122,14 +122,22 @@ export class AuthService {
         }
     };
 
-    public async isEmailAlreadyTaken(email: string): Promise<boolean> {
-        const users: IUser[] = await this.userDAO.find({find: { email }});
-        return users.length > 0;
+    public async isEmailAlreadyTaken(email: string, userId?: string): Promise<boolean> {
+        const users: IUser[] = await this.userDAO.find({
+            find: { 
+                email
+            }
+        });
+        return users.length > 0 && users.some(user => user.id !== userId);
     }
 
-    public async isPhoneAlreadyTaken(phone: any): Promise<boolean> {
-        const users: IUser[] = await this.userDAO.find({find: { 'phone.internationalNumber': phone.internationalNumber }});
-        return users.length > 0;
+    public async isPhoneAlreadyTaken(phone: IPhone, userId?: string): Promise<boolean> {
+        const users: IUser[] = await this.userDAO.find({
+            find: { 
+                'phone.internationalNumber': phone.internationalNumber
+            }
+        });
+        return users.length > 0 && users.some(user => user.id !== userId);;
     }
 
     public defineEmailOrPhone(credentials: IUserCredentials): 'email' | 'phone' {
@@ -144,8 +152,8 @@ export class AuthService {
         }
     }
 
-    public async emailValidation(email: string): Promise<void> {  
-        if (await this.isEmailAlreadyTaken(email)) {
+    public async emailValidation(email: string, userId?: string): Promise<void> {  
+        if (await this.isEmailAlreadyTaken(email, userId || null)) {
             throw new Error('Email address already belongs to an account');
         }
         if (!validator.isEmail(email)) {
@@ -153,9 +161,9 @@ export class AuthService {
         }
     }
 
-    public async phoneValidation(phone: IPhone): Promise<void> {
+    public async phoneValidation(phone: IPhone, userId?: string): Promise<void> {
         const formatedPhoneNumber: string = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
-        if (await this.isPhoneAlreadyTaken(phone)) {
+        if (await this.isPhoneAlreadyTaken(phone, userId || null)) {
             throw new Error('Phone number already belongs to an account');
         }
         if (!phone.hasOwnProperty('internationalNumber')
