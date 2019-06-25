@@ -21,8 +21,9 @@ const typedi_1 = require("typedi");
 const user_model_1 = require("../models/user-model");
 const auth_service_1 = require("./auth-service");
 const routing_controllers_1 = require("routing-controllers");
+const secure_service_1 = require("./secure-service");
+const messages_service_1 = require("./messages-service");
 let UserService = class UserService {
-    // @Inject() private messagesService: MessagesService;
     constructor() { }
     updateUser(user, userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -36,7 +37,50 @@ let UserService = class UserService {
             }
         });
     }
+    handleChangePassword(userId, oldPassword, newPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const user = yield this.userDAO.get(userId);
+                if (!user) {
+                    throw new Error('Change password request rejected since user was not found during process');
+                }
+                ;
+                yield this.secureService.comparePassword(oldPassword, user.password);
+                yield this.secureService.updatePassword(newPassword, userId);
+                if (process.env.NODE_ENV !== 'test') {
+                    yield this.sendMessagesAfterRestePassword(user, newPassword);
+                }
+                ;
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(400, err.message);
+            }
+        });
+    }
+    ;
+    sendMessagesAfterRestePassword(user, newPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (user.email) {
+                yield this.messagesService.sendEmail({
+                    from: 'info@olivierriccini.com',
+                    to: user.email,
+                    subject: 'New Password',
+                    content: `Hey ${user.username.toUpperCase()}, you just reste your password, this is your new one: ${newPassword}`
+                });
+            }
+            if (user.phone && user.phone.internationalNumber) {
+                yield this.messagesService.sendSMS({
+                    phone: user.phone.internationalNumber,
+                    content: `Hey ${user.username.toUpperCase()}, you just reste your password, this is your new one: ${newPassword}`
+                });
+            }
+        });
+    }
 };
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", secure_service_1.SecureService)
+], UserService.prototype, "secureService", void 0);
 __decorate([
     typedi_1.Inject(),
     __metadata("design:type", user_model_1.UserDAO)
@@ -45,6 +89,10 @@ __decorate([
     typedi_1.Inject(),
     __metadata("design:type", auth_service_1.AuthService)
 ], UserService.prototype, "authService", void 0);
+__decorate([
+    typedi_1.Inject(),
+    __metadata("design:type", messages_service_1.MessagesService)
+], UserService.prototype, "messagesService", void 0);
 UserService = __decorate([
     typedi_1.Service(),
     __metadata("design:paramtypes", [])

@@ -17,6 +17,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
     async use(request: any, response: any, next: (err?: any) => Promise<any>) {
         let accessToken = request.header('Authorization');  
         // console.log('///////////////////// 1 ////////////////////////////');
+        // console.log(accessToken);
         try {
             if (!accessToken) {
                 throw new HttpError(401, 'No authorization token provided');
@@ -32,7 +33,7 @@ export class Authenticate implements ExpressMiddlewareInterface {
             };
 
            const user = decoded['payload'];
-        //   console.log('//////////////////// 3 //////////////////////////////');
+            // console.log('//////////////////// 3 //////////////////////////////');
            if (!user) {
                 throw new HttpError(401, 'This token is not related to any user');
            };
@@ -44,6 +45,8 @@ export class Authenticate implements ExpressMiddlewareInterface {
                     throw new HttpError(401, 'Only administrator can perform this task');             
                 };
             }
+            // console.log('//////////////////// 4 //////////////////////////////');
+            // console.log(accessToken);
             request.user = user;
             request.token = accessToken;
             next();

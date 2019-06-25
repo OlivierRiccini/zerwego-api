@@ -39,15 +39,15 @@ export class AuthController {
   }
 
   @Post('/email-already-taken')
-  async isEmailAlreadyTaken(@Body() email: {email: string}) {
+  async isEmailAlreadyTaken(@Body() body: {email: string, userId: string}) {
     debug('POST /auth/email-already-taken => Successfully checked!');
-    return await this.authService.isEmailAlreadyTaken(email.email);
+    return await this.authService.isEmailAlreadyTaken(body.email, body.userId);
   }
 
   @Post('/phone-already-taken')
-  async isPhoneAlreadyTaken(@Body() phone: IPhone) {
+  async isPhoneAlreadyTaken(@Body() body: {phone: IPhone, userId: string}) {
     debug('POST /auth/phone-already-taken => Successfully checked!');
-    return await this.authService.isPhoneAlreadyTaken(phone);
+    return await this.authService.isPhoneAlreadyTaken(body.phone, body.userId);
   }
 
   @Post('/password-is-valid')

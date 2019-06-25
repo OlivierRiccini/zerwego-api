@@ -24,17 +24,24 @@ const debug = require('debug')('http');
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const user_service_1 = require("../services/user-service");
-// import { AuthService } from "../services/auth-service";
-// import { SecureService } from "../services/secure-service";
+const auth_middleware_1 = require("../middlewares/auth-middleware");
 let UserController = class UserController {
-    //   @Inject() private authService: AuthService;
-    //   @Inject() private secureService: SecureService;
     constructor() { }
     updateUser(id, user) {
         return __awaiter(this, void 0, void 0, function* () {
             const updatedUser = yield this.userService.updateUser(user, id);
-            debug('POST /user/update => Successfully updated!');
+            debug('POST /users/update => Successfully updated!');
             return updatedUser;
+        });
+    }
+    updateUserPassord(id, passwords) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log('*****************************************************************************');
+            console.log(passwords.oldPassword, passwords.newPassword);
+            console.log('*****************************************************************************');
+            yield this.userService.handleChangePassword(id, passwords.oldPassword, passwords.newPassword);
+            debug('POST /users/update-password => Successfully updated!');
+            return 'Password successfully updated!';
         });
     }
 };
@@ -43,12 +50,21 @@ __decorate([
     __metadata("design:type", user_service_1.UserService)
 ], UserController.prototype, "userService", void 0);
 __decorate([
+    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
     routing_controllers_1.Put('/:id/update'),
     __param(0, routing_controllers_1.Param('id')), __param(1, routing_controllers_1.Body()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "updateUser", null);
+__decorate([
+    routing_controllers_1.UseBefore(auth_middleware_1.Authenticate),
+    routing_controllers_1.Patch('/:id/update-password'),
+    __param(0, routing_controllers_1.Param('id')), __param(1, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "updateUserPassord", null);
 UserController = __decorate([
     routing_controllers_1.JsonController('/users'),
     typedi_1.Service(),

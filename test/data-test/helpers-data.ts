@@ -7,7 +7,7 @@ import chaiHttp = require('chai-http');
 import { MODELS_DATA } from './common-data';
 import * as jwt from 'jsonwebtoken';
 import { CONSTANTS } from '../../src/persist/constants';
-import { ISecure, SecureDAO } from '../../src/models/secure-model';
+// import { SecureService } from '../../src/services/secure-service';
 var mongoose = require('mongoose');
 
 chai.use(chaiHttp);
@@ -51,6 +51,11 @@ export class UserHelper {
     constructor(private userDAO: UserDAO) {
     }
 
+
+    public async getUserById(userId: string | number): Promise<any> {
+        return this.userDAO.get(userId);
+    }
+
     public async getUserAndToken(user?: IUser): Promise<{ user: IUser, token: string }> {
         const newUser = user ? user : MODELS_DATA.User[0];
         const response = await this.request
@@ -68,7 +73,7 @@ export class UserHelper {
         const userResponse = decoded['payload'];
         return { user: userResponse, token };
     }
-
+    
     public async deleteAllUsers(): Promise<any> {
         return this.userDAO.deleteAll();  
     }
@@ -89,9 +94,9 @@ export class UserHelper {
 
 }
 
-export class AuthHelper {
-    public secureDAO: SecureDAO;
-    constructor() {
-        this.secureDAO = new SecureDAO()
-    }
+export class SecureHelper {
+    // public secureService: SecureService;
+    // constructor() {
+    //     this.secureService = new SecureService()
+    // }
 }

@@ -30,6 +30,7 @@ let Authenticate = class Authenticate {
         return __awaiter(this, void 0, void 0, function* () {
             let accessToken = request.header('Authorization');
             // console.log('///////////////////// 1 ////////////////////////////');
+            // console.log(accessToken);
             try {
                 if (!accessToken) {
                     throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
@@ -45,7 +46,7 @@ let Authenticate = class Authenticate {
                 }
                 ;
                 const user = decoded['payload'];
-                //   console.log('//////////////////// 3 //////////////////////////////');
+                // console.log('//////////////////// 3 //////////////////////////////');
                 if (!user) {
                     throw new routing_controllers_1.HttpError(401, 'This token is not related to any user');
                 }
@@ -58,6 +59,8 @@ let Authenticate = class Authenticate {
                     }
                     ;
                 }
+                // console.log('//////////////////// 4 //////////////////////////////');
+                // console.log(accessToken);
                 request.user = user;
                 request.token = accessToken;
                 next();

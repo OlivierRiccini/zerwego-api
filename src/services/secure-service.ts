@@ -6,6 +6,7 @@ import { CONSTANTS } from "../persist/constants";
 import { HttpError } from "routing-controllers";
 import { SecureDAO, ISecure } from "../models/secure-model";
 import { AuthService } from "./auth-service";
+const generator = require('generate-password');
 
 export interface ITokens { accessToken: string, refreshToken: string };
 
@@ -93,10 +94,10 @@ export class SecureService {
         }
     }
 
-    public async hashPassword(user: IUser): Promise<string> {
+    public async hashPassword(userPassword: string): Promise<string> {
         return new Promise((resolve, reject) => {
             bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(user.password, salt, (err, hash) => {
+                bcrypt.hash(userPassword, salt, (err, hash) => {
                     if (err) {
                         reject(new Error("Something went wrong while hashing password"));
                     } else {
@@ -107,11 +108,11 @@ export class SecureService {
         });
     };
 
-    public async comparePassword(credentialPassword: string, userPassword: string): Promise<void> {
+    public async comparePassword(credentialPassword: string, userPassword: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             bcrypt.compare(credentialPassword, userPassword, (err, res) => {
                 if (res) {
-                    resolve();
+                    resolve(true);
                 } else {
                     reject(new Error('Wrong password'));
                 }
@@ -132,6 +133,23 @@ export class SecureService {
         }
     }
 
+    public async updatePassword(password: string, userId: string): Promise<void> {
+        try {
+            password = await this.hashPassword(password);
+            await this.userDAO.update({ password }, userId);
+        } catch (err) {
+            throw new HttpError(400, err.message);
+        }
+    } 
+
+    public async generateNewPassword(): Promise<string> {
+        const newPassword = generator.generate({
+            length: 10,
+            numbers: true
+        });
+        return newPassword;
+    }
+    
     private async getSecretFromRefreshToken(refreshToken: string): Promise<string> {
         const decodedRefreshToken = jwt.decode(refreshToken);
         const users = await this.userDAO.find({find: { id: decodedRefreshToken['payload'].userId}});
@@ -141,4 +159,6 @@ export class SecureService {
         }
         return CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
     }
+
+
 }

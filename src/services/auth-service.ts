@@ -4,7 +4,8 @@ import { HttpError, BadRequestError } from "routing-controllers";
 import { SecureService } from "./secure-service";
 import { MessagesService } from "./messages-service";
 import validator from 'validator';
-const generator = require('generate-password');
+import { ContactMode } from "src/models/shared-interfaces";
+// const generator = require('generate-password');
 
 @Service()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
         try {
             let user = req;
             // const nonHashedPassword = user.password;
-            user.password = await this.secureService.hashPassword(user);
+            user.password = await this.secureService.hashPassword(user.password);
             if (user.email) { await this.emailValidation(user.email) };
             if (user.phone) { await this.phoneValidation(user.phone) };
             user = await this.userDAO.create(req);
@@ -66,37 +67,20 @@ export class AuthService {
     }
 
     public async forgotPassword(contact: IForgotPassword) {
+        let user: IUser, newPassword: string;
         try {
-            const result = await this.generateNewPassword(contact);
-            switch(contact.type) {
-                case 'email':
-                    await this.messagesService.sendEmail({
-                        from: 'info@olivierriccini.com',
-                        to: contact.email,
-                        subject: 'New Password',
-                        content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
-                    });
-                    break;
-                case 'sms':
-                await this.messagesService.sendSMS({
-                    phone: contact.phone.number,
-                    content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
-                });
-                    break;
-                default:
-                    throw new BadRequestError('Something went wrong while reinitilizing password');
-            }
+            user = await this.findUserByEmailOrPhone(contact.email, contact.phone);
+            newPassword = await this.secureService.generateNewPassword();
+            await this.secureService.updatePassword(newPassword, user.id);
+            await this.sendMessagesAfterForgotPassword(contact, newPassword);
         } catch (err) {
-            throw err;
+            throw new HttpError(400, err.message);
         }
     }
 
     public async handleFacebookLogin(credentials: IUserCredentials): Promise<string> {
         const users = await this.userDAO.find({find:{email: credentials.email}});
-        const password = generator.generate({
-            length: 10,
-            numbers: true
-        });
+        const password = await this.secureService.generateNewPassword();
         if (users && users.length < 1) {
             const newUser = {
                 username: credentials.username,
@@ -123,21 +107,15 @@ export class AuthService {
     };
 
     public async isEmailAlreadyTaken(email: string, userId?: string): Promise<boolean> {
-        const users: IUser[] = await this.userDAO.find({
-            find: { 
-                email
-            }
-        });
-        return users.length > 0 && users.some(user => user.id !== userId);
+        const users: IUser[] = await this.userDAO.find({find: { email }});
+        return users.length > 0 && !users.some(user => user.id === userId);
     }
 
     public async isPhoneAlreadyTaken(phone: IPhone, userId?: string): Promise<boolean> {
         const users: IUser[] = await this.userDAO.find({
-            find: { 
-                'phone.internationalNumber': phone.internationalNumber
-            }
+            find: { 'phone.internationalNumber': phone.internationalNumber }
         });
-        return users.length > 0 && users.some(user => user.id !== userId);;
+        return users.length > 0 && !users.some(user => user.id === userId);
     }
 
     public defineEmailOrPhone(credentials: IUserCredentials): 'email' | 'phone' {
@@ -172,21 +150,13 @@ export class AuthService {
         }
     }
 
-    private async generateNewPassword(contact: IForgotPassword): Promise<{newPassword: string, user: IUser}> {
-        const query = contact.type === 'email' ? {email: contact.email} : {phone: contact.phone};
+    private async findUserByEmailOrPhone(email: string, phone: IPhone): Promise<IUser> {
+        const query = email ? { email} : { phone };
         const users = await this.userDAO.find({find: query});
         if (!users || users.length < 1 || users.length > 1) {
             throw new HttpError(400, 'No user or more than one user found during password reinitilization process')
         }
-        const user = users[0];
-        const newPassword = generator.generate({
-            length: 10,
-            numbers: true
-        });
-        user.password = newPassword;
-        user.password = await this.secureService.hashPassword(user);
-        await this.userDAO.update(user, user.id);
-        return {newPassword, user};
+        return users[0];
     }
 
     private validateProvidedCredentials(credentials: IUserCredentials): void {
@@ -210,6 +180,34 @@ export class AuthService {
     private validateLoginType(credentials: IUserCredentials): void {
         if (!credentials.hasOwnProperty('type') || credentials.type !== 'password' && credentials.type !== 'facebook') {
             throw new Error('Credentials should have a property type equal either \'password\' or \'facebook\'');
+        }
+    }
+
+    private async sendMessagesAfterForgotPassword(contact: IForgotPassword, newPassword: string): Promise<void> {
+        let user: IUser;
+        switch(contact.type) {
+            case 'email':
+                user = await this.findUserByEmailOrPhone(contact.email, null);
+                await this.messagesService.sendEmail({
+                    from: 'info@olivierriccini.com',
+                    to: contact.email,
+                    subject: 'New Password',
+                    content: `Hey ${user.username.toUpperCase()},
+                              this is your new password: ${newPassword}. 
+                              You can go to your profile to change it`
+                });
+                break;
+            case 'sms':
+                user = await this.findUserByEmailOrPhone(null, contact.phone);
+                await this.messagesService.sendSMS({
+                    phone: contact.phone.internationalNumber,
+                    content: `Hey ${user.username.toUpperCase()},
+                            this is your new password: ${newPassword}. 
+                            You can go to your profile to change it`
+                });
+                break;
+            default:
+                throw new Error('Something went wrong while reinitilizing password');
         }
     }
 }

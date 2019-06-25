@@ -25,6 +25,7 @@ const constants_1 = require("../persist/constants");
 const routing_controllers_1 = require("routing-controllers");
 const secure_model_1 = require("../models/secure-model");
 const auth_service_1 = require("./auth-service");
+const generator = require('generate-password');
 ;
 let SecureService = class SecureService {
     constructor() { }
@@ -118,11 +119,11 @@ let SecureService = class SecureService {
             }
         });
     }
-    hashPassword(user) {
+    hashPassword(userPassword) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(user.password, salt, (err, hash) => {
+                    bcrypt.hash(userPassword, salt, (err, hash) => {
                         if (err) {
                             reject(new Error("Something went wrong while hashing password"));
                         }
@@ -141,7 +142,7 @@ let SecureService = class SecureService {
             return new Promise((resolve, reject) => {
                 bcrypt.compare(credentialPassword, userPassword, (err, res) => {
                     if (res) {
-                        resolve();
+                        resolve(true);
                     }
                     else {
                         reject(new Error('Wrong password'));
@@ -164,6 +165,26 @@ let SecureService = class SecureService {
             catch (err) {
                 return false;
             }
+        });
+    }
+    updatePassword(password, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                password = yield this.hashPassword(password);
+                yield this.userDAO.update({ password }, userId);
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(400, err.message);
+            }
+        });
+    }
+    generateNewPassword() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const newPassword = generator.generate({
+                length: 10,
+                numbers: true
+            });
+            return newPassword;
         });
     }
     getSecretFromRefreshToken(refreshToken) {

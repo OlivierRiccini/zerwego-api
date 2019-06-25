@@ -53,16 +53,16 @@ let AuthController = class AuthController {
             };
         });
     }
-    isEmailAlreadyTaken(email) {
+    isEmailAlreadyTaken(body) {
         return __awaiter(this, void 0, void 0, function* () {
             debug('POST /auth/email-already-taken => Successfully checked!');
-            return yield this.authService.isEmailAlreadyTaken(email.email);
+            return yield this.authService.isEmailAlreadyTaken(body.email, body.userId);
         });
     }
-    isPhoneAlreadyTaken(phone) {
+    isPhoneAlreadyTaken(body) {
         return __awaiter(this, void 0, void 0, function* () {
             debug('POST /auth/phone-already-taken => Successfully checked!');
-            return yield this.authService.isPhoneAlreadyTaken(phone);
+            return yield this.authService.isPhoneAlreadyTaken(body.phone, body.userId);
         });
     }
     isPasswordValid(credentials) {
