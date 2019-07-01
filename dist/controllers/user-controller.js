@@ -36,9 +36,6 @@ let UserController = class UserController {
     }
     updateUserPassord(id, passwords) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('*****************************************************************************');
-            console.log(passwords.oldPassword, passwords.newPassword);
-            console.log('*****************************************************************************');
             yield this.userService.handleChangePassword(id, passwords.oldPassword, passwords.newPassword);
             debug('POST /users/update-password => Successfully updated!');
             return 'Password successfully updated!';

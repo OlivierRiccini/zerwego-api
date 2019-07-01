@@ -23,9 +23,6 @@ export class UserController {
   @UseBefore(Authenticate)
   @Patch('/:id/update-password')
   async updateUserPassord(@Param('id') id: string, @Body() passwords: { oldPassword: string, newPassword: string }) {
-    console.log('*****************************************************************************');
-    console.log(passwords.oldPassword, passwords.newPassword);
-    console.log('*****************************************************************************');
     await this.userService.handleChangePassword(id, passwords.oldPassword, passwords.newPassword);
     debug('POST /users/update-password => Successfully updated!');
     return 'Password successfully updated!';

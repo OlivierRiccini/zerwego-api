@@ -5,7 +5,7 @@ var app = require('../../dist/app').app;
 import 'mocha';
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { IUser, IUserCredentials, UserDAO } from '../../src/models/user-model';
+import { IUser, IUserCredentials, UserDAO, IPhone } from '../../src/models/user-model';
 import { CONSTANTS } from '../../src/persist/constants';
 import * as jwt from 'jsonwebtoken';
 import * as helpers from '../data-test/helpers-data';
@@ -233,9 +233,10 @@ describe('HTTP - TESTING AUTH ROUTES ./http/auth.test', function() {
   });
 
   it('NEGATIVE - Should not login a user if neither email nor phone provided', async () => {
+    const credentials: IUserCredentials = {  type: 'password', phone: null, password: 'blaa' };
     const response = await request
       .post('/auth/login')
-      .send({type: 'password', phone: null, password: VALID_USER.password});
+      .send({type: 'password', credentials, password: VALID_USER.password});
     
     expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('User credentials should at least contain an email or a phone property');
@@ -250,10 +251,30 @@ describe('HTTP - TESTING AUTH ROUTES ./http/auth.test', function() {
     expect(response.body.message).to.equals('Provided email is not valid');
   });
 
-  it('NEGATIVE - Should not login a user if phone provided is not valid', async () => {
+  it('NEGATIVE - Should not login a user if internationalNumber provided is not valid', async () => {
+    const phone: IPhone = { 
+      number: '4383991332', 
+      internationalNumber: '4383991332', // +1 missing 
+      nationalNumber: '4383991332', 
+      countryCode: 'US' 
+    };
     const response = await request
       .post('/auth/login')
-      .send({type: 'password', phone: { number: 'notvalidphone' }, password: VALID_USER.password});
+      .send({type: 'password', phone, password: VALID_USER.password});
+
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Provided phone number is not valid');
+  });
+
+  it('NEGATIVE - Should not login a user if phone number format is not valid', async () => {
+    const phone: any = {  // {countryCode} missing
+      number: '4383991332', 
+      internationalNumber: '+14383991332', 
+      nationalNumber: '4383991332', 
+    };
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', phone, password: VALID_USER.password});
 
     expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('Provided phone number is not valid');
@@ -273,6 +294,21 @@ describe('HTTP - TESTING AUTH ROUTES ./http/auth.test', function() {
           password: VALID_USER.password
       });
     
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('User was not found while login');
+  });
+
+  it('NEGATIVE - Should not find user in DB if {countryCode} is not valid', async () => {
+    const phone: any = {  // {countryCode} missing
+      number: '4383991332', 
+      internationalNumber: '+14383991332', 
+      nationalNumber: '4383991332', 
+      countryCode: 'FR' // FR should be US
+    };
+    const response = await request
+      .post('/auth/login')
+      .send({type: 'password', phone, password: VALID_USER.password});
+
     expect(response.status).to.equal(400);
     expect(response.body.message).to.equals('User was not found while login');
   });

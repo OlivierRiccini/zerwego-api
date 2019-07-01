@@ -155,8 +155,7 @@ let SecureService = class SecureService {
     isPasswordValid(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const emailOrPhone = this.authService.defineEmailOrPhone(credentials);
-                const query = emailOrPhone === 'email' ? { find: { email: credentials.email } } : { find: { phone: credentials.phone } };
+                const query = this.authService.buildQueryFromCredentials(credentials);
                 const users = yield this.userDAO.find(query);
                 const user = users[0];
                 yield this.comparePassword(credentials.password, user.password);

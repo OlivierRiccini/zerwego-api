@@ -58,9 +58,8 @@ let AuthService = class AuthService {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 this.validateLoginType(credentials);
-                const emailOrPhone = this.defineEmailOrPhone(credentials);
-                this.validateProvidedCredentials(credentials);
-                const query = emailOrPhone === 'email' ? { find: { email: credentials.email } } : { find: { phone: credentials.phone } };
+                this.validateCredentials(credentials);
+                const query = this.buildQueryFromCredentials(credentials);
                 let users = yield this.userDAO.find(query);
                 if (!users || users.length <= 0) {
                     throw new Error('User was not found while login');
@@ -151,17 +150,6 @@ let AuthService = class AuthService {
             return users.length > 0 && !users.some(user => user.id === userId);
         });
     }
-    defineEmailOrPhone(credentials) {
-        if (this.credentialsHadEmail(credentials)) {
-            return 'email';
-        }
-        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
-            return 'phone';
-        }
-        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
-            throw new routing_controllers_1.HttpError(400, 'User credentials should at least contain an email or a phone property');
-        }
-    }
     emailValidation(email, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             if (yield this.isEmailAlreadyTaken(email, userId || null)) {
@@ -174,15 +162,36 @@ let AuthService = class AuthService {
     }
     phoneValidation(phone, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const formatedPhoneNumber = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
             if (yield this.isPhoneAlreadyTaken(phone, userId || null)) {
                 throw new Error('Phone number already belongs to an account');
             }
-            if (!phone.hasOwnProperty('internationalNumber')
-                || (!validator_1.default.isMobilePhone(formatedPhoneNumber, 'any', { strictMode: true }))) {
+            if (!this.isPhoneFormatValid(phone)) {
                 throw new Error('Phone number provided is not valid');
             }
         });
+    }
+    buildQueryFromCredentials(credentials) {
+        let query;
+        if (credentials.email) {
+            query = { find: { email: credentials.email } };
+        }
+        if (credentials.phone) {
+            query = {
+                find: {
+                    'phone.countryCode': credentials.phone.countryCode,
+                    // MORE FLEXIBLE
+                    $or: [
+                        { 'phone.number': credentials.phone.internationalNumber },
+                        { 'phone.internationalNumber': credentials.phone.internationalNumber },
+                        { 'phone.nationalNumber': credentials.phone.nationalNumber }
+                    ]
+                    // 'phone.number': credentials.phone.number,
+                    // 'phone.internationalNumber': credentials.phone.internationalNumber,
+                    // 'phone.nationalNumber': credentials.phone.nationalNumber,
+                }
+            };
+        }
+        return query;
     }
     findUserByEmailOrPhone(email, phone) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -194,20 +203,34 @@ let AuthService = class AuthService {
             return users[0];
         });
     }
-    validateProvidedCredentials(credentials) {
-        if (this.credentialsHadEmail(credentials) && !validator_1.default.isEmail(credentials.email)) {
+    validateCredentials(credentials) {
+        if (!this.credentialsHaveEmail(credentials) && !this.credentialsHavePhone(credentials)) {
+            throw new Error('User credentials should at least contain an email or a phone property');
+        }
+        if (this.credentialsHaveEmail(credentials) && !validator_1.default.isEmail(credentials.email)) {
             throw new Error('Provided email is not valid');
         }
-        if (this.credentialsHasPhone(credentials)
-            && !validator_1.default.isMobilePhone(credentials.phone.number, 'any', { strictMode: true })) {
+        if (this.credentialsHavePhone(credentials)
+            && !this.isPhoneFormatValid(credentials.phone)) {
             throw new Error('Provided phone number is not valid');
         }
     }
-    credentialsHadEmail(credentials) {
+    credentialsHaveEmail(credentials) {
         return credentials.hasOwnProperty('email') && !!credentials.email;
     }
-    credentialsHasPhone(credentials) {
-        return credentials.phone && credentials.phone.hasOwnProperty('number');
+    credentialsHavePhone(credentials) {
+        return credentials.hasOwnProperty('phone');
+    }
+    isPhoneFormatValid(phone) {
+        const allPropertiesPresent = phone.hasOwnProperty('number')
+            && phone.hasOwnProperty('internationalNumber')
+            && phone.hasOwnProperty('nationalNumber')
+            && phone.hasOwnProperty('countryCode');
+        if (!allPropertiesPresent) {
+            return false;
+        }
+        const formatedPhoneNumber = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
+        return validator_1.default.isMobilePhone(formatedPhoneNumber, 'any', { strictMode: true });
     }
     validateLoginType(credentials) {
         if (!credentials.hasOwnProperty('type') || credentials.type !== 'password' && credentials.type !== 'facebook') {

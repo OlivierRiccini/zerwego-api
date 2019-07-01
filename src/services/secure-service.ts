@@ -122,8 +122,7 @@ export class SecureService {
 
     public async isPasswordValid(credentials: IUserCredentials): Promise<boolean> {
         try {
-            const emailOrPhone: 'email' | 'phone' = this.authService.defineEmailOrPhone(credentials);
-            const query = emailOrPhone === 'email' ? {find:{email: credentials.email}} : {find:{phone: credentials.phone}};
+            const query = this.authService.buildQueryFromCredentials(credentials);
             const users = await this.userDAO.find(query);
             const user = users[0];
             await this.comparePassword(credentials.password, user.password);

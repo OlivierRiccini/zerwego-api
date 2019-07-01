@@ -37,9 +37,8 @@ export class AuthService {
     public async login(credentials: IUserCredentials): Promise<any> {
         try {
             this.validateLoginType(credentials);
-            const emailOrPhone: 'email' | 'phone' = this.defineEmailOrPhone(credentials);
-            this.validateProvidedCredentials(credentials);
-            const query = emailOrPhone === 'email' ? {find:{email: credentials.email}} : {find:{phone: credentials.phone}};
+            this.validateCredentials(credentials);
+            const query = this.buildQueryFromCredentials(credentials);
             let users = await this.userDAO.find(query);
             if (!users || users.length <= 0) {
                 throw new Error('User was not found while login');
@@ -118,18 +117,6 @@ export class AuthService {
         return users.length > 0 && !users.some(user => user.id === userId);
     }
 
-    public defineEmailOrPhone(credentials: IUserCredentials): 'email' | 'phone' {
-        if (this.credentialsHadEmail(credentials)) {
-            return 'email'
-        }
-        if (!this.credentialsHadEmail(credentials) && this.credentialsHasPhone(credentials)) {
-            return 'phone'
-        }
-        if (!this.credentialsHadEmail(credentials) && !this.credentialsHasPhone(credentials)) {
-            throw new HttpError(400, 'User credentials should at least contain an email or a phone property');
-        }
-    }
-
     public async emailValidation(email: string, userId?: string): Promise<void> {  
         if (await this.isEmailAlreadyTaken(email, userId || null)) {
             throw new Error('Email address already belongs to an account');
@@ -140,14 +127,37 @@ export class AuthService {
     }
 
     public async phoneValidation(phone: IPhone, userId?: string): Promise<void> {
-        const formatedPhoneNumber: string = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
         if (await this.isPhoneAlreadyTaken(phone, userId || null)) {
             throw new Error('Phone number already belongs to an account');
         }
-        if (!phone.hasOwnProperty('internationalNumber')
-            || (!validator.isMobilePhone(formatedPhoneNumber, 'any', {strictMode: true}))) {
+        
+        if (!this.isPhoneFormatValid(phone)) {
             throw new Error('Phone number provided is not valid');
         }
+    }
+
+    public buildQueryFromCredentials(credentials: IUserCredentials): { find: {} } {
+        let query: { find: {} };
+        if (credentials.email) {
+            query = { find: { email: credentials.email } };
+        }
+        if (credentials.phone) {
+            query = { 
+                find: { 
+                    'phone.countryCode': credentials.phone.countryCode,
+                    // MORE FLEXIBLE
+                    $or: [
+                        {'phone.number': credentials.phone.internationalNumber}, 
+                        {'phone.internationalNumber': credentials.phone.internationalNumber}, 
+                        {'phone.nationalNumber': credentials.phone.nationalNumber}
+                    ]
+                    // 'phone.number': credentials.phone.number,
+                    // 'phone.internationalNumber': credentials.phone.internationalNumber,
+                    // 'phone.nationalNumber': credentials.phone.nationalNumber,
+                }
+            }
+        }
+        return query;
     }
 
     private async findUserByEmailOrPhone(email: string, phone: IPhone): Promise<IUser> {
@@ -159,22 +169,38 @@ export class AuthService {
         return users[0];
     }
 
-    private validateProvidedCredentials(credentials: IUserCredentials): void {
-        if (this.credentialsHadEmail(credentials) && !validator.isEmail(credentials.email)) {
+    private validateCredentials(credentials: IUserCredentials): void {
+        if (!this.credentialsHaveEmail(credentials) && !this.credentialsHavePhone(credentials)) {
+            throw new Error('User credentials should at least contain an email or a phone property');
+        }
+        
+        if (this.credentialsHaveEmail(credentials) && !validator.isEmail(credentials.email)) {
             throw new Error('Provided email is not valid');
         }
-        if (this.credentialsHasPhone(credentials)
-            && !validator.isMobilePhone(credentials.phone.number, 'any', {strictMode: true})) {
+        if (this.credentialsHavePhone(credentials)
+            && !this.isPhoneFormatValid(credentials.phone)) {
             throw new Error('Provided phone number is not valid');
         }
     }
 
-    private credentialsHadEmail(credentials: IUserCredentials): boolean {
+    private credentialsHaveEmail(credentials: IUserCredentials): boolean {
         return credentials.hasOwnProperty('email') && !!credentials.email;
     }
 
-    private credentialsHasPhone(credentials: IUserCredentials): boolean {
-        return credentials.phone && credentials.phone.hasOwnProperty('number');
+    private credentialsHavePhone(credentials: IUserCredentials): boolean {
+        return credentials.hasOwnProperty('phone');
+    }
+
+    private isPhoneFormatValid(phone: IPhone): boolean {
+        const allPropertiesPresent: boolean = phone.hasOwnProperty('number')
+                                              && phone.hasOwnProperty('internationalNumber')
+                                              && phone.hasOwnProperty('nationalNumber')
+                                              && phone.hasOwnProperty('countryCode');
+        if (!allPropertiesPresent) {
+            return false;
+        }
+        const formatedPhoneNumber: string = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
+        return validator.isMobilePhone(formatedPhoneNumber, 'any', {strictMode: true});
     }
 
     private validateLoginType(credentials: IUserCredentials): void {

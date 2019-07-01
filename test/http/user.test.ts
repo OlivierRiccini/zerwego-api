@@ -26,7 +26,7 @@ chai.use(chaiHttp);
 chai.use(chaiAsPromised)
 chai.should();
 
-describe.only('HTTP - TESTING USER ROUTES ./http/user.test', function() {
+describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
 
   const request = chai.request(app).keepOpen();
 
