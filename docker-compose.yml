@@ -1,7 +1,7 @@
 version: '3'
 services:
   app:
-    container_name: zerwego-api
+    container_name: showcase-api
     restart: always
     build: .
     command: npm run build
@@ -13,19 +13,9 @@ services:
       - .:/home/app/appDir
       - /home/app/appDir/node_modules
   mongo:
-    container_name: zerwego-mongo
+    container_name: showcase-mongo
     image: mongo
     ports:
       - '27017:27017'
     volumes:
         - ./data/db:/data/db
-  rabbitmq:
-    image: "rabbitmq:3-management"
-    hostname: "rabbit"
-    ports:
-      - "15672:15672"
-      - "5672:5672"
-    labels:
-      NAME: "rabbitmq"
-    volumes:
-      - ./rabbitmq-isolated.conf:/etc/rabbitmq/rabbitmq.config
