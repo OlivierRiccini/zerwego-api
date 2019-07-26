@@ -3,250 +3,295 @@ process.env.NODE_ENV = 'test';
 var app = require('../../dist/app').app;
 
 import 'mocha';
-// import mongoose = require('mongoose');
 import * as chai from 'chai';
 import chaiHttp = require('chai-http');
-import { IUser } from '../../src/models/user-model';
+// import chaiAsPromised from 'chai-as-promised'
+import * as chaiAsPromised from 'chai-as-promised';
+// chai.use(chaiAsPromised);
+import { IUser, UserDAO, IUserCredentials } from '../../src/models/user-model';
+import * as helpers from '../data-test/helpers-data';
+import { SecureService } from '../../src/services/secure-service';
+import { assert } from 'chai';
 import { CONSTANTS } from '../../src/persist/constants';
 import * as jwt from 'jsonwebtoken';
-import { GeneralHelper, AuthHelper } from '../data-test/helpers-data';
-import { SecureService } from '../../src/services/secure-service';
-import { ISecure, SecureDAO } from '../../src/models/secure-model';
-import { ITrip } from '../../src/models/trip-model';
 
-const debug = require('debug')('test');
+const generalHelper: helpers.GeneralHelper = new helpers.GeneralHelper();
 
-const generalHelper: GeneralHelper = new GeneralHelper();
-
-// const secureDAO: SecureDAO = new SecureDAO();
-// const authHelper: AuthHelper = new AuthHelper();
+const userDAO: UserDAO = new UserDAO();
+const userHelper: helpers.UserHelper = new helpers.UserHelper(userDAO);
+const secureService: SecureService = new SecureService();
 
 const expect = chai.expect;
 chai.use(chaiHttp);
+chai.use(chaiAsPromised)
 chai.should();
 
 describe('HTTP - TESTING USER ROUTES ./http/user.test', function() {
-  this.timeout(15000);
 
   const request = chai.request(app).keepOpen();
 
-  let validUser: IUser = {
+  let VALID_USER: IUser = {
     username: 'Lebron',
     email: 'lebron.james@lakers.com',
-    password: 'Iamtheking',
+    password: 'IamTheKing',
+    phone: {
+      countryCode: "US",
+      internationalNumber: "+1 438-399-1332",
+      nationalNumber: "(438) 399-1332",
+      number: "+14383991332"
+    },
   };
 
-  let validUserToken: string;
+  const VALID_USER_CREDENTIALS_EMAIL: IUserCredentials = {
+    type: 'password',
+    email: 'lebron.james@lakers.com',
+    password: 'IamTheKing'  
+  };
+
+  let VALID_USER_TOKEN: string;
 
   before('Create user', async () => {
+    generalHelper.cleanDB();
     const response = await request
       .post('/auth/register')
-      .send(validUser);
-    let token = response.header['authorization'];
-    if (token.startsWith('Bearer ')) {
-      // Remove Bearer from string
-      token = token.slice(7, token.length);
-    }
-
-    const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-    const user = decoded['payload'];
-    // Assign id to validUser to reuse in other tests
-    validUser.id = user.id;
-    // Save token to reuse in other tests
-    validUserToken = token;
+      .send(VALID_USER);
+    let token = response.body['jwt'];
+    VALID_USER.id = userHelper.getIdByToken(token);
+    VALID_USER_TOKEN = token; 
   });
 
   after('Cleaning DB', async () => {
     generalHelper.cleanDB();
   });
 
-
-  it('Should signUp a user and get token back set in the header', async () => {
-    const newUser: IUser = {
-      username: 'Steph',
-      email: 'steph.curry@warrriors.com',
-      password: 'shoot',
+  it('POSTIVE - Should update user profile', async () => {
+    let newUser: IUser = {
+      username: 'French user',
+      email: 'french@user.fr',
+      password: 'zidane',
+      phone: {
+        countryCode: "FR",
+        internationalNumber: "+33 6 74 99 00 99",
+        nationalNumber: "06 74 99 00 99",
+        number: "0674990099"
+      }
     };
 
     const response = await request
       .post('/auth/register')
       .send(newUser);
-       
-    expect(response.header).to.have.property('authorization');
-
-    let token = response.header['authorization'];
-    if (token.startsWith('Bearer ')) {
-      // Remove Bearer from string
-      token = token.slice(7, token.length);
-    }
-    const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-    const user = decoded['payload'];
-
     expect(response.status).to.equal(200);
-    expect(user).to.have.property('id');
-    expect(user).to.have.property('username');
-    expect(user).to.have.property('email');
+
+    
+    let token = response.body['jwt'];
+    const userId: string = userHelper.getIdByToken(token);
+    newUser.username = 'Zizou';
+    newUser.email = 'zizou@zz.fr';
+    
+    const response2 = await request
+      .put(`/users/${userId}/update`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send(newUser);
+    expect(response2.status).to.equal(200);
+    expect(response2.body.username).to.equal('Zizou');
+    expect(response2.body.email).to.equal('zizou@zz.fr');
+
+    await userHelper.delete(userId);
   });
 
-  it('POSITIVE - Token should expire', done => {
-      console.log('Testing tokens...could take a little while... 1 / 3');
-      const intervalLogger = setInterval(() => process.stdout.write(`-`), 100);
+  it('NEGATIVE - Should not update user email address if not valid', async () => {
+    VALID_USER.email = 'notvalidemail';
 
-      const newUser: IUser = {
-        username: 'Steph',
-        email: 'steph.curry@warrriors.com',
-        password: 'shoot',
-      };
-
-      request.post('/auth/register').send(newUser).then(
-        response => {
-          let token = response.header['authorization'];
-          if (token.startsWith('Bearer ')) {
-            token = token.slice(7, token.length);
-          }
-          setTimeout(() => {
-            clearInterval(intervalLogger);
-            process.stdout.write(`\n`);
-            try {
-              const payload =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-              expect(payload).to.not.have.property('payload');
-            } catch (err) {
-              expect(err).to.have.property('name').to.equal('TokenExpiredError');
-            }
-            done(); 
-          }, Number(CONSTANTS.ACCESS_TOKEN_EXPIRES_IN) + 1000); 
-        }
-      )
+    // Updating
+    const response = await request
+      .put(`/users/${VALID_USER.id}/update`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send(VALID_USER);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Email address provided is not valid');
   });
 
-  it('POSITIVE - If access_token is expired and refresh token not, should return a new access_token', done => {
-    console.log('Testing tokens...could take a little while... 2 / 3');
-    const intervalLogger = setInterval(() => process.stdout.write(`-`), 100);
-
-    const newUser: IUser = {
-      username: 'Olivier',
-      email: 'olivier.riccini@leboss.com',
-      password: 'inholeboss',
+  it('NEGATIVE - Should not update user email address is already taken', async () => {
+    let user: IUser = {
+      username: 'Test USer',
+      email: 'test@user.fr',
+      password: 'test',
+      phone: {
+        countryCode: "FR",
+        internationalNumber: "+33 6 77 99 99 99",
+        nationalNumber: "06 77 99 99 99",
+        number: "0677999999"
+      }
     };
 
-    request.post('/auth/register').send(newUser).then(
-      response => {
-        let token = response.header['authorization'];
-        const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-        const user: IUser = decoded['payload'];
+    const response = await request
+      .post('/auth/register')
+      .send(user);
+    expect(response.status).to.equal(200);
 
-          setTimeout(() => {
-            clearInterval(intervalLogger);
-            process.stdout.write(`\n`);
-            const trip: ITrip = {
-              tripName: "TEST TRIP",
-              destination: "Los Angeles, California, United States",
-              imageUrl: null,
-              startDate: new Date('2019-03-12'),
-              endDate: new Date('2019-03-25'),
-              participants: [
-                { userId: user.id, info: { email: user.email, username: user.username }, isAdmin: true }
-              ]
-            };
+    let token = response.body['jwt'];
+    const userId: string = userHelper.getIdByToken(token);
+
+    // Updating our main VALID_USER
+    VALID_USER.email = user.email;
+
+    const response2 = await request
+      .put(`/users/${VALID_USER.id}/update`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send(VALID_USER);
+      expect(response2.status).to.equal(400);
+      expect(response2.body.message).to.equals('Email address already belongs to an account');
     
-            request
-              .post('/trips')
-              .set('Authorization', token)
-              .send(trip)
-              .then(
-                tripRes => {
-                  const newToken: string = tripRes.header['authorization'];
-                  expect(newToken).to.not.equal(token);
-                  const decodedOriginalToken = jwt.decode(token);
-                  const decodedNewToken = jwt.decode(newToken);
-                  expect(decodedNewToken['exp'] - decodedOriginalToken['exp']).to.equal((Number(CONSTANTS.ACCESS_TOKEN_EXPIRES_IN) + 1000)/1000);
-                  expect(tripRes.status).to.equal(200);
-                  done(); 
-                }
-              )
-              .catch(err =>  done(err));
-
-          }, Number(CONSTANTS.ACCESS_TOKEN_EXPIRES_IN) + 1000);
-      }
-    )
+    await userHelper.delete(userId);  
   });
 
-  it('NEGATIVE - Should allow request and ask to login again if refresh token is expired', done => {
-    console.log('Testing tokens...could take a little while... 3 / 3');
-    const intervalLogger = setInterval(() => process.stdout.write(`-`), 100);
-    const newUser: IUser = {
-      username: 'Token Max',
-      email: 'token.test@token.com',
-      password: 'inholeboss',
+  it('NEGATIVE - Should not update user phone number if not valid', async () => {
+    VALID_USER.phone = {
+      countryCode: "US",
+      internationalNumber: "438-399-1332", // missing +1
+      nationalNumber: "(438) 399-1332",
+      number: "+14383991332"
     };
 
-    request.post('/auth/register').send(newUser).then(
-      response => {
-        let token = response.header['authorization'];
-        const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-        const user: IUser = decoded['payload'];
+    // Updating
+    const response = await request
+      .put(`/users/${VALID_USER.id}/update`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send(VALID_USER);
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Phone number provided is not valid');
+  });
 
-          setTimeout(() => {
-            clearInterval(intervalLogger);
-            process.stdout.write(`\n`);
-            const trip: ITrip = {
-              tripName: "TEST TRIP",
-              destination: "Los Angeles, California, United States",
-              imageUrl: null,
-              startDate: new Date('2019-03-12'),
-              endDate: new Date('2019-03-25'),
-              participants: [
-                { userId: user.id, info: { email: user.email, username: user.username }, isAdmin: true }
-              ]
-            };
-    
-            request
-              .post('/trips')
-              .set('Authorization', token)
-              .send(trip)
-              .then(
-                tripRes => {
-                  expect(tripRes.status).to.equal(403);
-                  expect(tripRes.header).to.not.have.property('authorization');
-                  expect(tripRes.body.message).to.equal('Refresh token is expired, user has to login');
-                  done(); 
-                }
-              )
-              .catch(err => done(err));
-
-          }, Number(CONSTANTS.REFRESH_TOKEN_EXPIRES_IN) + 1000);
+  it('NEGATIVE - Should not update user if phone number is already taken', async () => {
+    let anotherUser: IUser = {
+      username: 'Test anotherUser',
+      email: 'test@anotherUser.fr',
+      password: 'test',
+      phone: {
+        countryCode: "FR",
+        internationalNumber: "+33 6 77 11 11 11",
+        nationalNumber: "06 77 11 11 11",
+        number: "0677111111"
       }
-    )
-  });
+    };
 
-  it('Should signOut a user by removing secure', async () => {
     const response = await request
-      .del('/auth/logout')
-      .set('authorization', validUserToken);
-    
+      .post('/auth/register')
+      .send(anotherUser);
     expect(response.status).to.equal(200);
-    expect(response.body).to.equal('Successfully logged out!');
+
+    let token = response.body['jwt'];
+    const userId: string = userHelper.getIdByToken(token);
+
+    // Updating our main VALID_USER
+    VALID_USER.phone = anotherUser.phone;
+
+    const response2 = await request
+      .put(`/users/${VALID_USER.id}/update`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send(VALID_USER);
+      expect(response2.status).to.equal(400);
+      expect(response2.body.message).to.equals('Phone number already belongs to an account');
+    
+    await userHelper.delete(userId);  
   });
 
-  it('Should signIn a user and get a token back set in the header', async () => {
+  it('POSITIVE - Should update user password', async () => {
+    let oldPassword: string = VALID_USER.password;
+    let newPassword: string = 'new password';
+
     const response = await request
+      .patch(`/users/${VALID_USER.id}/update-password`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send({oldPassword, newPassword});
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.equals('Password successfully updated!');
+
+    const userFromDB: IUser = await userHelper.getUserById(VALID_USER.id);
+    await expect(secureService.comparePassword(newPassword, userFromDB.password)).to.be.fulfilled;
+
+    // re-update password in case other tests need to use VALID_USER
+    oldPassword = newPassword;
+    newPassword = VALID_USER.password;
+
+    const response2 = await request
+      .patch(`/users/${VALID_USER.id}/update-password`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send({oldPassword, newPassword});
+    
+    expect(response2.status).to.equal(200);
+    expect(response2.body).to.equals('Password successfully updated!');
+    const userFromDB2: IUser = await userHelper.getUserById(VALID_USER.id);
+    await expect(secureService.comparePassword(newPassword, userFromDB2.password)).to.be.fulfilled;
+
+  });
+
+  it('NEGTIVE - Should not update user password if oldPassword is wrong', async () => {
+    const wrongOldPassword: string = 'odlpasswordiswrong';
+    const rightOldPassword: string = VALID_USER.password;
+    const newPassword: string = 'anotherChangePassword';
+    
+    const response = await request
+      .patch(`/users/${VALID_USER.id}/update-password`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send({oldPassword: wrongOldPassword, newPassword});
+
+    expect(response.status).to.equal(400);
+    expect(response.body.message).to.equals('Wrong password');
+
+    const userFromDB: IUser = await userHelper.getUserById(VALID_USER.id);
+    // Password shoudl be the same since it's not been successfully updated
+    await expect(secureService.comparePassword(rightOldPassword, userFromDB.password)).to.be.fulfilled;
+    return assert.isRejected(secureService.comparePassword(newPassword, userFromDB.password), Error, 'Wrong password');
+  
+  });
+
+  it('POSITIVE - Should be able to login with new password after reset and make a request', async () => {
+    const oldPassword: string = VALID_USER.password;
+    const newPassword: string = 'passs';
+    
+    const response = await request
+      .patch(`/users/${VALID_USER.id}/update-password`)
+      .set('Authorization', VALID_USER_TOKEN)
+      .send({oldPassword, newPassword});
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.equals('Password successfully updated!');
+
+    const userFromDB: IUser = await userHelper.getUserById(VALID_USER.id);
+    // Password shoudl be the same since it's not been successfully updated
+    await expect(secureService.comparePassword(newPassword, userFromDB.password)).to.be.fulfilled;
+
+    // logging out user
+    await request.post('/auth/logout').set('authorization', VALID_USER_TOKEN);
+
+    VALID_USER_CREDENTIALS_EMAIL.password = newPassword;
+
+    const response2 = await request
       .post('/auth/login')
-      .send({email: validUser.email, password: validUser.password});
+      .send(VALID_USER_CREDENTIALS_EMAIL);
     
-    expect(response.header).to.have.property('authorization');
+    expect(response2.status).to.equal(200);
+    expect(response2.body).to.have.property('jwt');
     
-    let token = response.header['authorization'];
+    let token = response2.body['jwt'];
     if (token.startsWith('Bearer ')) {
       // Remove Bearer from string
       token = token.slice(7, token.length);
     }
-    const decoded =  jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
-    const user = decoded['payload'];
 
-    expect(response.status).to.equal(200);
-    expect(user).to.have.property('id');
-    expect(user).to.have.property('username');
-    expect(user).to.have.property('email');
+    VALID_USER_TOKEN = token;
+
+    // making trip request
+    const response3 = await request
+      .get('/trips')
+      .set('Authorization', VALID_USER_TOKEN);
+
+    expect(response3.status).to.equal(200);
+
+    await request.post('/auth/logout').set('authorization', VALID_USER_TOKEN);
+  
   });
 
 });

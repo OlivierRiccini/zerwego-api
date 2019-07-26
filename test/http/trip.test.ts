@@ -40,6 +40,7 @@ describe('HTTP - TESTING TRIP ROUTES ./http/trip.test', function() {
     const user2 = await userHelper.getUserAndToken(MODELS_DATA.User[1]);
     USER_2 = user2.user;
     USER_2_TOKEN = user2.token;
+    USER_TOKEN = user1.token;
   });
 
   // beforeEach('', async () => {

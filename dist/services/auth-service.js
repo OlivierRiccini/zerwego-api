@@ -22,25 +22,34 @@ const user_model_1 = require("../models/user-model");
 const routing_controllers_1 = require("routing-controllers");
 const secure_service_1 = require("./secure-service");
 const messages_service_1 = require("./messages-service");
-const generator = require('generate-password');
+const validator_1 = require("validator");
+// const generator = require('generate-password');
 let AuthService = class AuthService {
     constructor() { }
     register(req) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let user = req;
-                const nonHashedPassword = user.password;
-                user.password = yield this.secureService.hashPassword(user);
+                // const nonHashedPassword = user.password;
+                user.password = yield this.secureService.hashPassword(user.password);
+                if (user.email) {
+                    yield this.emailValidation(user.email);
+                }
+                ;
+                if (user.phone) {
+                    yield this.phoneValidation(user.phone);
+                }
+                ;
                 user = yield this.userDAO.create(req);
                 const tokens = yield this.secureService.generateAuthTokens(user);
                 // await this.messagesService.sendSMS({
                 //     phone: '+14383991332',
                 //     content: `Welcome: ${user.name.toUpperCase()}! We generated a new password for you: ${nonHashedPassword}`
                 // });
-                return tokens.accessToken;
+                return tokens;
             }
             catch (err) {
-                throw new routing_controllers_1.HttpError(400, 'Smothing went wrong while creating new user');
+                throw new routing_controllers_1.HttpError(400, err.message);
             }
         });
     }
@@ -48,66 +57,57 @@ let AuthService = class AuthService {
     login(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let users = yield this.userDAO.find({ find: { email: credentials.email } });
+                this.validateLoginType(credentials);
+                this.validateCredentials(credentials);
+                const query = this.buildQueryFromCredentials(credentials);
+                let users = yield this.userDAO.find(query);
+                if (!users || users.length <= 0) {
+                    throw new Error('User was not found while login');
+                }
                 let user = users[0];
                 if (credentials.type === 'password') {
                     yield this.secureService.comparePassword(credentials.password, user.password);
                 }
-                // TODO; Maybe verify facebook token
                 const tokens = yield this.secureService.generateAuthTokens(user);
-                // await this.messagesService.sendEmail({
-                //         from: 'info@olivierriccini.com',
-                //         subject: 'Welcome to Zerwego',
-                //         to: user.email,
-                //         content: `Welcome: ${user.name.toUpperCase()}!`
-                //     });
-                // await this.messagesService.sendSMS({
-                //     phone: '+14383991332',
-                //     content: `Welcome: ${user.name.toUpperCase()}!`
-                // });
-                return tokens.accessToken;
+                return tokens;
             }
             catch (err) {
-                throw new routing_controllers_1.HttpError(400, err);
+                throw new routing_controllers_1.HttpError(400, err.message);
             }
         });
     }
     ;
-    forgotPassword(contact) {
+    refreshTokens(refreshToken, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const result = yield this.generateNewPassword(contact);
-                switch (contact.type) {
-                    case 'email':
-                        yield this.messagesService.sendEmail({
-                            from: 'info@olivierriccini.com',
-                            to: contact.email,
-                            subject: 'New Password',
-                            content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
-                        });
-                        break;
-                    case 'sms':
-                        yield this.messagesService.sendSMS({
-                            phone: contact.phone,
-                            content: `Hey ${result.user.username.toUpperCase()}, this is your new password: ${result.newPassword}. You can go to your profile to change it`
-                        });
-                        break;
-                    default:
-                        throw new routing_controllers_1.BadRequestError('Something went wrong while reinitilizing password');
-                }
+                const user = yield this.userDAO.get(userId);
+                yield this.secureService.validateRefreshToken(refreshToken);
+                const tokens = yield this.secureService.generateAuthTokens(user);
+                return tokens;
             }
             catch (err) {
-                throw err;
+                throw new routing_controllers_1.HttpError(401, err.message);
+            }
+        });
+    }
+    forgotPassword(contact) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let user, newPassword;
+            try {
+                user = yield this.findUserByEmailOrPhone(contact.email, contact.phone);
+                newPassword = yield this.secureService.generateNewPassword();
+                yield this.secureService.updatePassword(newPassword, user.id);
+                yield this.sendMessagesAfterForgotPassword(contact, newPassword);
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(400, err.message);
             }
         });
     }
     handleFacebookLogin(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
             const users = yield this.userDAO.find({ find: { email: credentials.email } });
-            const password = generator.generate({
-                length: 10,
-                numbers: true
-            });
+            const password = yield this.secureService.generateNewPassword();
             if (users && users.length < 1) {
                 const newUser = {
                     username: credentials.username,
@@ -125,10 +125,10 @@ let AuthService = class AuthService {
             return yield this.login(credentials);
         });
     }
-    logout(token) {
+    logout(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.secureService.removeSecure(token);
+                yield this.secureService.removeRefreshToken(refreshToken);
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(400, err);
@@ -136,27 +136,139 @@ let AuthService = class AuthService {
         });
     }
     ;
-    generateNewPassword(contact) {
+    isEmailAlreadyTaken(email, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = contact.type === 'email' ? { email: contact.email } : { phone: contact.phone };
+            const users = yield this.userDAO.find({ find: { email } });
+            return users.length > 0 && !users.some(user => user.id === userId);
+        });
+    }
+    isPhoneAlreadyTaken(phone, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.userDAO.find({
+                find: { 'phone.internationalNumber': phone.internationalNumber }
+            });
+            return users.length > 0 && !users.some(user => user.id === userId);
+        });
+    }
+    emailValidation(email, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (yield this.isEmailAlreadyTaken(email, userId || null)) {
+                throw new Error('Email address already belongs to an account');
+            }
+            if (!validator_1.default.isEmail(email)) {
+                throw new Error('Email address provided is not valid');
+            }
+        });
+    }
+    phoneValidation(phone, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (yield this.isPhoneAlreadyTaken(phone, userId || null)) {
+                throw new Error('Phone number already belongs to an account');
+            }
+            if (!this.isPhoneFormatValid(phone)) {
+                throw new Error('Phone number provided is not valid');
+            }
+        });
+    }
+    buildQueryFromCredentials(credentials) {
+        let query;
+        if (credentials.email) {
+            query = { find: { email: credentials.email } };
+        }
+        if (credentials.phone) {
+            query = {
+                find: {
+                    'phone.countryCode': credentials.phone.countryCode,
+                    // MORE FLEXIBLE
+                    $or: [
+                        { 'phone.number': credentials.phone.internationalNumber },
+                        { 'phone.internationalNumber': credentials.phone.internationalNumber },
+                        { 'phone.nationalNumber': credentials.phone.nationalNumber }
+                    ]
+                    // 'phone.number': credentials.phone.number,
+                    // 'phone.internationalNumber': credentials.phone.internationalNumber,
+                    // 'phone.nationalNumber': credentials.phone.nationalNumber,
+                }
+            };
+        }
+        return query;
+    }
+    findUserByEmailOrPhone(email, phone) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = email ? { email } : { phone };
             const users = yield this.userDAO.find({ find: query });
             if (!users || users.length < 1 || users.length > 1) {
                 throw new routing_controllers_1.HttpError(400, 'No user or more than one user found during password reinitilization process');
             }
-            const user = users[0];
-            const newPassword = generator.generate({
-                length: 10,
-                numbers: true
-            });
-            user.password = newPassword;
-            user.password = yield this.secureService.hashPassword(user);
-            yield this.userDAO.update(user, user.id);
-            return { newPassword, user };
+            return users[0];
+        });
+    }
+    validateCredentials(credentials) {
+        if (!this.credentialsHaveEmail(credentials) && !this.credentialsHavePhone(credentials)) {
+            throw new Error('User credentials should at least contain an email or a phone property');
+        }
+        if (this.credentialsHaveEmail(credentials) && !validator_1.default.isEmail(credentials.email)) {
+            throw new Error('Provided email is not valid');
+        }
+        if (this.credentialsHavePhone(credentials)
+            && !this.isPhoneFormatValid(credentials.phone)) {
+            throw new Error('Provided phone number is not valid');
+        }
+    }
+    credentialsHaveEmail(credentials) {
+        return credentials.hasOwnProperty('email') && !!credentials.email;
+    }
+    credentialsHavePhone(credentials) {
+        return credentials.hasOwnProperty('phone');
+    }
+    isPhoneFormatValid(phone) {
+        const allPropertiesPresent = phone.hasOwnProperty('number')
+            && phone.hasOwnProperty('internationalNumber')
+            && phone.hasOwnProperty('nationalNumber')
+            && phone.hasOwnProperty('countryCode');
+        if (!allPropertiesPresent) {
+            return false;
+        }
+        const formatedPhoneNumber = phone.internationalNumber.replace(/\s|\-|\(|\)/gm, '');
+        return validator_1.default.isMobilePhone(formatedPhoneNumber, 'any', { strictMode: true });
+    }
+    validateLoginType(credentials) {
+        if (!credentials.hasOwnProperty('type') || credentials.type !== 'password' && credentials.type !== 'facebook') {
+            throw new Error('Credentials should have a property type equal either \'password\' or \'facebook\'');
+        }
+    }
+    sendMessagesAfterForgotPassword(contact, newPassword) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let user;
+            switch (contact.type) {
+                case 'email':
+                    user = yield this.findUserByEmailOrPhone(contact.email, null);
+                    yield this.messagesService.sendEmail({
+                        from: 'info@olivierriccini.com',
+                        to: contact.email,
+                        subject: 'New Password',
+                        content: `Hey ${user.username.toUpperCase()},
+                              this is your new password: ${newPassword}. 
+                              You can go to your profile to change it`
+                    });
+                    break;
+                case 'sms':
+                    user = yield this.findUserByEmailOrPhone(null, contact.phone);
+                    yield this.messagesService.sendSMS({
+                        phone: contact.phone.internationalNumber,
+                        content: `Hey ${user.username.toUpperCase()},
+                            this is your new password: ${newPassword}. 
+                            You can go to your profile to change it`
+                    });
+                    break;
+                default:
+                    throw new Error('Something went wrong while reinitilizing password');
+            }
         });
     }
 };
 __decorate([
-    typedi_1.Inject(),
+    typedi_1.Inject(type => secure_service_1.SecureService),
     __metadata("design:type", secure_service_1.SecureService)
 ], AuthService.prototype, "secureService", void 0);
 __decorate([

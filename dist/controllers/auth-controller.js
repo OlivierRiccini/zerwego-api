@@ -21,43 +21,70 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require('debug')('http');
-const passport = require('passport');
-const FacebookStrategy = require('passport-facebook');
 const routing_controllers_1 = require("routing-controllers");
 const typedi_1 = require("typedi");
 const auth_service_1 = require("../services/auth-service");
-const auth_social_service_1 = require("../services/auth-social.service");
-// import { AuthFacebook } from "../middlewares/auth-facebook-middleware";
+const secure_service_1 = require("../services/secure-service");
 let AuthController = class AuthController {
     constructor() { }
-    registerUser(user, response) {
+    registerUser(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const token = yield this.authService.register(user);
-            const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
-            response.header(headers);
-            debug('POST /user/register => Successfully registered!');
-            return 'Successfully registered!';
+            const tokens = yield this.authService.register(user);
+            debug('POST /auth/register => Successfully registered!');
+            return {
+                jwt: tokens.accessToken,
+                'refresh-token': tokens.refreshToken
+            };
         });
     }
-    login(credentials, response) {
+    login(credentials) {
         return __awaiter(this, void 0, void 0, function* () {
-            let token;
+            let tokens;
             if (credentials.type === 'facebook') {
-                token = yield this.authService.handleFacebookLogin(credentials);
+                tokens = yield this.authService.handleFacebookLogin(credentials);
             }
             else {
-                token = yield this.authService.login(credentials);
+                tokens = yield this.authService.login(credentials);
             }
-            const headers = { 'Authorization': token, 'Access-Control-Expose-Headers': '*' };
-            response.header(headers);
-            debug('POST /user/login => Successfully logged in!');
-            return 'Successfully logged in!';
+            debug('POST /auth/login => Successfully logged in!');
+            return {
+                jwt: tokens.accessToken,
+                'refresh-token': tokens.refreshToken
+            };
         });
     }
-    logout(token) {
+    isEmailAlreadyTaken(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.authService.logout(token);
-            debug('POST /user/out => Successfully logged out!');
+            debug('POST /auth/email-already-taken => Successfully checked!');
+            return yield this.authService.isEmailAlreadyTaken(body.email, body.userId);
+        });
+    }
+    isPhoneAlreadyTaken(body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('POST /auth/phone-already-taken => Successfully checked!');
+            return yield this.authService.isPhoneAlreadyTaken(body.phone, body.userId);
+        });
+    }
+    isPasswordValid(credentials) {
+        return __awaiter(this, void 0, void 0, function* () {
+            debug('POST /auth/password-is-valid => Successfully checked!');
+            return yield this.secureService.isPasswordValid(credentials);
+        });
+    }
+    refresh(refreshToken, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const newTokens = yield this.authService.refreshTokens(refreshToken, user.id);
+            debug('POST /auth/refresh => New Tokens successfully created!');
+            return {
+                jwt: newTokens.accessToken,
+                'refresh-token': newTokens.refreshToken
+            };
+        });
+    }
+    logout(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.authService.logout(refreshToken);
+            debug('POST /auth/logout => Successfully logged out!');
             return 'Successfully logged out!';
         });
     }
@@ -74,25 +101,53 @@ __decorate([
 ], AuthController.prototype, "authService", void 0);
 __decorate([
     typedi_1.Inject(),
-    __metadata("design:type", auth_social_service_1.AuthSocialService)
-], AuthController.prototype, "authSocialService", void 0);
+    __metadata("design:type", secure_service_1.SecureService)
+], AuthController.prototype, "secureService", void 0);
 __decorate([
     routing_controllers_1.Post('/register'),
-    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "registerUser", null);
 __decorate([
     routing_controllers_1.Post('/login'),
-    __param(0, routing_controllers_1.Body()), __param(1, routing_controllers_1.Res()),
+    __param(0, routing_controllers_1.Body()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
-    routing_controllers_1.Delete('/logout'),
-    __param(0, routing_controllers_1.HeaderParam("authorization")),
+    routing_controllers_1.Post('/email-already-taken'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "isEmailAlreadyTaken", null);
+__decorate([
+    routing_controllers_1.Post('/phone-already-taken'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "isPhoneAlreadyTaken", null);
+__decorate([
+    routing_controllers_1.Post('/password-is-valid'),
+    __param(0, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "isPasswordValid", null);
+__decorate([
+    routing_controllers_1.Post('/refresh'),
+    __param(0, routing_controllers_1.HeaderParam('refresh-token')), __param(1, routing_controllers_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "refresh", null);
+__decorate([
+    routing_controllers_1.Post('/logout'),
+    __param(0, routing_controllers_1.HeaderParam('refreshToken')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

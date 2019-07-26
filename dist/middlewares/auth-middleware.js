@@ -22,7 +22,6 @@ const trip_model_1 = require("../models/trip-model");
 const jwt = require("jsonwebtoken");
 const typedi_1 = require("typedi");
 const constants_1 = require("../persist/constants");
-const secure_service_1 = require("../services/secure-service");
 let Authenticate = class Authenticate {
     constructor(isAdmin) {
         this.isAdmin = isAdmin;
@@ -30,7 +29,8 @@ let Authenticate = class Authenticate {
     use(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             let accessToken = request.header('Authorization');
-            // let refreshToken = request.header('Refresh_token');  
+            // console.log('///////////////////// 1 ////////////////////////////');
+            // console.log(accessToken);
             try {
                 if (!accessToken) {
                     throw new routing_controllers_1.HttpError(401, 'No authorization token provided');
@@ -39,18 +39,14 @@ let Authenticate = class Authenticate {
                     // Remove Bearer from string
                     accessToken = accessToken.slice(7, accessToken.length);
                 }
-                if (accessToken && (yield this.secureService.accessTokenIsExpired(accessToken))) {
-                    accessToken = yield this.secureService.refreshTokens(accessToken);
-                    // refreshToken = tokens.refreshToken;
-                    response.set('Access-Control-Expose-Headers', '*');
-                    response.set('Authorization', accessToken);
-                }
                 const decoded = jwt.verify(accessToken, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, null);
+                // console.log('///////////////////// 2 //////////////////////////////');
                 if (typeof decoded === 'undefined') {
                     throw new routing_controllers_1.HttpError(401, 'Authorizationt token cannot be decoded');
                 }
                 ;
                 const user = decoded['payload'];
+                // console.log('//////////////////// 3 //////////////////////////////');
                 if (!user) {
                     throw new routing_controllers_1.HttpError(401, 'This token is not related to any user');
                 }
@@ -63,6 +59,8 @@ let Authenticate = class Authenticate {
                     }
                     ;
                 }
+                // console.log('//////////////////// 4 //////////////////////////////');
+                // console.log(accessToken);
                 request.user = user;
                 request.token = accessToken;
                 next();
@@ -96,10 +94,6 @@ let Authenticate = class Authenticate {
 };
 __decorate([
     typedi_1.Inject(),
-    __metadata("design:type", secure_service_1.SecureService)
-], Authenticate.prototype, "secureService", void 0);
-__decorate([
-    typedi_1.Inject(),
     __metadata("design:type", trip_model_1.TripDAO)
 ], Authenticate.prototype, "tripDAO", void 0);
 Authenticate = __decorate([
@@ -107,7 +101,6 @@ Authenticate = __decorate([
     __metadata("design:paramtypes", [Boolean])
 ], Authenticate);
 exports.Authenticate = Authenticate;
-// @Middleware()
 class AdminOnly extends Authenticate {
     constructor() {
         super(true);

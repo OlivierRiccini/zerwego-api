@@ -1,6 +1,7 @@
 import * as mongoose from 'mongoose';
 import { ObjectID } from 'bson';
 import { DAOImpl } from '../persist/dao';
+import { IPhone } from './user-model';
 
 delete mongoose.connection.models['Trip'];
 
@@ -26,7 +27,7 @@ export interface IParticipant {
     info: {
         username: string,
         email?: string,
-        phone?: string
+        phone?: IPhone
     },
     isAdmin?: boolean,
     status?: ParticipationStatus

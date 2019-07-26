@@ -11,21 +11,29 @@ export type LoginType =
 | 'password'
 | 'facebook' 
 
+export interface IPhone {
+    countryCode: string,
+    internationalNumber: string,
+    nationalNumber: string,
+    number: string,
+}
+
 //Interface for model
 export interface IUser {
     id?: string,
     _id?: ObjectID,
     username?: string,
     email?: string,
-    phone?: string,
+    phone?: IPhone,
     password: string,
     facebookId?: string
 }
 
 export interface IUserCredentials {
-    username?: string,
     type: LoginType,
-    email: string,
+    username?: string,
+    email?: string,
+    phone?: IPhone,
     password?: string,
     facebookId?: string
 }
@@ -33,7 +41,14 @@ export interface IUserCredentials {
 export interface IForgotPassword {
     type: ContactMode,
     email?: string,
-    phone?: string
+    phone?: IPhone
+}
+
+export interface IPayload {
+    id: string,
+    username: string,
+    email?: string,
+    phone?: IPhone
 }
 
 // Document
@@ -55,7 +70,12 @@ export class UserDAO extends DAOImpl<IUser, UserDocument> {
                     validator: validator.isEmail
                 }
             },
-            phone: String,
+            phone: {
+                countryCode: String,
+                internationalNumber: String,
+                nationalNumber: String,
+                number: String
+            },
             password: {
                 type: String,
                 require: true,

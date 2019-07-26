@@ -24,6 +24,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "bson-objectid": "^1.2.4",
+    "chai-as-promised": "^7.1.1",
     "compression": "^1.7.3",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.5",
@@ -54,6 +55,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7.1.0",
     "@types/chai-http": "^3.0.5",
     "@types/cors": "^2.8.4",
     "@types/crypto-js": "^3.1.43",

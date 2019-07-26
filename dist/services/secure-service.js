@@ -24,47 +24,21 @@ const bcrypt = require("bcryptjs");
 const constants_1 = require("../persist/constants");
 const routing_controllers_1 = require("routing-controllers");
 const secure_model_1 = require("../models/secure-model");
+const auth_service_1 = require("./auth-service");
+const generator = require('generate-password');
 ;
 let SecureService = class SecureService {
     constructor() { }
     ;
-    generateAuthTokens(user, refreshing, secureId) {
+    generateAuthTokens(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const accessToken = yield this.generateAccessToken(user);
-                const refreshToken = yield this.generateRefreshToken(accessToken, user);
-                if (!refreshing) {
-                    yield this.secureDAO.create({ refreshToken, _accessToken: accessToken });
-                }
-                else {
-                    yield this.secureDAO.update({ refreshToken, _accessToken: accessToken }, secureId);
-                }
+                const refreshToken = yield this.generateRefreshToken(user);
                 return { refreshToken, accessToken };
             }
             catch (err) {
                 throw new routing_controllers_1.HttpError(401, 'Error while generating tokens');
-            }
-        });
-    }
-    refreshTokens(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const secure = yield this.findISecureByAccessToken(token);
-                const refreshToken = secure.refreshToken;
-                if (yield this.refreshTokenIsExpired(refreshToken)) {
-                    throw new routing_controllers_1.HttpError(403, 'Refresh token is expired, user has to login');
-                }
-                else {
-                    const decodedRefreshToken = jwt.decode(refreshToken);
-                    const userId = jwt.decode(decodedRefreshToken['payload'].accessToken)['payload'].id;
-                    // const users = await this.userDAO.find({find: { id: userId}});
-                    const user = yield this.userDAO.get(userId);
-                    const tokens = yield this.generateAuthTokens(user, true, secure.id);
-                    return tokens.accessToken;
-                }
-            }
-            catch (err) {
-                throw new routing_controllers_1.HttpError(err.httpCode, err.message);
             }
         });
     }
@@ -79,15 +53,24 @@ let SecureService = class SecureService {
             return false;
         });
     }
+    validateRefreshToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const secret = yield this.getSecretFromRefreshToken(refreshToken);
+                jwt.verify(refreshToken, secret, null);
+            }
+            catch (err) {
+                if (err.name && err.name === 'TokenExpiredError') {
+                    throw new Error('Refresh token is no longer valid, user has to login');
+                }
+                throw new Error(err);
+            }
+        });
+    }
     refreshTokenIsExpired(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const decodedRefreshToken = jwt.decode(refreshToken);
-                const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
-                if (users.length <= 0) {
-                    throw new routing_controllers_1.HttpError(404, 'User was not found while refreshing tokens');
-                }
-                const secret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
+                const secret = yield this.getSecretFromRefreshToken(refreshToken);
                 jwt.verify(refreshToken, secret, null);
             }
             catch (err) {
@@ -96,50 +79,51 @@ let SecureService = class SecureService {
             return false;
         });
     }
-    findISecureByAccessToken(accessToken) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (accessToken.startsWith('Bearer ')) {
-                accessToken = accessToken.slice(7, accessToken.length);
-            }
-            const results = yield this.secureDAO.find({ find: { _accessToken: accessToken } });
-            return results.length > 0 ? results[0] : null;
-        });
-    }
     generateAccessToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
             const payload = {
                 id: user.id,
                 username: user.username,
-                email: user.email
+                email: user.email || null,
+                phone: user.phone || null
             };
             const accessToken = yield jwt.sign({ payload }, constants_1.CONSTANTS.ACCESS_TOKEN_SECRET, { expiresIn: constants_1.CONSTANTS.ACCESS_TOKEN_EXPIRES_IN }).toString();
             return accessToken;
         });
     }
-    generateRefreshToken(accessToken, user) {
+    generateRefreshToken(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const payload = { accessToken, userId: user.id };
-            const refreshSecret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
-            const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: constants_1.CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
-            return refreshToken;
-        });
-    }
-    removeSecure(token) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const secure = yield this.findISecureByAccessToken(token);
-            if (secure) {
-                yield this.secureDAO.delete(secure.id);
+            try {
+                const payload = { userId: user.id };
+                const refreshSecret = constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + user.password;
+                const refreshToken = yield jwt.sign({ payload }, refreshSecret, { expiresIn: constants_1.CONSTANTS.REFRESH_TOKEN_EXPIRES_IN }).toString();
+                yield this.secureDAO.create({ refreshToken });
+                return refreshToken;
             }
-            else {
-                throw new routing_controllers_1.HttpError(400, 'Something went wrong while removing token');
+            catch (err) {
+                throw new routing_controllers_1.HttpError(404, err.message);
             }
         });
     }
-    hashPassword(user) {
+    removeRefreshToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const secures = yield this.secureDAO.find({ find: { refreshToken } });
+                if (secures && secures.length < 1) {
+                    throw new routing_controllers_1.HttpError(401, 'Refresh token not found when trying to delete it');
+                }
+                yield this.secureDAO.delete(secures[0].id);
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(404, err.message);
+            }
+        });
+    }
+    hashPassword(userPassword) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(user.password, salt, (err, hash) => {
+                    bcrypt.hash(userPassword, salt, (err, hash) => {
                         if (err) {
                             reject(new Error("Something went wrong while hashing password"));
                         }
@@ -158,17 +142,66 @@ let SecureService = class SecureService {
             return new Promise((resolve, reject) => {
                 bcrypt.compare(credentialPassword, userPassword, (err, res) => {
                     if (res) {
-                        resolve();
+                        resolve(true);
                     }
                     else {
-                        reject("Wrong password");
+                        reject(new Error('Wrong password'));
                     }
                 });
             });
         });
     }
     ;
+    isPasswordValid(credentials) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const query = this.authService.buildQueryFromCredentials(credentials);
+                const users = yield this.userDAO.find(query);
+                const user = users[0];
+                yield this.comparePassword(credentials.password, user.password);
+                return true;
+            }
+            catch (err) {
+                return false;
+            }
+        });
+    }
+    updatePassword(password, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                password = yield this.hashPassword(password);
+                yield this.userDAO.update({ password }, userId);
+            }
+            catch (err) {
+                throw new routing_controllers_1.HttpError(400, err.message);
+            }
+        });
+    }
+    generateNewPassword() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const newPassword = generator.generate({
+                length: 10,
+                numbers: true
+            });
+            return newPassword;
+        });
+    }
+    getSecretFromRefreshToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const decodedRefreshToken = jwt.decode(refreshToken);
+            const users = yield this.userDAO.find({ find: { id: decodedRefreshToken['payload'].userId } });
+            // TODO: change this way
+            if (users.length <= 0) {
+                throw new Error('User was not found while refreshing tokens');
+            }
+            return constants_1.CONSTANTS.REFRESH_TOKEN_SECRET + users[0].password;
+        });
+    }
 };
+__decorate([
+    typedi_1.Inject(type => auth_service_1.AuthService),
+    __metadata("design:type", auth_service_1.AuthService)
+], SecureService.prototype, "authService", void 0);
 __decorate([
     typedi_1.Inject(),
     __metadata("design:type", user_model_1.UserDAO)

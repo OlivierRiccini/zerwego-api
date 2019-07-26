@@ -93,7 +93,8 @@ class DAOImpl {
                 ;
                 let updated = _.merge(found, obj);
                 updated.save((err, updated) => {
-                    err ? reject(err) : resolve(this.idNormalizator(updated).toObject());
+                    // console.log(updated);
+                    err ? reject(err) : resolve(this.idNormalizator(updated.toObject()));
                 });
             });
         });
@@ -134,8 +135,8 @@ class DAOImpl {
                 .lean()
                 .exec((err, res) => {
                 if (err) {
-                    debug('find - FAILED => No documents found');
-                    reject(new Error("No documents found"));
+                    debug(err.message);
+                    reject(new Error(err.message));
                 }
                 else {
                     resolve(this.idNormalizator(res));

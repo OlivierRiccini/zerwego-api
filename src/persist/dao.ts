@@ -54,7 +54,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
         this.model = this.constructor['_model'];
     }
 
-    create(model: T):Promise<T> {
+    create(model: T): Promise<T> {
         return new Promise((resolve, reject) => {
             let document = new this.model(model);
             document._id = document._id ? document._id : new ObjectID();
@@ -70,7 +70,7 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
         })
     };
 
-    get(id:number|string): Promise<T|any> {
+    get(id: number  | string): Promise<T|any> {
         return new Promise((resolve, reject) => {
             this.model.findOne({ _id: new ObjectID(id) })
             .lean()
@@ -118,7 +118,8 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
                         let updated = _.merge(found, obj);
                         updated.save(
                             (err, updated) => {
-                                err ? reject(err) : resolve(this.idNormalizator(updated).toObject())
+                                // console.log(updated);
+                                err ? reject(err) : resolve(this.idNormalizator(updated.toObject()))
                             }
                         )
                     }
@@ -163,8 +164,8 @@ export abstract class DAOImpl<T, Q extends mongoose.Document> implements DAO<T> 
             .lean()
             .exec((err: any, res: any) => {
                 if (err) {
-                    debug('find - FAILED => No documents found');
-                    reject(new Error("No documents found"));
+                    debug(err.message);
+                    reject(new Error(err.message));
                 } else {
                     resolve(this.idNormalizator(res));
                 }

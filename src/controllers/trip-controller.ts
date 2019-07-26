@@ -12,7 +12,6 @@ export class TripController {
   @Inject() private tripService: TripService;
 
   constructor() { }
-  
  
   @Get()
   @UseBefore(Authenticate)

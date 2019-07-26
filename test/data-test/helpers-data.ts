@@ -7,7 +7,7 @@ import chaiHttp = require('chai-http');
 import { MODELS_DATA } from './common-data';
 import * as jwt from 'jsonwebtoken';
 import { CONSTANTS } from '../../src/persist/constants';
-import { ISecure, SecureDAO } from '../../src/models/secure-model';
+// import { SecureService } from '../../src/services/secure-service';
 var mongoose = require('mongoose');
 
 chai.use(chaiHttp);
@@ -33,9 +33,9 @@ export class TripHelper {
     public async addTrips(user) {
         for (const trip of this.trips) {
             trip.participants.push({ 
-                    userId: user.id,
-                    info: {email: user.email, username: user.username},
-                    status: 'request_accepted', isAdmin: true });
+                userId: user.id,
+                info: {email: user.email, username: user.username},
+                status: 'request_accepted', isAdmin: true });
             await this.tripDAO.create(trip);
         }   
     }
@@ -51,13 +51,18 @@ export class UserHelper {
     constructor(private userDAO: UserDAO) {
     }
 
-    public async getUserAndToken(user?: IUser) {
+
+    public async getUserById(userId: string | number): Promise<any> {
+        return this.userDAO.get(userId);
+    }
+
+    public async getUserAndToken(user?: IUser): Promise<{ user: IUser, token: string }> {
         const newUser = user ? user : MODELS_DATA.User[0];
         const response = await this.request
             .post('/auth/register')
             .send(newUser)
         
-        let token = response.header['authorization'];
+        let token = response.body['jwt'];
 
         if (token.startsWith('Bearer ')) {
             // Remove Bearer from string
@@ -68,21 +73,30 @@ export class UserHelper {
         const userResponse = decoded['payload'];
         return { user: userResponse, token };
     }
-
-    public async deleteAllUsers() {
+    
+    public async deleteAllUsers(): Promise<any> {
         return this.userDAO.deleteAll();  
     }
 
-    public find
+    public async delete(userId: string | number): Promise<any> {
+        return this.userDAO.delete(userId);
+    }
+
+    public getIdByToken(token: string): string {
+        if (token.startsWith('Bearer ')) {
+            // Remove Bearer from string
+            token = token.slice(7, token.length);
+        }
+        const decoded = jwt.verify(token, CONSTANTS.ACCESS_TOKEN_SECRET, null);
+        const user = decoded['payload'];
+        return user.id;
+    }
+
 }
 
-export class AuthHelper {
-    public secureDAO: SecureDAO;
-    constructor() {
-        this.secureDAO = new SecureDAO()
-    }
-    // public async findSecureByAccessToken(accessToken: string): Promise<ISecure> {
-    //     // const results = await this.secureDAO.find({find:{_accessToken: accessToken}});
-    //     // return results.length > 0 ? results[0] : null;
+export class SecureHelper {
+    // public secureService: SecureService;
+    // constructor() {
+    //     this.secureService = new SecureService()
     // }
 }

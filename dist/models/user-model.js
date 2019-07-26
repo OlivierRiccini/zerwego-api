@@ -18,7 +18,12 @@ class UserDAO extends dao_1.DAOImpl {
                     validator: validator_1.default.isEmail
                 }
             },
-            phone: String,
+            phone: {
+                countryCode: String,
+                internationalNumber: String,
+                nationalNumber: String,
+                number: String
+            },
             password: {
                 type: String,
                 require: true,
