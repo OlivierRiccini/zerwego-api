@@ -15,8 +15,7 @@ class UserDAO extends dao_1.DAOImpl {
                 trim: true,
                 unique: true,
                 validate: {
-                    validator: validator_1.default.isEmail,
-                    message: '{VALUE} is not a valid email'
+                    validator: validator_1.default.isEmail
                 }
             },
             phone: String,

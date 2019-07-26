@@ -78,10 +78,10 @@ class DAOImpl {
             if (!_.isObject(obj)) {
                 return reject(new TypeError('DAO.update value passed is not object.'));
             }
-            if (!id && !obj.id && !obj._id) {
+            if (!id && !obj['id'] && !obj['_id']) {
                 return reject(new TypeError('DAO.update object passed doesn\'t have _id or id.'));
             }
-            const _id = id ? new bson_1.ObjectID(id) : new bson_1.ObjectID(obj.id ? obj.id : obj._id);
+            const _id = id ? new bson_1.ObjectID(id) : new bson_1.ObjectID(obj['id'] ? obj['id'] : obj['_id']);
             this.model.findOne({ _id }).exec((err, found) => {
                 if (err) {
                     reject(err);
