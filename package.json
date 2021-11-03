@@ -51,7 +51,7 @@
     "smtp-server": "^3.5.0",
     "sqs-consumer": "^5.2.0",
     "typedi": "^0.8.0",
-    "validator": "^10.11.0"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
